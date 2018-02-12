@@ -1,0 +1,10 @@
+
+
+lint_output=$(exec swiftlint --strict 2>&1)
+ret_code=$?
+
+if [ $ret_code != 0 ]; then
+	echo "$lint_output\n"
+    exit $ret_code
+fi
+
