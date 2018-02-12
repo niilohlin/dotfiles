@@ -1,0 +1,31 @@
+# This is Git's per-user configuration file.
+[core]
+# Please adapt and uncomment the following lines:
+	user = Niil Öhlin
+	email = niil.ohlin@atea.se
+	excludesfile = /Users/niilohlin/.gitignore_global
+	editor = nvim
+	pager = diff-so-fancy | less --tabs=4 -RFX
+[user]
+	name = Niil Öhlin
+	email = niil.ohlin@atea.se
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path =
+[mergetool "sourcetree"]
+	cmd = /opt/homebrew-cask/Caskroom/sourcetree/2.0.5.2/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[filter "lfs"]
+	clean = git-lfs clean %f
+	smudge = git-lfs smudge %f
+	required = true
+[push]
+	default = simple
+[credential]
+	helper = osxkeychain
+[alias]
+	co = checkout
+	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
+    go = checkout -b
+    branches = for-each-ref --sort=-committerdate refs/heads/
+    fix = !git add . && git commit --amend --no-edit
