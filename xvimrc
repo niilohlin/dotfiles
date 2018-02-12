@@ -1,0 +1,28 @@
+inoremap tn <esc>
+
+nnoremap V v
+nnoremap v V
+
+nnoremap ds( di(hPlxx
+nnoremap ds[ di[hPlxx
+nnoremap ds{ di{hPlxx
+
+nnoremap dq mj_%mk%xElr.lxxx~f:s = <esc>`khx`j
+nnoremap gcc :xccmd commentAndUncommentCurrentLines<CR>
+vnoremap gc :xccmd commentAndUncommentCurrentLines<CR>
+
+nnoremap L :xcmenucmd Go forward<CR>
+nnoremap H :xcmenucmd Go back<CR>
+nnoremap gd :xcmenucmd Jump To Definition<CR>
+nnoremap <space>d :xcmenucmd Jump To Definition<CR>
+nnoremap <space>k :xcmenucmd Show Related Items<CR>
+
+nnoremap K kJ
+nnoremap <D-C-Right> <nop>
+nnoremap <D-C-Left> <nop>
+nnoremap <D-C-j> <nop>
+nnoremap <D-C-k> <nop>
+
+nnoremap <space>p viwpyiwb
+
+nnoremap <space>o :xcmenucmd Open Quickly...<CR>

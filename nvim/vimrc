@@ -1,0 +1,164 @@
+
+execute pathogen#infect()
+
+syntax enable
+syntax on
+filetype plugin indent on
+set showcmd
+set incsearch
+set showmatch
+set ignorecase
+set smartcase
+set smartindent
+set autowrite
+set number
+set relativenumber
+set backspace=2
+set ruler
+set showcmd
+" set colorcolumn=80
+call matchadd('ColorColumn', '\%81v', 100)
+"set clipboard=unnamed
+set whichwrap+=<,>,[,],l,h
+set scrolloff=1
+colorscheme monokai
+" handle tabs
+let tabLength=4
+execute "set tabstop=".tabLength
+execute "set shiftwidth=".tabLength
+execute "set softtabstop=".tabLength
+set expandtab
+
+set list
+set listchars=tab:›\ ,trail:·,extends:›,precedes:‹,nbsp:+
+
+" Some remaps
+inoremap tn <Esc>
+nnoremap v V
+nnoremap V v
+"nnoremap p p=`]
+"nnoremap P P=`]
+" Makes so that indendation does not disappear when
+" entering normal mode
+inoremap <CR> <CR>a<BS>
+nnoremap o oa<BS>
+nnoremap O Oa<BS>
+
+nnoremap H <C-O>
+nnoremap L <C-I>
+
+inoremap <C-F> <C-X><C-F>
+inoremap <C-L> <C-X><C-L>
+inoremap <C-D> <C-X><C-D>
+inoremap <C-O> <C-X><C-O>
+inoremap <C-]> <C-X><C-]>
+
+" Set cursor position to old spot
+au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe  "normal! g'\"" | endif
+
+autocmd BufWritePre * :%s/\s\+$//e
+
+au BufNewFile,BufRead *.stencil set filetype=swift
+
+command NT :NERDTreeToggle
+command W w
+let mapleader = "\<space>"
+
+nnoremap K kJ
+
+inoremap {<CR> {<ESC>o}<ESC>O
+
+set nohlsearch!
+set wildmenu
+set wildmode=list:longest,full
+
+nnoremap <silent> n n:call HLNext(0.07)<CR>
+nnoremap <silent> N N:call HLNext(0.07)<CR>
+
+nnoremap <leader>n :cnext <cr>
+nnoremap <leader>N :cprev <cr>
+
+nnoremap <leader>w /\u<cr>
+nnoremap <leader>e /\l\u<cr>
+
+nnoremap <leader>b ?\u<cr>
+nnoremap <leader>ge ?\u\l<cr>
+
+if v:version > 703 || v:version == 703 && has('patch541')
+  set formatoptions+=j
+endif
+
+" OR ELSE briefly hide everything except the match...
+function! HLNext (blinktime)
+    highlight BlackOnBlack ctermfg=black ctermbg=black
+    let [bufnum, lnum, col, off] = getpos('.')
+    let matchlen = strlen(matchstr(strpart(getline('.'),col-1),@/))
+    let hide_pat = '\%<'.lnum.'l.'
+            \ . '\|'
+            \ . '\%'.lnum.'l\%<'.col.'v.'
+            \ . '\|'
+            \ . '\%'.lnum.'l\%>'.(col+matchlen-1).'v.'
+            \ . '\|'
+            \ . '\%>'.lnum.'l.'
+    let ring = matchadd('BlackOnBlack', hide_pat, 101)
+    redraw
+    exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
+    call matchdelete(ring)
+    redraw
+endfunction
+
+"ve the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
+"You might also want to look at the echodoc plugin
+set splitbelow
+
+" Get Code Issues and syntax errors
+
+set statusline=%f
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:Powerline_symbols = 'fancy'
+
+let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 0
+
+"let g:loaded_python_provider=1
+let g:python_host_prog='/usr/bin/python'
+let g:loaded_python3_provider=1
+let g:python2_host_prog='/usr/bin/python2.7'
+let g:python3_host_prog='/usr/local/bin/python3'
+
+let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib/'
+nmap <F8> :TagbarToggle<CR>
+let g:tagbar_type_swift = {
+  \ 'ctagstype': 'swift',
+  \ 'kinds' : [
+    \ 'n:Enums',
+    \ 't:Typealiases',
+    \ 'p:Protocols',
+    \ 's:Structs',
+    \ 'c:Classes',
+    \ 'f:Functions',
+    \ 'v:Variables',
+    \ 'e:Extensions'
+  \ ],
+  \ 'sort' : 0
+\ }
+
+" this setting controls how long to wait (in ms) before fetching type / symbol information.
+set updatetime=500
+" Remove 'Press Enter to continue' message when type information is longer than one line.
+set cmdheight=2
+
+"Don't ask to save when changing buffers (i.e. when jumping to a type definition)
+set hidden
+"let g:OmniSharp_server_type = 'roslyn'
+
+let g:ctrlp_map = '<leader>o'
+let g:ctrlp_cmd = 'CtrlP'
+
+let g:markdown_enable_spell_checking = 0
