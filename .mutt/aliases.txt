@@ -1,0 +1,22 @@
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias juntti-arne Arne Juntti <arne.juntti@atea.se>
+alias rosenberg-freddie Freddie Rosenberg <freddie.rosenberg@atea.se>
+alias ohlin-niil Niil Ohlin <niil.ohlin@atea.se>
+alias (jira)-lars Lars Heikkila (JIRA) <jira@ateajira.atlassian.net>
+alias (jira)-niklas Niklas Oja (JIRA) <jira@ateajira.atlassian.net>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias (jira)-jonas Jonas Sunnari (JIRA) <jira@ateajira.atlassian.net>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias raatiniemi-tobias Tobias Raatiniemi <tobias.raatiniemi@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias norman-simon Simon Norman <simon.norman@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias heikkil„§-lars Lars Heikkil√§ <lars.heikkila@atea.se>
+alias nord-atea Atea Support Nord <support.nord@atea.se>
+alias Apple <News_Europe@InsideApple.Apple.com>

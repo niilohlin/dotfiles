@@ -1,0 +1,26 @@
+[general]
+accounts = Work
+
+[Account Work]
+localrepository = Local
+remoterepository = Remote
+autorefresh = 0.5
+
+[Repository Local]
+type = Maildir
+localfolders = ~/Maildir/work
+
+[Repository Remote]
+type = IMAP
+remotehost = smtp.office365.com
+ssl = no
+remoteuser =
+remotepass =
+# Folders to skip during sync.
+folderfilter = lambda foldername: foldername not in ['Kalender',
+	'Borttagna objekt',
+	'Deleted Items',
+	'Contacts',
+	'Calendar',
+	'Trash',
+	'MyFolderOfReallyOldMaildir']

@@ -1,0 +1,55 @@
+set sendmail=/usr/local/bin/msmtp
+set mbox_type=Maildir
+set folder="~/Maildir"
+mailboxes `echo -n "+ "; for file in ~/Maildir/*; do box=$(basename "$file"); echo -n "\"+$box\" "; done`
+set spoolfile="~/Maildir/work/INBOX"
+set postponed="+Drafts"
+set record="+work/Sent"
+
+
+set hostname="atea.se"
+set realname="Niil Ohlin"
+set from=
+set envelope_from=yes
+set hidden_host=yes
+set use_domain=yes
+set pager_stop=yes
+my_hdr From: niil.ohlin@atea.se
+set attribution="%n <%a> wrote on %{%a} [%{%Y-%b-%d %H:%M:%S %Z}]:"
+set strict_threads = no
+set date_format="!%a, %b %d, %Y at %I:%M:%S%p %Z"
+set index_format="%4C %Z[%[%a %m/%d %H:%M]] %-16.16L%?X? [%X]? (%?l?%4l&%4c?) %s"
+set pager_index_lines=20
+# Change default subject format for fwd'd msgs.
+set forward_format="Fwd: %s"
+# Use emacs to compose mail.
+set editor = "/usr/local/bin/nvim"
+# Create a nice status bar.
+set status_format=" %r %b %f New:%n Del:%d TotMsgs:%m Tag:%t Flag:%F Size:%l %> Lim:%V (%P)"
+# Ignore all lines by default
+ignore *
+# Set what I want to see
+unignore from to cc subject date reply-to mail-followup-to x-url organisation organization x-mailer user-agent xmail-sent-to
+hdr_order from to cc subject date reply-to mail-followup-to x-url organisation organization x-mailer user-agent xmail-sent-to
+# Create a cache for performance.
+# http://www.mutt.org/doc/devel/manual.html#header-cache
+set header_cache="~/.mutt_cache"
+set maildir_header_cache_verify="yes"
+#set header_cache_pagesize="65536"
+
+#nametemplate=%s.html; copiousoutput
+alternative_order text/plain text/html
+auto_view text/html
+
+set sort=reverse-date-received
+
+bind pager l next-line #scroll inside the message rather than the index
+bind pager h previous-line
+set sleep_time = 0
+set smart_wrap
+
+source '~/.mutt/vombatidae.mutt'
+set text_flowed=yes
+set display_filter = '~/.mutt/filter.sh'
+set alias_file=~/.mutt/aliases.txt
+source '~/.mutt/aliases.txt'
