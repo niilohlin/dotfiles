@@ -1,10 +1,12 @@
-
+#!/bin/sh
 
 lint_output=$(exec swiftlint --strict 2>&1)
 ret_code=$?
+PWDSTRING=$(pwd | sed -e 's/[\/&]/\\&/g')
 
 if [ $ret_code != 0 ]; then
-	echo "$lint_output\n"
+    echo "$lint_output" | grep -v "^Linting" | sed "s/$PWDSTRING//g"
     exit $ret_code
 fi
 
+./.git/hooks/stricter-swiftlint.sh
