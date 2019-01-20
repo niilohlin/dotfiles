@@ -1,4 +1,4 @@
-
+scriptencoding utf-8
 execute pathogen#infect()
 
 syntax enable
@@ -17,18 +17,20 @@ set backspace=2
 set ruler
 set showcmd
 " set colorcolumn=80
-call matchadd('ColorColumn', '\%81v', 100)
+let g:m1=matchadd('ColorColumn', '\%81v', 100)
 "set clipboard=unnamed
 set whichwrap+=<,>,[,],l,h
 set scrolloff=1
 colorscheme monokai
 " handle tabs
 let tabLength=4
-execute "set tabstop=".tabLength
-execute "set shiftwidth=".tabLength
-execute "set softtabstop=".tabLength
+execute 'set tabstop='.tabLength
+execute 'set shiftwidth='.tabLength
+execute 'set softtabstop='.tabLength
 set expandtab
 
+set undofile
+set undodir=~/.config/nvim/undodir
 set list
 set listchars=tab:›\ ,trail:·,extends:›,precedes:‹,nbsp:+
 
@@ -36,6 +38,7 @@ set listchars=tab:›\ ,trail:·,extends:›,precedes:‹,nbsp:+
 inoremap tn <Esc>
 nnoremap v V
 nnoremap V v
+"inoremap <Paste> <Esc>:set nopaste<CR>
 "nnoremap p p=`]
 "nnoremap P P=`]
 " Makes so that indendation does not disappear when
@@ -53,14 +56,22 @@ inoremap <C-D> <C-X><C-D>
 inoremap <C-O> <C-X><C-O>
 inoremap <C-]> <C-X><C-]>
 
-" Set cursor position to old spot
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe  "normal! g'\"" | endif
+tnoremap <Esc> <C-\><C-n>
+set modifiable
+nnoremap } :keepjumps normal! }<cr>
+nnoremap { :keepjumps normal! {<cr>
 
-autocmd BufWritePre * :%s/\s\+$//e
+augroup onWrite
 
-au BufNewFile,BufRead *.stencil set filetype=swift
+    " Set cursor position to old spot
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe  "normal! g'\"" | endif
+
+    " clear trailing space
+    autocmd BufWritePre * :%s/\s\+$//e
+augroup END
 
 command NT :NERDTreeToggle
+nnoremap <leader>j :NERDTreeFind<cr>
 command W w
 let mapleader = "\<space>"
 
@@ -83,6 +94,9 @@ nnoremap <leader>e /\l\u<cr>
 
 nnoremap <leader>b ?\u<cr>
 nnoremap <leader>ge ?\u\l<cr>
+
+" Rename word under cursor
+nnoremap <F14> :%s/\<<C-r><C-w>\>//g<Left><Left>
 
 if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
@@ -117,6 +131,8 @@ set statusline=%f
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
+"call deoplete#enable()
+"let g:deoplete#enable_at_startup = 1
 
 let g:Powerline_symbols = 'fancy'
 
@@ -125,29 +141,18 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
+let g:syntastic_aggregate_errors = 1
+let g:syntastic_swift_checkers = ['swift']
+
 
 "let g:loaded_python_provider=1
-let g:python_host_prog='/usr/bin/python'
-let g:loaded_python3_provider=1
-let g:python2_host_prog='/usr/bin/python2.7'
+let g:python_host_prog='/usr/local/bin/python'
+"let g:loaded_python3_provider=1
+let g:python2_host_prog='/usr/local/bin/python2'
 let g:python3_host_prog='/usr/local/bin/python3'
 
 let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib/'
 nmap <F8> :TagbarToggle<CR>
-let g:tagbar_type_swift = {
-  \ 'ctagstype': 'swift',
-  \ 'kinds' : [
-    \ 'n:Enums',
-    \ 't:Typealiases',
-    \ 'p:Protocols',
-    \ 's:Structs',
-    \ 'c:Classes',
-    \ 'f:Functions',
-    \ 'v:Variables',
-    \ 'e:Extensions'
-  \ ],
-  \ 'sort' : 0
-\ }
 
 " this setting controls how long to wait (in ms) before fetching type / symbol information.
 set updatetime=500
