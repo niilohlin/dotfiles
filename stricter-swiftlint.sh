@@ -1,12 +1,14 @@
 #!/bin/sh
 
-
 get_changed_files() {
-    git diff --cached --name-only | grep ".*.swift"
+    git diff --cached --name-only --diff-filter=dr | grep ".*\\.swift$"
 }
-#set -o xtrace
+
 get_lint_output() {
     read -r file
+    if [ -z "$file" ]; then
+        return 0
+    fi
     result=$(exec swiftlint --path "$file" --strict --config ./.git/hooks/stricter-swiftlint.yml 2>&1)
     ret_code=$?
     echo "$result"
@@ -18,7 +20,6 @@ filter_lint_output() {
     lint_output=$(echo "$lint_output" | grep -v "^Loading configuration from")
     lint_output=$(echo "$lint_output" | grep -v "^Linting Swift files at paths")
     if [ -z "$lint_output" ]; then
-        echo "$lint_output" > out
         return 0
     else
         echo "$lint_output"
@@ -40,7 +41,7 @@ remove_warning_from_path() {
 }
 
 get_added_changes() {
-    git --no-pager diff --cached --no-color
+    xargs git --no-pager diff --cached --no-color --diff-filter=dr
 }
 
 ## parsing patch
@@ -52,6 +53,7 @@ parse_diff_into_files_and_lines() {
         match=$(echo "$line" | grep "diff --git")
         if [ ! -z "$match" ]; then
             filename=$(echo "$match" | sed -E "s/.* b\\/(.*.swift)/\\1/g" )
+
             linenumber=""
         else
             match=$(echo "$line" | pcregrep -o1 "^@@ -\\d+,\\d+ \\+(\\d+),\\d+ @@")
@@ -85,7 +87,7 @@ PWDSTRING=$(pwd | sed -e 's/[\/&]/\\&/g')
 if [ $ret_code != 0 ]; then
     lint_errors=$(echo "$lint_output" | filter_lint_output | filter_nonfailed_files | remove_current_directory | remove_warning_from_path)
     #echo "lint errors: $lint_errors"
-    changes=$(get_added_changes | parse_diff_into_files_and_lines)
+    changes=$(get_changed_files | get_added_changes | parse_diff_into_files_and_lines)
     #echo "changes: $changes"
 
     found=""
