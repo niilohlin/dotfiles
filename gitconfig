@@ -2,18 +2,18 @@
 [core]
 # Please adapt and uncomment the following lines:
 	user = Niil Öhlin
-	email = niil.ohlin@atea.se
-	excludesfile = /Users/niilohlin/.gitignore_global
+	email = niil.ohlin@izettle.com
+	excludesfile = /Users/niil.ohlin/.gitignore_global
 	editor = nvim
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [user]
 	name = Niil Öhlin
-	email = niil.ohlin@atea.se
+	email = niil.ohlin@izettle.com
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path =
 [mergetool "sourcetree"]
-	cmd = /opt/homebrew-cask/Caskroom/sourcetree/2.0.5.2/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	cmd = /Users/niil.ohlin/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [filter "lfs"]
 	clean = git-lfs clean %f
@@ -23,9 +23,17 @@
 	default = simple
 [credential]
 	helper = osxkeychain
+[rebase]
+    autosquash = true
 [alias]
 	co = checkout
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
     go = checkout -b
     branches = for-each-ref --sort=-committerdate refs/heads/
     fix = !git add . && git commit --amend --no-edit
+    branch-name = "!git rev-parse --abbrev-ref HEAD"
+    publish = "!git push -u origin $(git branch-name)"
+    next = "!git log --reverse --pretty=%H master | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
+    prev = "!git checkout HEAD^1"
+    patch = !git --no-pager diff --no-color
+    delete = "!git branch -D"
