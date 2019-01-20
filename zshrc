@@ -25,18 +25,26 @@ alias cp="cp -i -r"                          # confirm before overwriting someth
 alias df='df -h'                          # human-readable sizes
 alias free='free -m'                      # show sizes in MB
 alias carup='carthage update --platform iOS --cache-builds'
-alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias carbs='carthage bootstrap --platform iOS --cache-builds'
+alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph"
 alias gs="git status";
 alias gd="git diff";
 alias gdc="git diff --cached";
 alias gc="git commit";
 alias ga="git add";
 alias gb='git branch'
+alias gsummary='grep "^Updating" | sed "s/Updating //" | xargs git log --oneline | grep "Merge pull request" | awk "{print $1;}" | xargs git show -s --format=%B | grep -v -e "^$" | grep -v "Merge pull request"'
 alias vim='nvim'
+alias editvimconf='nvim ~/.config/nvim/vimrc'
+alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
 
+function copy() {
+    cat $1 | pbcopy
+}
 function gclean() {
     git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
-    git gc
+    git fetch --all --prune
+    #git gc
 }
 
 function commitsAtDate() {
@@ -68,12 +76,12 @@ ex ()
   fi
 }
 
-function mycd {
-	cd $1;
+function cdAndLs {
+	\cd $1;
 	ls # --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F;
 }
-function mymkdir {
-	mkdir $1;
+function mkdirAndCd {
+	\mkdir $1;
 	cd $1 # --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F;
 }
 function cdr {
@@ -89,8 +97,8 @@ function clock {
 	tty-clock -bcC 4
 }
 
-alias cd='mycd'
-alias mkdir='mymkdir'
+alias cd='cdAndLs'
+alias mkdir='mkdirAndCd'
 alias lynx='lynx --accept_all_cookies'
 
 set -o vi
@@ -116,6 +124,8 @@ PATH=$PATH:/nix
 PATH=$PATH:$HOME/.fastlane/bin
 PATH=$PATH:/usr/local/Cellar
 PATH=$PATH:/usr/local/bin/
+PATH=$PATH:~/.gem/gems/mdl-0.5.0/bin
+PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
 #[[ -z "$TMUX" ]] && exec tmux
 eval $(/usr/libexec/path_helper -s)
 
@@ -128,17 +138,15 @@ search() {
 # case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
-fpath=(/usr/local/share/zsh-completions $fpath)
-
 source ~/.zsh/git-completion.bash
-source ~/.zsh/git-completion.zsh
+fpath=(~/.zsh $fpath)
 
 source ~/.zsh/async.zsh
 source ~/.zsh/pure.zsh
 export LANG=C
 export LC_ALL=en_US.UTF-8
 if [[ ! $TERM =~ screen ]]; then
-    exec tmux
+    #exec tmux
 fi
 
 eval $(thefuck --alias)
@@ -146,3 +154,8 @@ eval $(thefuck --alias)
 #reattach-to-user-namespace -l ${SHELL}
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+export PATH="/usr/local/opt/icu4c/bin:$PATH"
+export PATH="/usr/local/opt/icu4c/sbin:$PATH"
+export PATH="/Users/niil.ohlin/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
