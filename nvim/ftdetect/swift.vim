@@ -1,6 +1,9 @@
 call clearmatches()
 call matchadd('ColorColumn', '\%121v', 100)
-au BufNewFile,BufRead *.stencil set filetype=swift
+
+autocmd BufNewFile,BufRead *.stencil set filetype=swift
+autocmd FileType swift setlocal textwidth=120
+
 
 let g:tagbar_type_swift = {
   \ 'ctagstype': 'swift',
@@ -16,3 +19,5 @@ let g:tagbar_type_swift = {
   \ ],
   \ 'sort' : 0
 \ }
+
+let g:syntastic_swift_checkers = ['swiftpm', 'swiftlint']

@@ -1,5 +1,4 @@
 scriptencoding utf-8
-execute pathogen#infect()
 
 syntax enable
 syntax on
@@ -60,6 +59,7 @@ tnoremap <Esc> <C-\><C-n>
 set modifiable
 nnoremap } :keepjumps normal! }<cr>
 nnoremap { :keepjumps normal! {<cr>
+nnoremap <leader>/ :vimgrep //gj ./**/*.swift<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
 
 augroup onWrite
 
@@ -167,3 +167,19 @@ let g:ctrlp_map = '<leader>o'
 let g:ctrlp_cmd = 'CtrlP'
 
 let g:markdown_enable_spell_checking = 0
+set spelllang=en
+set spellfile=$HOME/.config/nvim/spell/en.utf-8.add
+
+call plug#begin('~/.config/nvim/plugged')
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'scrooloose/nerdcommenter'
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+Plug 'vim-syntastic/syntastic'
+Plug 'cfdrake/vim-pbxproj'
+Plug 'plasticboy/vim-markdown'
+Plug 'vim-ruby/vim-ruby'
+Plug 'christoomey/vim-tmux-runner'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'keith/swift.vim'
+Plug 'udalov/kotlin-vim'
+call plug#end()
