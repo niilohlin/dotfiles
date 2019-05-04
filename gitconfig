@@ -37,3 +37,4 @@
     prev = "!git checkout HEAD^1"
     patch = !git --no-pager diff --no-color
     delete = "!git branch -D"
+    nuke = "!git clean -df && git reset HEAD --hard"
