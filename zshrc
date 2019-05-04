@@ -120,12 +120,10 @@ PS1="%{%F{red}%}%n%{%f%}@%{%F{blue}%}%m %{%F{yellow}%}%~ %{$%f%}% "
 PATH=$PATH:$HOME/.rvm/bin # Add RVM to PATH for scripting
 PATH=$PATH:$HOME/bin/
 PATH=$PATH:$HOME/.cabal/bin/
-PATH=$PATH:/nix
 PATH=$PATH:$HOME/.fastlane/bin
 PATH=$PATH:/usr/local/Cellar
 PATH=$PATH:/usr/local/bin/
-PATH=$PATH:~/.gem/gems/mdl-0.5.0/bin
-PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
+#PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
 #[[ -z "$TMUX" ]] && exec tmux
 eval $(/usr/libexec/path_helper -s)
 
@@ -145,17 +143,25 @@ source ~/.zsh/async.zsh
 source ~/.zsh/pure.zsh
 export LANG=C
 export LC_ALL=en_US.UTF-8
+
+export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
+
+
 if [[ ! $TERM =~ screen ]]; then
     #exec tmux
 fi
 
-eval $(thefuck --alias)
+#eval $(thefuck --alias)
 
 #reattach-to-user-namespace -l ${SHELL}
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
-export PATH="/Users/niil.ohlin/.pyenv/bin:$PATH"
+export PATH="~/.pyenv/bin:$PATH"
+export PATH="~/.rbenv/bin:$PATH"
+eval "$(rbenv init -)"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
