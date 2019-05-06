@@ -146,7 +146,7 @@ let g:syntastic_swift_checkers = ['swift']
 
 
 "let g:loaded_python_provider=1
-let g:python_host_prog='/usr/local/bin/python'
+let g:python_host_prog='~/.pyenv/shims/python' "/usr/local/bin/python
 "let g:loaded_python3_provider=1
 let g:python2_host_prog='/usr/local/bin/python2'
 let g:python3_host_prog='/usr/local/bin/python3'
