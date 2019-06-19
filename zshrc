@@ -52,6 +52,8 @@ function commitsAtDate() {
 }
 
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
+autoload -U compinit
+compinit
 # ex - archive extractor
 # usage: ex <file>
 ex ()
@@ -137,6 +139,7 @@ search() {
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
 source ~/.zsh/git-completion.bash
+source ~/.zsh/fastlane-completion.zsh
 fpath=(~/.zsh $fpath)
 
 source ~/.zsh/async.zsh
@@ -163,4 +166,6 @@ export PATH="/usr/local/opt/icu4c/sbin:$PATH"
 export PATH="~/.pyenv/bin:$PATH"
 export PATH="~/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
+
+export PYTHON_CONFIGURE_OPTS="--enable-framework"
 eval "$(pyenv init -)"

@@ -149,7 +149,7 @@ let g:syntastic_swift_checkers = ['swift']
 let g:python_host_prog='~/.pyenv/shims/python' "/usr/local/bin/python
 "let g:loaded_python3_provider=1
 let g:python2_host_prog='/usr/local/bin/python2'
-let g:python3_host_prog='/usr/local/bin/python3'
+let g:python3_host_prog='~/.pyenv/shims/python3'
 
 let g:clang_library_path='/Library/Developer/CommandLineTools/usr/lib/'
 nmap <F8> :TagbarToggle<CR>
@@ -182,4 +182,7 @@ Plug 'christoomey/vim-tmux-runner'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'keith/swift.vim'
 Plug 'udalov/kotlin-vim'
+Plug 'Rip-Rip/clang_complete'
+Plug 'kien/ctrlp.vim'
+Plug '~/.config/nvim/linters', { 'do': './install.sh' }
 call plug#end()

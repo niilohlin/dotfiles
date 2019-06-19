@@ -3,7 +3,7 @@
 # Please adapt and uncomment the following lines:
 	user = Niil Öhlin
 	email = niil.ohlin@izettle.com
-	excludesfile = /Users/niil.ohlin/.gitignore_global
+	excludesfile = /Users/niilohlin/.gitignore
 	editor = nvim
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [user]
