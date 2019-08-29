@@ -1,0 +1,47 @@
+#!/bin/sh
+
+command -v git-lfs >/dev/null 2>&1 || { echo >&2 "\nThis repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting .git/hooks/pre-push.\n"; exit 2; }
+git lfs pre-push "$@"
+
+remote="$1"
+url="$2"
+
+z40=0000000000000000000000000000000000000000
+
+while read local_ref local_sha remote_ref remote_sha
+do
+	if [ "$local_sha" = $z40 ]
+	then
+		# Handle delete
+		:
+	else
+		if [ "$remote_sha" = $z40 ]
+		then
+			# New branch, examine all since master
+			range="$local_sha...master"
+		else
+			# Update to existing branch, examine new commits
+			range="$remote_sha..$local_sha"
+		fi
+
+		# Check for WIP commit
+		commit=`git rev-list -n 1 --grep '^WIP' "$range"`
+		if [ -n "$commit" ]
+		then
+			echo >&2 "Found WIP commit in $local_ref, not pushing"
+			exit 1
+		fi
+	fi
+done
+
+
+# Check syntax of all ruby files.
+files=$(git diff --name-only master...HEAD | grep -E "Fastfile|.*\.rb")
+while read -r file; do
+    ruby -wc "$file" > /dev/null
+    if [ $? != 0 ]; then
+        exit 1
+    fi
+done <<< "$files"
+
+exit 0

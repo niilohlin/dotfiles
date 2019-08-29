@@ -37,3 +37,7 @@ vnoremap V <ESC>V
 command W w
 
 set incsearch
+set ideajoin=true
+
+set relativenumber
+set number

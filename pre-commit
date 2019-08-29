@@ -10,3 +10,31 @@ if [ $ret_code != 0 ]; then
 fi
 
 ./.git/hooks/stricter-swiftlint.sh
+if [ $? != 0 ]; then
+    exit 1
+fi
+
+if [ -d ./test_output ]; then
+    if [ ! -z "$(ls -A ./test_output)" ]; then
+        echo "FailureDiffs not empty"
+        exit 1
+    fi
+fi
+
+circleci config validate
+
+if [ $? != 0 ]; then
+    exit 1
+fi
+
+#codeowners-checker check --no-interactive
+
+#if [ $? != 0 ]; then
+#    exit 1
+#fi
+
+ruby -c fastlane/Fastfile
+
+if [ $? != 0 ]; then
+    exit 1
+fi

@@ -2,6 +2,7 @@ scriptencoding utf-8
 
 syntax enable
 syntax on
+filetype on
 filetype plugin indent on
 set showcmd
 set incsearch
@@ -15,7 +16,7 @@ set relativenumber
 set backspace=2
 set ruler
 set showcmd
-" set colorcolumn=80
+set colorcolumn=80
 let g:m1=matchadd('ColorColumn', '\%81v', 100)
 "set clipboard=unnamed
 set whichwrap+=<,>,[,],l,h
@@ -57,7 +58,7 @@ inoremap <C-]> <C-X><C-]>
 
 tnoremap <Esc> <C-\><C-n>
 set modifiable
-nnoremap } :keepjumps normal! }<cr>
+nnoremap } :silent! exec "keepjumps normal! }"<cr>
 nnoremap { :keepjumps normal! {<cr>
 nnoremap <leader>/ :vimgrep //gj ./**/*.swift<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
 
@@ -136,14 +137,11 @@ set statusline+=%*
 
 let g:Powerline_symbols = 'fancy'
 
-let g:syntastic_cs_checkers = ['syntax', 'semantic', 'issues']
 let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 0
 let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 0
 let g:syntastic_aggregate_errors = 1
-let g:syntastic_swift_checkers = ['swift']
-
 
 "let g:loaded_python_provider=1
 let g:python_host_prog='~/.pyenv/shims/python' "/usr/local/bin/python
@@ -185,4 +183,8 @@ Plug 'udalov/kotlin-vim'
 Plug 'Rip-Rip/clang_complete'
 Plug 'kien/ctrlp.vim'
 Plug '~/.config/nvim/linters', { 'do': './install.sh' }
+Plug 'tpope/vim-commentary'
+Plug 'mzlogin/vim-markdown-toc'
+Plug 'tpope/vim-surround'
+Plug 'airblade/vim-gitgutter'
 call plug#end()

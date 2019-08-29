@@ -1,5 +1,9 @@
 #!/bin/zsh
 
+if [ -z $TMUX ]; then
+    exec tmux
+fi
+
 xhost +local:root > /dev/null 2>&1
 
 export HISTSIZE=10000
@@ -17,7 +21,7 @@ setopt incappendhistory
 export HD='/run/media/niil/8d25eb81-c066-48cd-a263-83d2b0b3308c/'
 
 
-alias ls='ls  -G -F'
+alias ls='ls -G -F'
 alias ll='ls -l --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
 alias la='ls -la --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
 alias grep='grep --color=tty -d skip'
@@ -44,6 +48,7 @@ function copy() {
 function gclean() {
     git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
     git fetch --all --prune
+    exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v master | xargs -P 4 -I {} bash -c "( ! git cherry master {} | grep -q '^[^-]' ) && git branch -D {}"
     #git gc
 }
 
@@ -54,6 +59,9 @@ function commitsAtDate() {
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
 autoload -U compinit
 compinit
+zstyle ':completion:*' menu yes select
+zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)(?)*==02=01}:${(s.:.)LS_COLORS}")'
+
 # ex - archive extractor
 # usage: ex <file>
 ex ()
@@ -151,11 +159,6 @@ export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 
-
-if [[ ! $TERM =~ screen ]]; then
-    #exec tmux
-fi
-
 #eval $(thefuck --alias)
 
 #reattach-to-user-namespace -l ${SHELL}
@@ -165,6 +168,7 @@ export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
 export PATH="~/.pyenv/bin:$PATH"
 export PATH="~/.rbenv/bin:$PATH"
+export PATH="~/.cargo/bin:$PATH"
 eval "$(rbenv init -)"
 
 export PYTHON_CONFIGURE_OPTS="--enable-framework"

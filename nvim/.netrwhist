@@ -1,2 +1,11 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =0
+let g:netrw_dirhist_cnt =9
+let g:netrw_dirhist_1='/Users/niilohlin/workspace/iZettle-iOS/fastlane/spec'
+let g:netrw_dirhist_2='/Users/niilohlin/workspace/iZettle-iOS/fastlane/spec/fixtures'
+let g:netrw_dirhist_3='/Users/niilohlin/workspace/iZettle-iOS/fastlane/spec'
+let g:netrw_dirhist_4='/Users/niilohlin/workspace/iZettle-iOS/fastlane'
+let g:netrw_dirhist_5='/Users/niilohlin/workspace/iZettle-iOS/fastlane/extensions'
+let g:netrw_dirhist_6='/Users/niilohlin/workspace/iZettle-iOS/fastlane'
+let g:netrw_dirhist_7='/Users/niilohlin/workspace/iZettle-iOS/fastlane/actions'
+let g:netrw_dirhist_8='/Users/niilohlin/workspace/iZettle-iOS'
+let g:netrw_dirhist_9='/Users/niilohlin'
