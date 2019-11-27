@@ -39,5 +39,8 @@
     patch = !git --no-pager diff --no-color
     delete = "!git branch -D"
     nuke = "!git clean -df && git reset HEAD --hard"
+    wip = "!git add . && git commit -m \"WIP\" --no-verify"
+    added = diff --cached
+    remote-tags = ls-remote --tags
 [url "ssh://git@github.com"]
 	insteadOf = https://github.com

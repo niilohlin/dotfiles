@@ -36,7 +36,7 @@ done
 
 
 # Check syntax of all ruby files.
-files=$(git diff --name-only master...HEAD | grep -E "Fastfile|.*\.rb")
+files=$(git diff --name-only --diff-filter=dr master...HEAD | grep -E "Fastfile|.*\.rb")
 while read -r file; do
     ruby -wc "$file" > /dev/null
     if [ $? != 0 ]; then

@@ -21,3 +21,12 @@ let g:tagbar_type_swift = {
 \ }
 
 let g:syntastic_swift_checkers = ['swift', 'swiftpm', 'swiftlint']
+autocmd FileType swift setlocal omnifunc=lsp#complete
+
+if executable('sourcekit-lsp')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'sourcekit-lsp',
+        \ 'cmd': {server_info->['sourcekit-lsp']},
+        \ 'whitelist': ['swift'],
+        \ })
+endif

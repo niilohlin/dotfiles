@@ -61,6 +61,7 @@ set modifiable
 nnoremap } :silent! exec "keepjumps normal! }"<cr>
 nnoremap { :keepjumps normal! {<cr>
 nnoremap <leader>/ :vimgrep //gj ./**/*.swift<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
+nnoremap <leader>a ma:s/, /,\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a
 
 augroup onWrite
 
@@ -80,12 +81,10 @@ nnoremap K kJ
 
 inoremap {<CR> {<ESC>o}<ESC>O
 
-set nohlsearch!
+"set nohlsearch!
 set wildmenu
 set wildmode=list:longest,full
-
-nnoremap <silent> n n:call HLNext(0.07)<CR>
-nnoremap <silent> N N:call HLNext(0.07)<CR>
+set cursorline
 
 nnoremap <leader>n :cnext <cr>
 nnoremap <leader>N :cprev <cr>
@@ -103,24 +102,26 @@ if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
 endif
 
+" nnoremap <silent> n n:call HLNext(0.07)<CR>
+" nnoremap <silent> N N:call HLNext(0.07)<CR>
 " OR ELSE briefly hide everything except the match...
-function! HLNext (blinktime)
-    highlight BlackOnBlack ctermfg=black ctermbg=black
-    let [bufnum, lnum, col, off] = getpos('.')
-    let matchlen = strlen(matchstr(strpart(getline('.'),col-1),@/))
-    let hide_pat = '\%<'.lnum.'l.'
-            \ . '\|'
-            \ . '\%'.lnum.'l\%<'.col.'v.'
-            \ . '\|'
-            \ . '\%'.lnum.'l\%>'.(col+matchlen-1).'v.'
-            \ . '\|'
-            \ . '\%>'.lnum.'l.'
-    let ring = matchadd('BlackOnBlack', hide_pat, 101)
-    redraw
-    exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
-    call matchdelete(ring)
-    redraw
-endfunction
+" function! HLNext (blinktime)
+"     highlight BlackOnBlack ctermfg=black ctermbg=black
+"     let [bufnum, lnum, col, off] = getpos('.')
+"     let matchlen = strlen(matchstr(strpart(getline('.'),col-1),@/))
+"     let hide_pat = '\%<'.lnum.'l.'
+"             \ . '\|'
+"             \ . '\%'.lnum.'l\%<'.col.'v.'
+"             \ . '\|'
+"             \ . '\%'.lnum.'l\%>'.(col+matchlen-1).'v.'
+"             \ . '\|'
+"             \ . '\%>'.lnum.'l.'
+"     let ring = matchadd('BlackOnBlack', hide_pat, 101)
+"     redraw
+"     exec 'sleep ' . float2nr(a:blinktime * 1000) . 'm'
+"     call matchdelete(ring)
+"     redraw
+" endfunction
 
 "ve the preview window (code documentation) to the bottom of the screen, so it doesn't move the code!
 "You might also want to look at the echodoc plugin
@@ -169,22 +170,32 @@ set spelllang=en
 set spellfile=$HOME/.config/nvim/spell/en.utf-8.add
 
 call plug#begin('~/.config/nvim/plugged')
-Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
-Plug 'scrooloose/nerdcommenter'
-Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-Plug 'vim-syntastic/syntastic'
-Plug 'cfdrake/vim-pbxproj'
-Plug 'plasticboy/vim-markdown'
-Plug 'vim-ruby/vim-ruby'
-Plug 'christoomey/vim-tmux-runner'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'keith/swift.vim'
-Plug 'udalov/kotlin-vim'
 Plug 'Rip-Rip/clang_complete'
-Plug 'kien/ctrlp.vim'
-Plug '~/.config/nvim/linters', { 'do': './install.sh' }
-Plug 'tpope/vim-commentary'
-Plug 'mzlogin/vim-markdown-toc'
-Plug 'tpope/vim-surround'
+
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
 Plug 'airblade/vim-gitgutter'
+Plug 'cfdrake/vim-pbxproj'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'christoomey/vim-tmux-runner'
+Plug 'keith/swift.vim'
+Plug 'kien/ctrlp.vim'
+Plug 'mzlogin/vim-markdown-toc'
+Plug 'plasticboy/vim-markdown'
+Plug 'scrooloose/nerdcommenter'
+Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-surround'
+Plug 'udalov/kotlin-vim'
+Plug 'vim-ruby/vim-ruby'
+Plug 'vim-syntastic/syntastic'
+Plug '~/.config/nvim/linters', { 'do': './install.sh' }
+Plug 'romainl/vim-cool'
+Plug 'zyedidia/literate.vim'
+
+" swift lsp
+"Plug 'prabirshrestha/async.vim'
+"Plug 'prabirshrestha/asyncomplete-lsp.vim'
+"Plug 'prabirshrestha/asyncomplete.vim'
+"Plug 'prabirshrestha/vim-lsp'
+"Plug 'ryanolsonx/vim-lsp-swift'
 call plug#end()

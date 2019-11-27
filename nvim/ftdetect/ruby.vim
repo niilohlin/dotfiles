@@ -1,5 +1,5 @@
 
-au BufNewFile,BufRead Fastfile,Appfile,Snapfile,Scanfile,Gymfile,Matchfile,Deliverfile,Dangerfile set filetype=ruby
+au BufNewFile,BufRead Fastfile,Appfile,Snapfile,Scanfile,Gymfile,Matchfile,Deliverfile,Dangerfile,*.gemspec set filetype=ruby
 autocmd FileType ruby setlocal shiftwidth=2
 autocmd FileType ruby setlocal tabstop=2
 autocmd FileType ruby setlocal softtabstop=2

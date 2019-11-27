@@ -443,6 +443,11 @@ prompt_pure_setup() {
 		typeset -g prompt_newline=$'\n%{\r%}'
 	fi
 
+	if [[ -z $pre_prompt_newline ]]; then
+		# This variable needs to be set, usually set by promptinit.
+		typeset -g pre_prompt_newline=$'·\n%{\r%}'
+	fi
+
 	zmodload zsh/datetime
 	zmodload zsh/zle
 	zmodload zsh/parameter
