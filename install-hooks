@@ -1,0 +1,13 @@
+#!/bin/sh
+
+rm .git/hooks/*.sample
+
+ln -s ~/dotfiles/post-checkout .git/hooks/post-checkout
+ln -s ~/dotfiles/post-commit .git/hooks/post-commit
+ln -s ~/dotfiles/post-merge .git/hooks/post-merge
+ln -s ~/dotfiles/stricter-swiftlint.sh .git/hooks/stricter-swiftlint.sh
+ln -s ~/dotfiles/check_dependency_lockfile .git/hooks/check_dependency_lockfile
+ln -s ~/dotfiles/diff-filter.sh .git/hooks/diff-filter.sh
+ln -s ~/dotfiles/pre-commit .git/hooks/pre-commit
+ln -s ~/dotfiles/pre-push .git/hooks/pre-push
+ln -s ~/dotfiles/stricter-swiftlint.yml .git/hooks/stricter-swiftlint.yml

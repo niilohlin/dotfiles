@@ -10,31 +10,23 @@ disabled_rules:
 
   - type_name
 
-  - force_try
-  - force_cast
-
   - nesting
   - cyclomatic_complexity
 
   - todo
   - mark
 
-  - legacy_constructor
   - private_over_fileprivate
   - multiple_closures_with_trailing_closure
-  - syntactic_sugar
-  - fallthrough
   - implicit_getter
-  - trailing_comma
 
   - protocol_property_accessors_order
   - operator_whitespace
   - shorthand_operator
 
-  - redundant_optional_initialization
-
 enabled_rules:
   - conditional_returns_on_newline
+  - file_name
 
 included:
   - iZettle
@@ -49,6 +41,9 @@ identifier_name:
   severity: warning
 
 custom_rules:
+  no_print:
+    name: "no_print"
+    regex: "print\\("
   separate_presentables_and_application_data:
     name: "Separate presentables and application data"
     included: "Frameworks\\/RegisterPresentation.*\\.swift"

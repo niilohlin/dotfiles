@@ -1,3 +1,6 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =1
+let g:netrw_dirhist_cnt =4
 let g:netrw_dirhist_1='/Users/niilohlin/dotfiles/nvim/plugged/YouCompleteMe/.git'
+let g:netrw_dirhist_2='/Users/niilohlin/workspace/iZettle-iOS/.git/hooks'
+let g:netrw_dirhist_3='/Users/niilohlin/workspace/payments-sdk-ios/.git/hooks'
+let g:netrw_dirhist_4='/Users/niilohlin/workspace/iZettle-iOS/.git/hooks'

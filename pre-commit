@@ -1,17 +1,20 @@
 #!/bin/sh
 
-lint_output=$(exec swiftlint --strict 2>&1)
-ret_code=$?
-PWDSTRING=$(pwd | sed -e 's/[\/&]/\\&/g')
+if [ -f "$GIT_DIR"./.swiftlint.yml ]
+then
+    lint_output=$(exec swiftlint --strict 2>&1)
+    ret_code=$?
+    PWDSTRING=$(pwd | sed -e 's/[\/&]/\\&/g')
 
-if [ $ret_code != 0 ]; then
-    echo "$lint_output" | grep -v "^Linting" | sed "s/$PWDSTRING//g"
-    exit $ret_code
-fi
+    if [ $ret_code != 0 ]; then
+        echo "$lint_output" | grep -v "^Linting" | sed "s/$PWDSTRING//g"
+        exit $ret_code
+    fi
 
-./.git/hooks/stricter-swiftlint.sh
-if [ $? != 0 ]; then
-    exit 1
+    ./.git/hooks/stricter-swiftlint.sh
+    if [ $? != 0 ]; then
+        exit 1
+    fi
 fi
 
 if [ -f ./test_output ]; then
@@ -24,11 +27,14 @@ if [ -d ./test_output ]; then
     exit 1
 fi
 
-circleci config validate
-
-if [ $? != 0 ]; then
-    exit 1
+if [ -f "$GIT_DIR"./.circleci/config.yml ]
+then
+    circleci config validate
+    if [ $? != 0 ]; then
+        exit 1
+    fi
 fi
+
 
 #codeowners-checker check --no-interactive
 
@@ -36,26 +42,12 @@ fi
 #    exit 1
 #fi
 
-ruby -c fastlane/Fastfile
 
-if [ $? != 0 ]; then
-    exit 1
+if [ -f "$GIT_DIR"./fastlane/Fastfile ]
+then
+    ruby -c fastlane/Fastfile
+
+    if [ $? != 0 ]; then
+        exit 1
+    fi
 fi
-#
-# Check syntax of all ruby files.
-#files=$(git diff --chached | grep -E "Fastfile|.*\.rb")
-#while read -r file; do
-#    ruby -wc "$file" > /dev/null
-#    if [ $? != 0 ]; then
-#        exit 1
-#    fi
-#done <<< "$files"
-#
-#
-#cd fastlane
-#bundle exec rspec
-#cd ..
-#
-#if [ $? != 0 ]; then
-#    exit 1
-#fi

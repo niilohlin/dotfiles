@@ -134,6 +134,7 @@ PATH=$PATH:$HOME/.fastlane/bin
 PATH=$PATH:/usr/local/Cellar
 PATH=$PATH:/usr/local/bin/
 PATH=$PATH:/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/
+PATH=$PATH:$HOME/dotfiles/
 #PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
 #[[ -z "$TMUX" ]] && exec tmux
 eval $(/usr/libexec/path_helper -s)
