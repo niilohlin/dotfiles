@@ -2,8 +2,14 @@
 # Must haves
 * brew
 * spectacle
-* quicksilver
 * neovim
+
+
+To install the keyboard layouts:
+
+```
+  sudo cp -r Keyboard\ Layouts/* /Library/Keyboard\ Layouts/
+```
 
 Remember to change scroll direction and to switch cmd and option keys on keyboard.
 
