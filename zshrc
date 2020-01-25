@@ -110,6 +110,7 @@ function clock {
 alias cd='cdAndLs'
 alias mkdir='mkdirAndCd'
 alias lynx='lynx --accept_all_cookies'
+alias last_touched_file='ls -t *.crash | head -1 t branch --merged | egrep -v "(^\*|master|dev)"'
 
 set -o vi
 bindkey -M viins 'tn' vi-cmd-mode
@@ -135,6 +136,7 @@ PATH=$PATH:/usr/local/Cellar
 PATH=$PATH:/usr/local/bin/
 PATH=$PATH:/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/
 PATH=$PATH:$HOME/dotfiles/
+PATH=/usr/local/opt/sqlite/bin:$PATH
 #PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
 #[[ -z "$TMUX" ]] && exec tmux
 eval $(/usr/libexec/path_helper -s)
@@ -171,6 +173,7 @@ export PATH="/usr/local/opt/icu4c/sbin:$PATH"
 export PATH="~/.pyenv/bin:$PATH"
 export PATH="~/.rbenv/bin:$PATH"
 export PATH="~/.cargo/bin:$PATH"
+
 eval "$(rbenv init -)"
 
 export PYTHON_CONFIGURE_OPTS="--enable-framework"

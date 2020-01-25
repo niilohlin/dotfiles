@@ -15,6 +15,11 @@ then
     if [ $? != 0 ]; then
         exit 1
     fi
+
+    if [ -f ./swiftlint.html ]; then
+        echo "swiftlint.html exists"
+        exit 1
+    fi
 fi
 
 if [ -f ./test_output ]; then
@@ -48,6 +53,15 @@ then
     ruby -c fastlane/Fastfile
 
     if [ $? != 0 ]; then
+        exit 1
+    fi
+fi
+
+if [ -f "GIT_DIR"./.rubocop.yml ]
+then
+    rubocop
+    if [ $? != 0]
+    then
         exit 1
     fi
 fi

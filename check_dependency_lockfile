@@ -1,24 +1,33 @@
 #!/bin/zsh
 
-
-if [ -f "$GIT_DIR"./Cartfile.resolved ]
-then
-    CHANGED=$(git diff "$1" "$2" --stat -- "$GIT_DIR"./Cartfile.resolved | wc -l)
-    if [ "$CHANGED" -gt 0 ];
+file_changed() {
+    if [ -f "$GIT_DIR"./$1 ]
     then
-        echo ""
-        echo -e "\e[31mCartfile.resolved has changed!\e[0m"
-        sh "$GIT_DIR"./fastlane/carthage-update.sh
+        CHANGED=""
+        if [ -z "$3" ]
+        then
+            CHANGED=$(git diff "$2" --stat -- "$GIT_DIR"./$1 | wc -l)
+        else
+            CHANGED=$(git diff "$2" "$3" --stat -- "$GIT_DIR"./$1 | wc -l)
+        fi
+        if [ $CHANGED -gt 0 ];
+        then
+            echo ""
+            echo -e "\e[31m$1 has changed!\e[0m"
+            return 0
+        fi
+        return 1
+    else
+        return 1
     fi
+}
+
+if file_changed "Cartfile.resolved" $1 $2;
+then
+    sh "$GIT_DIR"./fastlane/carthage-update.sh
 fi
 
-if [ -f "$GIT_DIR"./Gemfile.lock ]
+if file_changed "Gemfile.lock" $1 $2;
 then
-    CHANGED=$(git diff "$1" "$2" --stat -- "$GIT_DIR"./Gemfile.lock | wc -l)
-    if [ "$CHANGED" -gt 0 ];
-    then
-        echo ""
-        echo -e "\e[31mGemfile.lock has changed!\e[0m"
-        bundle install
-    fi
+    bundle install
 fi
