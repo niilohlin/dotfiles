@@ -1,5 +1,6 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =3
+let g:netrw_dirhist_cnt =4
 let g:netrw_dirhist_1='/tmp'
 let g:netrw_dirhist_2='/Users/niilohlin/workspace/Form/Examples/SwiftPackageManager/Example.xcodeproj'
 let g:netrw_dirhist_3='/Users/niilohlin/dotfiles/nvim/ftdetect'
+let g:netrw_dirhist_4='/Users/niilohlin/workspace/niilohlin.github.io/_posts'
