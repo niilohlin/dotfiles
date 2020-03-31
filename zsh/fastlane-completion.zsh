@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+#compdef fastlane
+
 _fastlane_complete() {
   local word completions
   word="$1"
@@ -20,3 +22,5 @@ update_fastlane"
 
   reply=( "${(ps:\n:)completions}" )
 }
+
+compctl -K _fastlane_complete fastlane

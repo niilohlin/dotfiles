@@ -5,4 +5,8 @@ autocmd FileType ruby setlocal tabstop=2
 autocmd FileType ruby setlocal softtabstop=2
 autocmd FileType ruby setlocal expandtab
 autocmd FileType ruby compiler ruby
+" autocmd FileType ruby let g:VtrStripLeadingWhitespace = 0
+" autocmd FileType ruby let g:VtrClearEmptyLines = 0
+" autocmd FileType ruby let g:VtrAppendNewline = 1
+
 let g:syntastic_ruby_checkers = ['rubocop']

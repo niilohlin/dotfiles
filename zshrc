@@ -45,6 +45,11 @@ alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
 function copy() {
     cat $1 | pbcopy
 }
+
+function asht() {
+    cat $1 | pbcopy
+}
+
 function gclean() {
     git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
     git fetch --all --prune
@@ -57,8 +62,7 @@ function commitsAtDate() {
 }
 
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
-autoload -U compinit
-compinit
+autoload -Uz compinit && compinit
 zstyle ':completion:*' menu yes select
 zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)(?)*==02=01}:${(s.:.)LS_COLORS}")'
 
@@ -153,6 +157,7 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:
 source ~/.zsh/git-completion.bash
 source ~/.zsh/fastlane-completion.zsh
 fpath=(~/.zsh $fpath)
+fpath=(~/.zsh/completions $fpath)
 
 source ~/.zsh/async.zsh
 source ~/.zsh/pure.zsh
@@ -162,6 +167,17 @@ export LC_ALL=en_US.UTF-8
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
+
+export NOTES_DIR="$HOME"/Documents/notes
+function new_note() {
+    if [ -z $1 ]
+    then
+        ID="$(date +%FT%T).md"
+    else
+        ID="$(date +%FT%T)-$1.md"
+    fi
+    vim $NOTES_DIR/$ID
+}
 
 #eval $(thefuck --alias)
 
