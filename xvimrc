@@ -3,7 +3,7 @@ inoremap tn <esc>
 nnoremap V v
 nnoremap v V
 
-nnoremap ds( di(hPlxx
+nnoremap ds( di(hPlaa<esc>hxxx
 nnoremap ds[ di[hPlxx
 nnoremap ds{ di{hPlxx
 
@@ -26,3 +26,5 @@ nnoremap <D-C-k> <nop>
 nnoremap <space>p viwpyiwb
 
 nnoremap <space>o :xcmenucmd Open Quickly...<CR>
+nnoremap { ?^\s*$<cr>
+nnoremap } /^\s*$<cr>

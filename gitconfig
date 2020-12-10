@@ -2,13 +2,13 @@
 [core]
 # Please adapt and uncomment the following lines:
 	user = Niil Öhlin
-	email = niil.ohlin@izettle.com
+	email = niilohlin@gmail.com
 	excludesfile = /Users/niilohlin/.gitignore
 	editor = nvim
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [user]
 	name = Niil Öhlin
-	email = niil.ohlin@izettle.com
+	email = niilohlin@gmail.com
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
 	path =
@@ -30,7 +30,7 @@
 	co = checkout
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
     go = checkout -b
-    branches = for-each-ref --sort=-committerdate refs/heads/
+    branches = "!git for-each-ref --sort=-committerdate refs/heads/ | tail -r"
     fix = !git add . && git commit --amend --no-edit
     branch-name = "!git rev-parse --abbrev-ref HEAD"
     publish = "!git push -u origin $(git branch-name) \
@@ -44,5 +44,5 @@
     wip = "!git add . && git commit -m \"WIP\" --no-verify"
     added = diff --cached
     remote-tags = ls-remote --tags
-[url "ssh://git@github.com"]
-	insteadOf = https://github.com
+; [url "ssh://git@github.com"]
+; 	insteadOf = https://github.com

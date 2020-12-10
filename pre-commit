@@ -34,9 +34,15 @@ fi
 
 if [ -f "$GIT_DIR"./.circleci/config.yml ]
 then
-    circleci config validate
-    if [ $? != 0 ]; then
-        exit 1
+    changed_config=$(git diff --cached --name-only | grep ".circleci/config.yml")
+    if [ ! -z "$changed_config" ]; then
+        echo "config changed"
+        circleci config validate
+        if [ $? != 0 ]; then
+            exit 1
+        fi
+    else
+        echo "config not changed"
     fi
 fi
 

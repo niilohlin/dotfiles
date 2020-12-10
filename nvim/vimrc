@@ -79,7 +79,7 @@ let mapleader = "\<space>"
 
 nnoremap K kJ
 
-inoremap {<CR> {<ESC>o}<ESC>O
+" inoremap {<CR> {<ESC>o}<ESC>O
 
 "set nohlsearch!
 set wildmenu
@@ -191,6 +191,10 @@ Plug 'vim-syntastic/syntastic'
 Plug '~/.config/nvim/linters', { 'do': './install.sh' }
 Plug 'romainl/vim-cool'
 Plug 'zyedidia/literate.vim'
+Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
+Plug 'zah/nim.vim'
+Plug 'rust-lang/rust.vim'
+Plug 'racer-rust/vim-racer'
 
 " swift lsp
 "Plug 'prabirshrestha/async.vim'

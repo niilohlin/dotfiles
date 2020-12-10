@@ -1,0 +1,3 @@
+command script import /usr/local/opt/chisel/libexec/fblldb.py
+script fblldb.loadCommandsInDirectory('/Users/niilohlin/dotfiles/commands')
+command regex ppjs 's/(.+)/expr print(NSString(string: String(data: try! JSONSerialization.data(withJSONObject: %1, options: .prettyPrinted), encoding: .utf8)!))/'

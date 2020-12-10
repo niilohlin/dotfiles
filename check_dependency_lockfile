@@ -24,10 +24,16 @@ file_changed() {
 
 if file_changed "Cartfile.resolved" $1 $2;
 then
-    sh "$GIT_DIR"./fastlane/carthage-update.sh
+    carthage update
 fi
 
 if file_changed "Gemfile.lock" $1 $2;
 then
     bundle install
 fi
+
+if file_changed "Podfile.lock" $1 $2;
+then
+    bundle exec pod install || pod install
+fi
+
