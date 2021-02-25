@@ -160,8 +160,8 @@ source ~/.zsh/fastlane-completion.zsh
 fpath=(~/.zsh $fpath)
 fpath=(~/.zsh/completions $fpath)
 
-source ~/.zsh/async.zsh
-source ~/.zsh/pure.zsh
+source ~/.zsh/pure/async.zsh
+source ~/.zsh/pure/pure.zsh
 export LANG=C
 export LC_ALL=en_US.UTF-8
 
