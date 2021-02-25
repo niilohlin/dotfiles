@@ -46,6 +46,36 @@ then
     fi
 fi
 
+# if [ -f "$GIT_DIR"./Jenkinsfile ]
+# then
+#     changed_config=$(git diff --cached --name-only | grep "Jenkinsfile")
+#     if [ ! -z "$changed_config" ]; then
+#         echo "config changed"
+#         curl --netrc-file "$GIT_DIR/.git/netrcfile" -X POST -F "jenkinsfile=<Jenkinsfile" http://jenkins.tocaboca.com:8080/pipeline-model-converter/validate
+#         if [ $? != 0 ]; then
+#             exit 1
+#         fi
+#     else
+#         echo "config not changed"
+#     fi
+# fi
+
+
+#codeowners-checker check --no-interactive
+
+#if [ $? != 0 ]; then
+#    exit 1
+#fi
+
+
+if [ -f "$GIT_DIR"./fastlane/Fastfile ]
+then
+    ruby -c fastlane/Fastfile
+
+    if [ $? != 0 ]; then
+        exit 1
+    fi
+fi
 
 #codeowners-checker check --no-interactive
 

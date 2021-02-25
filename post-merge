@@ -9,6 +9,8 @@ git lfs post-merge "$@"
 #     sh "$GIT_DIR"./fastlane/carthage-update.sh
 # fi
 
+git submodule update --recursive
+
 ./.git/hooks/check_dependency_lockfile $(git rev-parse HEAD@{1})
 
 git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph "$(git rev-parse HEAD@{1})..$(git rev-parse HEAD)"

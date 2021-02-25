@@ -26,5 +26,6 @@ nnoremap <D-C-k> <nop>
 nnoremap <space>p viwpyiwb
 
 nnoremap <space>o :xcmenucmd Open Quickly...<CR>
-nnoremap { ?^\s*$<cr>
-nnoremap } /^\s*$<cr>
+" for retarded projects.
+" nnoremap { ?^\s*$<cr>
+" nnoremap } /^\s*$<cr>

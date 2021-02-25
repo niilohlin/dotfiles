@@ -41,6 +41,7 @@ alias gsummary='grep "^Updating" | sed "s/Updating //" | xargs git log --oneline
 alias vim='nvim'
 alias editvimconf='nvim ~/.config/nvim/vimrc'
 alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
+alias cd..='cd ..'
 
 function copy() {
     cat $1 | pbcopy
@@ -167,7 +168,9 @@ export LC_ALL=en_US.UTF-8
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
+export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openjdk/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
+export GROOVY_HOME=/usr/local/opt/groovy/libexec
 
 export NOTES_DIR="$HOME"/Documents/notes
 function new_note() {
@@ -190,6 +193,8 @@ export PATH="/usr/local/opt/icu4c/sbin:$PATH"
 export PATH="$HOME/.pyenv/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
+export PATH="/usr/local/opt/openjdk/bin:$PATH"
+export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
 
 eval "$(rbenv init -)"
 
@@ -203,3 +208,5 @@ PERL5LIB="/Users/niilohlin/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PER
 PERL_LOCAL_LIB_ROOT="/Users/niilohlin/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
 PERL_MB_OPT="--install_base \"/Users/niilohlin/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/Users/niilohlin/perl5"; export PERL_MM_OPT;
+export PATH="/usr/local/opt/bison/bin:$PATH"
+export PATH="/usr/local/opt/llvm/bin:$PATH"

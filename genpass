@@ -3,11 +3,36 @@
 import random
 import string
 import sys
+import argparse
+
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
 
 if __name__ == "__main__":
-    length = 20
-    try:
-        length = int(sys.argv[1])
-    except:
-        pass
-    print(''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length)))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--length', help='length of generated passwords', type=int, default=20)
+    parser.add_argument('-d', '--digits', help='use digits', nargs='?', const=True, type=str2bool, default=True)
+    parser.add_argument('-C', '--upper', help='use upper case', nargs='?', const=True, type=str2bool, default=True)
+    parser.add_argument('-c', '--lower', help='use lower case', nargs='?', const=True, type=str2bool, default=True)
+    parser.add_argument('-p', '--punctuation', help='use punctuation', nargs='?', const=True, type=str2bool, default=False)
+
+    args = parser.parse_args()
+
+    characters = ''
+    if args.digits:
+        characters += string.digits
+    if args.upper:
+        characters += string.ascii_uppercase
+    if args.lower:
+        characters += string.ascii_lowercase
+    if args.punctuation:
+        characters += string.punctuation
+
+    print(''.join(random.choice(characters) for _ in range(args.length)))

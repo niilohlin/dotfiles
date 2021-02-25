@@ -1,0 +1,32 @@
+---
+
+
+- name: Install MacOS Packages
+  hosts: localhost
+  become: false
+
+  tasks:
+    - community.general.homebrew:
+        name: jq
+        state: present
+
+  tasks:
+    - community.general.homebrew:
+        name: pyenv
+        state: present
+
+  tasks:
+    - community.general.homebrew:
+        name: rbenv
+        state: present
+
+  tasks:
+    - community.general.homebrew:
+        name: zlib
+        state: present
+
+  tasks:
+    - community.general.homebrew:
+        name: cmake
+        state: present
+
