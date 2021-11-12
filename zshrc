@@ -1,8 +1,8 @@
 #!/bin/zsh
 
-if [ -z $TMUX ]; then
-    exec tmux
-fi
+# if [ -z $TMUX ]; then
+#     exec tmux
+# fi
 
 xhost +local:root > /dev/null 2>&1
 
@@ -20,10 +20,18 @@ setopt incappendhistory
 
 export HD='/run/media/niil/8d25eb81-c066-48cd-a263-83d2b0b3308c/'
 
+function ls() {
+    if [[ $PWD == '/tmp' ]]
+    then
+        exa --long --sort=modified
+    else
+        exa -G -F
+    fi
+}
 
-alias ls='ls -G -F'
-alias ll='ls -l --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
-alias la='ls -la --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F'
+# alias ls='exa -G -F'
+alias ll='exa -l --group-directories-first --color=auto -F'
+alias la='exa -la --group-directories-first --color=auto -F'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
 alias df='df -h'                          # human-readable sizes
@@ -41,6 +49,7 @@ alias gsummary='grep "^Updating" | sed "s/Updating //" | xargs git log --oneline
 alias vim='nvim'
 alias editvimconf='nvim ~/.config/nvim/vimrc'
 alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
+alias tree='broot'
 alias cd..='cd ..'
 
 function copy() {
@@ -143,7 +152,6 @@ PATH=$PATH:/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/
 PATH=$PATH:$HOME/dotfiles/
 PATH=/usr/local/opt/sqlite/bin:$PATH
 #PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
-#[[ -z "$TMUX" ]] && exec tmux
 eval $(/usr/libexec/path_helper -s)
 
 search() {
@@ -159,9 +167,11 @@ source ~/.zsh/git-completion.bash
 source ~/.zsh/fastlane-completion.zsh
 fpath=(~/.zsh $fpath)
 fpath=(~/.zsh/completions $fpath)
+# fpath+=~/.zsh/pure
 
 source ~/.zsh/pure/async.zsh
 source ~/.zsh/pure/pure.zsh
+
 export LANG=C
 export LC_ALL=en_US.UTF-8
 
@@ -210,3 +220,5 @@ PERL_MB_OPT="--install_base \"/Users/niilohlin/perl5\""; export PERL_MB_OPT;
 PERL_MM_OPT="INSTALL_BASE=/Users/niilohlin/perl5"; export PERL_MM_OPT;
 export PATH="/usr/local/opt/bison/bin:$PATH"
 export PATH="/usr/local/opt/llvm/bin:$PATH"
+
+source /Users/niilohlin/.config/broot/launcher/bash/br

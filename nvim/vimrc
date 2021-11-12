@@ -195,6 +195,8 @@ Plug 'numirias/semshi', {'do': ':UpdateRemotePlugins'}
 Plug 'zah/nim.vim'
 Plug 'rust-lang/rust.vim'
 Plug 'racer-rust/vim-racer'
+Plug 'Raku/vim-raku'
+Plug 'github/copilot.vim'
 
 " swift lsp
 "Plug 'prabirshrestha/async.vim'

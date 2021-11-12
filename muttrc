@@ -1,0 +1,7 @@
+set ssl_force_tls = yes
+set abort_nosubject = no
+set mail_check = 60
+set timeout = 10
+set sort = "reverse-date-received"
+set signature = "~/.mutt/signature"
+set copy = no

@@ -29,6 +29,7 @@
     autosquash = true
 [alias]
 	co = checkout
+    chp = cherry-pick
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
     go = checkout -b
     branches = "!git for-each-ref --sort=-committerdate refs/heads/ | tail -r"
@@ -41,7 +42,7 @@
     prev = "!git checkout HEAD^1"
     patch = !git --no-pager diff --no-color
     delete = "!git branch -D"
-    nuke = "!git clean -df && git reset HEAD --hard"
+    nuke = "!git clean -df && git reset HEAD --hard && git submodule update --recursive"
     wip = "!git add . && git commit -m \"WIP\" --no-verify"
     added = diff --cached
     remote-tags = ls-remote --tags
@@ -49,3 +50,7 @@
 	insteadOf = https://github.com
 [pull]
 	rebase = true
+[rerere]
+	enabled = true
+[init]
+	defaultBranch = master
