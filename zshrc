@@ -182,6 +182,13 @@ export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openjdk/include"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 export GROOVY_HOME=/usr/local/opt/groovy/libexec
 
+## psycopg2
+export LDFLAGS="-L/usr/local/opt/libpq/lib"
+export CPPFLAGS="-I/usr/local/opt/libpq/include"
+# export LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install psycopg2
+export LDFLAGS="-L/usr/local/opt/openssl@3/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl@3/include"
+
 export NOTES_DIR="$HOME"/Documents/notes
 function new_note() {
     if [ -z $1 ]
@@ -200,11 +207,12 @@ source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
-export PATH="$HOME/.pyenv/bin:$PATH"
+export PATH="$HOME/.pyenv/shims:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/openjdk/bin:$PATH"
 export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
+export PATH="$HOME/.local/share/nvim/site/pack/pack/paqs/start/paq-nvim/lua:$PATH"
 
 eval "$(rbenv init -)"
 
@@ -221,4 +229,4 @@ PERL_MM_OPT="INSTALL_BASE=/Users/niilohlin/perl5"; export PERL_MM_OPT;
 export PATH="/usr/local/opt/bison/bin:$PATH"
 export PATH="/usr/local/opt/llvm/bin:$PATH"
 
-source /Users/niilohlin/.config/broot/launcher/bash/br
+#source /Users/niilohlin/.config/broot/launcher/bash/br

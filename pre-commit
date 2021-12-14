@@ -11,10 +11,10 @@ then
         exit $ret_code
     fi
 
-    ./.git/hooks/stricter-swiftlint.sh
-    if [ $? != 0 ]; then
-        exit 1
-    fi
+    # ./.git/hooks/stricter-swiftlint.sh
+    # if [ $? != 0 ]; then
+    #     exit 1
+    # fi
 
     if [ -f ./swiftlint.html ]; then
         echo "swiftlint.html exists"
