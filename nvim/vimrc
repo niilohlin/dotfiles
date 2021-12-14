@@ -1,43 +1,12 @@
 scriptencoding utf-8
 
-syntax enable
-syntax on
-filetype on
-filetype plugin indent on
-set showcmd
-set incsearch
-set showmatch
-set ignorecase
-set smartcase
-set smartindent
-set autowrite
-set number
-set relativenumber
-set backspace=2
-set ruler
-set showcmd
-set colorcolumn=80
-let g:m1=matchadd('ColorColumn', '\%81v', 100)
+" filetype on
+" filetype plugin indent on
+
 "set clipboard=unnamed
-set whichwrap+=<,>,[,],l,h
-set scrolloff=1
+" set scrolloff=1
 colorscheme monokai
-" handle tabs
-let tabLength=4
-execute 'set tabstop='.tabLength
-execute 'set shiftwidth='.tabLength
-execute 'set softtabstop='.tabLength
-set expandtab
 
-set undofile
-set undodir=~/.config/nvim/undodir
-set list
-set listchars=tab:›\ ,trail:·,extends:›,precedes:‹,nbsp:+
-
-" Some remaps
-inoremap tn <Esc>
-nnoremap v V
-nnoremap V v
 "inoremap <Paste> <Esc>:set nopaste<CR>
 "nnoremap p p=`]
 "nnoremap P P=`]
@@ -101,6 +70,11 @@ nnoremap <F14> :%s/\<<C-r><C-w>\>//g<Left><Left>
 if v:version > 703 || v:version == 703 && has('patch541')
   set formatoptions+=j
 endif
+
+" emulate tmux movement
+nnoremap <C-b>" :split<cr>
+nnoremap <C-b>% :vsplit<cr>
+nnoremap <C-b>o <C-w><C-w>
 
 " nnoremap <silent> n n:call HLNext(0.07)<CR>
 " nnoremap <silent> N N:call HLNext(0.07)<CR>
@@ -172,7 +146,7 @@ set spellfile=$HOME/.config/nvim/spell/en.utf-8.add
 call plug#begin('~/.config/nvim/plugged')
 Plug 'Rip-Rip/clang_complete'
 
-Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'airblade/vim-gitgutter'
 Plug 'cfdrake/vim-pbxproj'
 Plug 'christoomey/vim-tmux-navigator'
@@ -196,7 +170,8 @@ Plug 'zah/nim.vim'
 Plug 'rust-lang/rust.vim'
 Plug 'racer-rust/vim-racer'
 Plug 'Raku/vim-raku'
-Plug 'github/copilot.vim'
+Plug 'neovimhaskell/haskell-vim'
+Plug 'eagletmt/ghcmod-vim'
 
 " swift lsp
 "Plug 'prabirshrestha/async.vim'
