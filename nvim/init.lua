@@ -1,53 +1,55 @@
 
+-- Package manager. https://github.com/savq/paq-nvim
 require "paq" {
     'savq/paq-nvim';                  -- Let Paq manage itself
-    'euclidianAce/BetterLua.vim';
-    'svermeulen/vimpeccable'
+    'euclidianAce/BetterLua.vim';     -- Lua improvements
+    'svermeulen/vimpeccable';         -- Adds vimp utility module
 }
 
 local opt = vim.opt
 local cmd = vim.cmd
 local g = vim.g
+local api = vim.api
 local HOME = os.getenv("HOME")
 
+-- Legacy config
 cmd('source ~/.config/nvim/vimrc')
-vim.api.nvim_command('colorscheme monokai')
+-- Set colorscheme
+api.nvim_command('colorscheme monokai')
 
 -- options
-
-opt.showcmd = true
-opt.incsearch = true
-opt.showmatch = true
-opt.ignorecase = true
-opt.smartcase = true
-opt.smartindent = true
-opt.autowrite = true
-opt.number = true
-opt.relativenumber = true
-opt.backspace = "2"
-opt.ruler = true
-opt.showcmd = true
-opt.colorcolumn = "120"
-opt.modifiable = true
+opt.showcmd = true          -- Show the current command in the bottom right
+opt.incsearch = true        -- Incremental search
+opt.showmatch = true        -- Highlight search match
+opt.ignorecase = true       -- Ignore search casing
+opt.smartcase = true        -- But not when searching with uppercase letters
+opt.smartindent = true      -- Language-aware indent
+opt.autowrite = true        -- Automatically write on :n and :p
+opt.number = true           -- Set line numbers
+opt.relativenumber = true   -- Set relative line numbers
+opt.backspace = "2"         -- Make backspace work as expected in insert mode.
+opt.ruler = true            -- Show cursor col and row position
+opt.colorcolumn = "120"     -- Show max column highlight.
+opt.modifiable = true       -- Make buffers modifiable.
 
 
--- handle tabs
+-- Handle tabs, expand to 4 spaces.
 local tabLength = 4
 opt.tabstop = tabLength
 opt.shiftwidth = tabLength
 opt.softtabstop = tabLength
 opt.expandtab = true
 
-opt.list = true
-opt.whichwrap = opt.whichwrap + "<,>,[,],l,h"
+opt.list = true                                 -- Show whitespace characters.
+opt.listchars = { tab = '› ', trail = '·', extends ='›', precedes = '‹', nbsp = '+' } -- Show these characters
+opt.whichwrap = opt.whichwrap + "<,>,[,],l,h"   -- Move cursor to next line when typing these characters.
 
-opt.undofile = true
-opt.undodir = HOME .. "/.config/nvim/undodir"
-opt.scrolloff = 1
-
-opt.listchars = { tab = '› ', trail = '·', extends ='›', precedes = '‹', nbsp = '+' }
+opt.undofile = true                             -- Use undo file
+opt.undodir = HOME .. "/.config/nvim/undodir"   -- Set undo dir
+opt.scrolloff = 1                               -- Scroll 1 line before cursor hits bottom
 
 
+-- Remapping utility.
 local vimp = require('vimp')
 
 -- Insert remaps.
