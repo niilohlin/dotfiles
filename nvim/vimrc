@@ -1,32 +1,10 @@
 scriptencoding utf-8
 
-" filetype on
-" filetype plugin indent on
-
-"set clipboard=unnamed
-" set scrolloff=1
-colorscheme monokai
-
 "inoremap <Paste> <Esc>:set nopaste<CR>
 "nnoremap p p=`]
 "nnoremap P P=`]
-" Makes so that indendation does not disappear when
-" entering normal mode
-inoremap <CR> <CR>a<BS>
-nnoremap o oa<BS>
-nnoremap O Oa<BS>
 
-nnoremap H <C-O>
-nnoremap L <C-I>
 
-inoremap <C-F> <C-X><C-F>
-inoremap <C-L> <C-X><C-L>
-inoremap <C-D> <C-X><C-D>
-inoremap <C-O> <C-X><C-O>
-inoremap <C-]> <C-X><C-]>
-
-tnoremap <Esc> <C-\><C-n>
-set modifiable
 nnoremap } :silent! exec "keepjumps normal! }"<cr>
 nnoremap { :keepjumps normal! {<cr>
 nnoremap <leader>/ :vimgrep //gj ./**/*.swift<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
