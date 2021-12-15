@@ -1,9 +1,44 @@
 
 -- Package manager. https://github.com/savq/paq-nvim
 require "paq" {
+    -- paq options:
+    -- as - name a package
+    -- branch - repo branch
+    -- opt - set to optional (lazy loading)
+    -- pin - do not update
+    -- run - run after install/update
+    -- url - url of remote repo.
     'savq/paq-nvim';                  -- Let Paq manage itself
     'euclidianAce/BetterLua.vim';     -- Lua improvements
     'svermeulen/vimpeccable';         -- Adds vimp utility module
+    -- {'ms-jpq/chadtree', branch='chad', run = 'python -m chadtree deps'};                -- Better NerdTree
+    { 'neoclide/coc.nvim', branch = 'release'}; -- Completion engine
+    'airblade/vim-gitgutter';         -- Git status of changed lines to the left.
+    'cfdrake/vim-pbxproj';            -- Syntax highlight for pbxproj (TODO switch to treesitter later)
+
+    'christoomey/vim-tmux-navigator'; -- Send text to tmux pane
+    'christoomey/vim-tmux-runner';    -- Send text to tmux pane
+    'kien/ctrlp.vim';                 -- Fuzzy file opener
+    'plasticboy/vim-markdown';        -- Markdown utility, go to link and so on.
+    'mhinz/vim-startify';             -- Startscreen.
+    -- 'scrooloose/nerdtree';            -- File explorer
+    'tpope/vim-commentary';           -- Commenter/uncommenter
+    'tpope/vim-surround';             -- Change surrounding.
+
+    'vim-syntastic/syntastic';        -- External syntax checkers, like linters and so on.
+    'romainl/vim-cool';               -- Disable search highlight after searching.
+    { 'numirias/semshi', run = ':UpdateRemotePlugins<CR>'}; -- Semantic highligting for python.
+    'neovimhaskell/haskell-vim';      -- Haskell
+    'eagletmt/ghcmod-vim';            -- More haskell
+    'vim-ruby/vim-ruby';              -- Ruby
+
+    -- nvim lsp
+    'neovim/nvim-lspconfig';
+    'prabirshrestha/async.vim';
+    'prabirshrestha/asyncomplete-lsp.vim';
+    'prabirshrestha/asyncomplete.vim';
+    'prabirshrestha/vim-lsp';
+    'keith/swift.vim';
 }
 
 local opt = vim.opt
@@ -12,10 +47,11 @@ local g = vim.g
 local api = vim.api
 local HOME = os.getenv("HOME")
 
--- Legacy config
-cmd('source ~/.config/nvim/vimrc')
 -- Set colorscheme
 api.nvim_command('colorscheme monokai')
+
+-- Set leader to <space>
+g.mapleader = " "
 
 -- options
 opt.showcmd = true          -- Show the current command in the bottom right
@@ -31,7 +67,18 @@ opt.backspace = "2"         -- Make backspace work as expected in insert mode.
 opt.ruler = true            -- Show cursor col and row position
 opt.colorcolumn = "120"     -- Show max column highlight.
 opt.modifiable = true       -- Make buffers modifiable.
+opt.wildmenu = true         -- Expanded in-line menus
+opt.wildmode = { 'list', 'longest' } -- Full extended menu
+opt.cursorline = true       -- Show a horizontal line where the cursor is
+opt.splitbelow = true       -- Show the preview window (code documentation) to the bottom of the screen.
+-- Status line, the line above the ex column TODO take a look at later and fix.
+opt.statusline = '%f%#warningmsg#%{SyntasticStatuslineFlag()}%*'
 
+-- This setting controls how long to wait (in ms) before fetching type / symbol information.
+opt.updatetime = 500
+-- Remove 'Press Enter to continue' message when type information is longer than one line.
+opt.cmdheight = 2
+opt.hidden = true -- Don't ask to save when changing buffers (i.e. when jumping to a type definition)
 
 -- Handle tabs, expand to 4 spaces.
 local tabLength = 4
@@ -45,9 +92,11 @@ opt.listchars = { tab = '› ', trail = '·', extends ='›', precedes = '‹', 
 opt.whichwrap = opt.whichwrap + "<,>,[,],l,h"   -- Move cursor to next line when typing these characters.
 
 opt.undofile = true                             -- Use undo file
-opt.undodir = HOME .. "/.config/nvim/undodir"   -- Set undo dir
+opt.undodir = HOME .. '/.config/nvim/undodir'   -- Set undo dir
 opt.scrolloff = 1                               -- Scroll 1 line before cursor hits bottom
 
+-- opt.spellang = 'en'
+-- opt.spellfile = HOME .. '/.config/nvim/spell/en.utf-8.add' -- Set custom spelling words path
 
 -- Remapping utility.
 local vimp = require('vimp')
@@ -80,5 +129,56 @@ vimp.nnoremap('O', 'Oa<BS>')
 vimp.nnoremap('H', '<C-O>')
 vimp.nnoremap('L', '<C-I>')
 
+-- Do not let paragraph-wise movement affect jumps as it just boggles up H and L movements.
+vimp.nnoremap('}', ':silent! exec "keepjumps normal! }"<CR>')
+vimp.nnoremap('{', ':silent! exec "keepjumps normal! {"<CR>')
+
 -- Terminal remap escape
 vimp.tnoremap('<Esc>', '<C-\\><C-n>')
+
+-- Normal remaps
+
+-- Should be made into a Lua function later, but split commas to newlines. f(a, b, c) -> f(a,\nb,\nc\n)
+vimp.nnoremap('<leader>a', "ma:s/, /,\\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a")
+
+
+vimp.nnoremap('<leader>n', ':cnext <cr>') -- Go to next error
+vimp.nnoremap('<leader>N', ':cprev <cr>') -- Go to previous issueerror
+
+vimp.nnoremap('<F12>', ':%s/\\<<C-r><C-w>\\>//g<Left><Left>') -- Rename word under cursor
+
+vimp.nnoremap('K', 'kJ') -- Remap K to be the inverse of J
+vimp.nnoremap('<leader>j', ':NERDTreeFind<CR>') -- Show current file in NerdTree
+
+api.nvim_command('command W w') -- Remap :W to :w
+api.nvim_command('command NT :NERDTreeToggle') -- Toggle NerdTree with :NT
+
+-- Lua does not have support for autogroups yet.
+cmd([[
+augroup onWrite
+    " Set cursor position to old spot
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe  "normal! g'\"" | endif
+
+    " Clear trailing space
+    autocmd BufWritePre * :%s/\s\+$//e
+augroup END
+]])
+
+-- Globals
+
+g.ctrlp_map = '<leader>o'
+g.Powerline_symbols = 'fancy'
+g.syntastic_always_populate_loc_list = 1
+g.syntastic_auto_loc_list = 0
+g.syntastic_check_on_open = 0
+g.syntastic_check_on_wq = 0
+g.syntastic_aggregate_errors = 1
+g.clang_library_path='/Library/Developer/CommandLineTools/usr/lib/'
+g.ctrlp_cmd = 'CtrlP'
+g.markdown_enable_spell_checking = 0
+
+g.python_host_prog='~/.pyenv/shims/python'
+g.python2_host_prog='/usr/local/bin/python2'
+g.python3_host_prog='~/.pyenv/shims/python3'
+
+

@@ -46,8 +46,8 @@
     wip = "!git add . && git commit -m \"WIP\" --no-verify"
     added = diff --cached
     remote-tags = ls-remote --tags
-; [url "ssh://git@github.com"]
-; 	insteadOf = https://github.com
+[url "ssh://git@github.com"]
+	insteadOf = https://github.com
 [pull]
 	rebase = true
 [rerere]
