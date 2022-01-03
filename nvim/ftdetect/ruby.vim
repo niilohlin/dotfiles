@@ -10,3 +10,8 @@ autocmd FileType ruby compiler ruby
 " autocmd FileType ruby let g:VtrAppendNewline = 1
 
 let g:syntastic_ruby_checkers = ['rubocop']
+augroup skeleton
+    autocmd!
+    "adds bash shebang to .sh files
+    autocmd bufnewfile *.rb 0r ~/.config/nvim/skeleton/skeleton.rb
+augroup END

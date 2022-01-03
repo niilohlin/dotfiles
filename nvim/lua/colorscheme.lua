@@ -1,4 +1,9 @@
 
 -- Set colorscheme
-vim.api.nvim_command('colorscheme monokai')
+local monokai = require('monokai')
 
+monokai.setup {
+    palette = {
+        base2 = '#272822'
+    }
+}

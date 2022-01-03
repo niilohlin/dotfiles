@@ -20,7 +20,7 @@ let g:tagbar_type_swift = {
   \ 'sort' : 0
 \ }
 
-let g:syntastic_swift_checkers = ['swift', 'swiftpm', 'swiftlint']
+let g:syntastic_swift_checkers = ['swiftc', 'swiftpm', 'swiftlint']
 autocmd FileType swift setlocal omnifunc=lsp#complete
 
 if executable('sourcekit-lsp')

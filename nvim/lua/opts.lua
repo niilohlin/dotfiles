@@ -15,8 +15,6 @@ opt.backspace = "2"         -- Make backspace work as expected in insert mode.
 opt.ruler = true            -- Show cursor col and row position
 opt.colorcolumn = "120"     -- Show max column highlight.
 opt.modifiable = true       -- Make buffers modifiable.
-opt.wildmenu = true         -- Expanded in-line menus
-opt.wildmode = { 'list', 'longest' } -- Full extended menu
 opt.cursorline = true       -- Show a horizontal line where the cursor is
 opt.splitbelow = true       -- Show the preview window (code documentation) to the bottom of the screen.
 -- Status line, the line above the ex column TODO take a look at later and fix.

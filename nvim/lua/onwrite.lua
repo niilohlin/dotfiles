@@ -10,4 +10,3 @@ augroup onWrite
     autocmd BufWritePre * :%s/\s\+$//e
 augroup END
 ]])
-

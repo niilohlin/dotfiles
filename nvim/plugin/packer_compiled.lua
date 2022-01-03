@@ -114,6 +114,16 @@ _G.packer_plugins = {
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/haskell-vim",
     url = "https://github.com/neovimhaskell/haskell-vim"
   },
+  ["lspkind-nvim"] = {
+    loaded = true,
+    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/lspkind-nvim",
+    url = "https://github.com/onsails/lspkind-nvim"
+  },
+  ["monokai.nvim"] = {
+    loaded = true,
+    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/monokai.nvim",
+    url = "https://github.com/tanvirtin/monokai.nvim"
+  },
   nerdtree = {
     loaded = true,
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/nerdtree",
@@ -124,17 +134,19 @@ _G.packer_plugins = {
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/nvim-lspconfig",
     url = "https://github.com/neovim/nvim-lspconfig"
   },
+  ["nvim-treesitter"] = {
+    loaded = true,
+    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/nvim-treesitter",
+    url = "https://github.com/nvim-treesitter/nvim-treesitter"
+  },
   ["packer.nvim"] = {
     loaded = true,
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/packer.nvim",
     url = "https://github.com/wbthomason/packer.nvim"
   },
   semshi = {
-    commands = { ":UpdateRemotePlugins<CR>" },
-    loaded = false,
-    needs_bufread = false,
-    only_cond = false,
-    path = "/Users/niil/.local/share/nvim/site/pack/packer/opt/semshi",
+    loaded = true,
+    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/semshi",
     url = "https://github.com/numirias/semshi"
   },
   ["swift.vim"] = {
@@ -210,12 +222,6 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
-
--- Command lazy-loads
-time([[Defining lazy-load commands]], true)
-pcall(vim.cmd, [[au CmdUndefined :UpdateRemotePlugins<CR> ++once lua require"packer.load"({'semshi'}, {}, _G.packer_plugins)]])
-time([[Defining lazy-load commands]], false)
-
 if should_profile then save_profiles() end
 
 end)

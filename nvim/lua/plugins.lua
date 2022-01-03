@@ -27,7 +27,7 @@ return require('packer').startup(function()
 
   use 'vim-syntastic/syntastic'        -- External syntax checkers, like linters and so on.
   use 'romainl/vim-cool'               -- Disable search highlight after searching.
-  use { 'numirias/semshi', cmd = ':UpdateRemotePlugins<CR>'} -- Semantic highligting for python.
+  use { 'numirias/semshi', run = ':UpdateRemotePlugins<CR>'} -- Semantic highligting for python.
   use 'neovimhaskell/haskell-vim'      -- Haskell
   use 'eagletmt/ghcmod-vim'            -- More haskell
   use 'vim-ruby/vim-ruby'              -- Ruby
@@ -39,4 +39,11 @@ return require('packer').startup(function()
     -- 'prabirshrestha/asyncomplete.vim';     -- Clashes with Coc
   use 'prabirshrestha/vim-lsp'
   use 'keith/swift.vim'
+
+  use 'onsails/lspkind-nvim'             -- unicode pictograms alognside lsp completions for modules/functions etc.
+
+  -- use {'nvim-orgmode/orgmode', config = function() require('orgmode').setup{} end } -- Text management
+  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }  -- Better syntax highlighting
+
+  use 'tanvirtin/monokai.nvim'           -- Monokai with treesitter support
 end)
