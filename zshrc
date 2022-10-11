@@ -152,10 +152,11 @@ PATH=$PATH:/Library/Developer/Toolchains/swift-latest.xctoolchain/usr/bin/
 PATH=$PATH:$HOME/dotfiles/
 PATH=/usr/local/opt/sqlite/bin:$PATH
 #PATH=/usr/local/lib/ruby/gems/2.5.0/bin:$PATH
+PATH=$PATH:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
 eval $(/usr/libexec/path_helper -s)
 
 search() {
-    find ./ -iname "$1"
+    find . -iname "$1"
 }
 
 [ -s "/Users/niilohlin/.k/kvm/kvm.sh" ] && . "/Users/niilohlin/.k/kvm/kvm.sh" # Load kvm

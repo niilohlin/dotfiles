@@ -69,11 +69,6 @@ end
 time([[try_loadstring definition]], false)
 time([[Defining packer_plugins]], true)
 _G.packer_plugins = {
-  ["BetterLua.vim"] = {
-    loaded = true,
-    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/BetterLua.vim",
-    url = "https://github.com/euclidianAce/BetterLua.vim"
-  },
   ["ag.vim"] = {
     loaded = true,
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/ag.vim",
@@ -218,6 +213,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/Users/niil/.local/share/nvim/site/pack/packer/start/vimpeccable",
     url = "https://github.com/svermeulen/vimpeccable"
+  },
+  ["yaml-revealer"] = {
+    loaded = true,
+    path = "/Users/niil/.local/share/nvim/site/pack/packer/start/yaml-revealer",
+    url = "https://github.com/Einenlum/yaml-revealer"
   }
 }
 

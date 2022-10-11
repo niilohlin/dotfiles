@@ -1,3 +1,4 @@
+" set debug
 inoremap tn <esc>
 
 nnoremap V v

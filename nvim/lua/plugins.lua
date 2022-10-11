@@ -2,11 +2,11 @@
 -- Package manager. https://github.com/savq/paq-nvim
 
 -- Only required if you have packer configured as `opt`
+
 vim.cmd [[packadd packer.nvim]]
 
 return require('packer').startup(function()
   use 'wbthomason/packer.nvim'         -- let Packer manage itself
-  use 'euclidianAce/BetterLua.vim'     -- Lua improvements
   use 'svermeulen/vimpeccable'         -- Adds vimp utility module
     -- {'ms-jpq/chadtree', branch='chad', run = 'python -m chadtree deps'};                -- Better NerdTree
   use { 'neoclide/coc.nvim', branch = 'release'} -- Completion engine
@@ -46,4 +46,8 @@ return require('packer').startup(function()
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }  -- Better syntax highlighting
 
   use 'tanvirtin/monokai.nvim'           -- Monokai with treesitter support
+
+  use 'Einenlum/yaml-revealer'           -- Yaml utility, helps distinguish indendation
+
+  use 'github/copilot.vim'               -- Github Copilot
 end)

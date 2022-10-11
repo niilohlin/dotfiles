@@ -21,6 +21,23 @@
         "sourcekit-lsp": {
             "filetypes": ["swift"],
             "command": "sourcekit-lsp"
+        },
+        "lua": {
+            "command": "/Users/niil/workspace/lua-language-server/bin/lua-language-server",
+            "args": [
+                "-E",
+                "/Users/niil/workspace/lua-language-server/bin/main.lua"
+            ],
+            "filetypes": ["lua"],
+            "settings": {
+                "Lua": {
+                    "workspace.library": {
+                    },
+                    "diagnostics": {
+                        "globals": [ "vim" ]
+                    }
+                }
+            }
         }
     }
 }

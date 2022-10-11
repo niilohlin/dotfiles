@@ -2,6 +2,16 @@
 
 set -o pipefail
 
+# Configure dock
+defaults write com.apple.dock autohide-delay -float 5; defaults write com.apple.dock autohide-time-modifier -int 0;killall Dock
+# Drag windows with cmd+ctrl+mouse
+defaults write -g NSWindowShouldDragOnGesture -bool true
+# Natural scroll direction. Not inverted.
+defaults write -g com.apple.swipescrolldirection -bool FALSE
+
+# Show compile times in Xcode
+defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
+
 # link config files
 
 ln -s $HOME/dotfiles/ideavimrc $HOME/.ideavimrc

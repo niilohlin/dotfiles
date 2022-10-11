@@ -4,26 +4,26 @@ source ~/.xvimrc
 nnoremap gcc :xccmd commentAndUncommentCurrentLines<CR>
 vnoremap gc :xccmd commentAndUncommentCurrentLines<CR>
 
-nnoremap L :action Forward<cr>
-nnoremap H :action Back<cr>
-nnoremap gd :action GotoDeclaration<cr>
-nnoremap <space>k :action ShowUsages<cr>
+nmap L <Action>(Forward)
+nmap H <Action>(Back)
+nmap gd <Action>(GotoDeclaration)
+nmap <space>k <Action>(ShowUsages)
 
-nnoremap <space>o :action SearchEverywhere<cr>
-nnoremap <space>b :action ToggleLineBreakpoint<CR>
+nmap <space>o <Action>(SearchEverywhere)
+nmap <space>b <Action>(ToggleLineBreakpoint)
 
-nnoremap <space>dr :action Debug<cr>
+nmap <space>dr <Action>(Debug)
 
-nnoremap <space>n :action GotoNextError<cr>
-nnoremap <space>N :action GotoPreviousError<cr>
+nmap <space>n <Action>(GotoNextError)
+nmap <space>N <Action>(GotoPreviousError)
 
 "nnoremap <space>w /\u<cr>
 "nnoremap <space>e /\l\u<cr>
 
-nnoremap <space>f :action ReformatCode<cr>
+nmap <space>f <Action>(ReformatCode)
 
 "nnoremap <space>b ?\u<cr>
-nnoremap <space>b :action ToggleLineBreakpoint<cr>
+nmap <space>b <Action>(ToggleLineBreakpoint)
 "nnoremap <space>ge ?\u\l<cr>
 nnoremap <space>p i§<esc>
 nnoremap <space>a ma:s/, /,\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a
