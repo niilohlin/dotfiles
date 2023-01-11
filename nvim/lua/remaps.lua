@@ -2,7 +2,7 @@ local g = vim.g
 local api = vim.api
 
 -- Set leader to <space>
-g.mapleader = " "
+g.mapleader = ' '
 
 -- Remapping utility.
 local vimp = require('vimp')
@@ -58,3 +58,8 @@ vimp.nnoremap('<leader>j', ':NERDTreeFind<CR>') -- Show current file in NerdTree
 
 api.nvim_command('command W w') -- Remap :W to :w
 api.nvim_command('command NT :NERDTreeToggle') -- Toggle NerdTree with :NT
+
+vimp.nnoremap('<leader>f', ':Telescope live_grep<CR>') -- live grep search
+vimp.nnoremap('<leader>o', ':Telescope find_files<CR>') -- live find files
+
+vimp.nnoremap('gd', 'g<C-]>') -- go to tag

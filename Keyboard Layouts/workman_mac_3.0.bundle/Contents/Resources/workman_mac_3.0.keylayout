@@ -8,7 +8,7 @@
 
 -->
 <!--Last edited by Ukelele version 359 on 2022-10-10 at 22:10 (CEST)-->
-<keyboard group="0" id="4429" name="Custom New Keyboard copy" maxout="1">
+<keyboard group="0" id="4429" name="Workman mac 3.0" maxout="1">
     <layouts>
         <layout first="0" last="17" mapSet="1a4" modifiers="12c"/>
         <layout first="18" last="18" mapSet="6b8" modifiers="12c"/>

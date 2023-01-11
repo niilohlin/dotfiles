@@ -15,7 +15,7 @@ return require('packer').startup(function()
 
   use 'christoomey/vim-tmux-navigator' -- Send text to tmux pane
   use 'christoomey/vim-tmux-runner'    -- Send text to tmux pane
-  use 'kien/ctrlp.vim'                 -- Fuzzy file opener
+--  use 'kien/ctrlp.vim'                 -- Fuzzy file opener
   use 'plasticboy/vim-markdown'        -- Markdown utility, go to link and so on.
   use 'mhinz/vim-startify'             -- Startscreen.
   use 'scrooloose/nerdtree'            -- File explorer
@@ -23,7 +23,9 @@ return require('packer').startup(function()
   use 'tpope/vim-surround'             -- Change surrounding.
   use 'junegunn/fzf'                   -- fuzzy file finder
   use 'junegunn/fzf.vim'               -- fzf binding
-  use 'rking/ag.vim'                   -- Silversearcher plugin (search project)
+  -- use 'rking/ag.vim'                   -- Silversearcher plugin (search project) -- deprecated!
+  use({ "nvim-telescope/telescope.nvim", requires = { { 'nvim-lua/plenary.nvim' } } }) -- project wide search
+  use({ "kelly-lin/telescope-ag", requires = { { "nvim-telescope/telescope.nvim" } } }) -- Silversearcher plugin (search project)
 
   use 'vim-syntastic/syntastic'        -- External syntax checkers, like linters and so on.
   use 'romainl/vim-cool'               -- Disable search highlight after searching.
@@ -48,6 +50,4 @@ return require('packer').startup(function()
   use 'tanvirtin/monokai.nvim'           -- Monokai with treesitter support
 
   use 'Einenlum/yaml-revealer'           -- Yaml utility, helps distinguish indendation
-
-  use 'github/copilot.vim'               -- Github Copilot
 end)

@@ -1,4 +1,5 @@
 local HOME = os.getenv("HOME")
+local cmd = vim.cmd
 
 opt = vim.opt
 -- options
@@ -9,6 +10,8 @@ opt.ignorecase = true       -- Ignore search casing
 opt.smartcase = true        -- But not when searching with uppercase letters
 opt.smartindent = true      -- Language-aware indent
 opt.autowrite = true        -- Automatically write on :n and :p
+opt.autoread = true         -- Automatically read file from disk on change
+cmd([[ au CursorHold * checktime ]]) -- When idle, check time and check if the file has changed from disk
 opt.number = true           -- Set line numbers
 opt.relativenumber = true   -- Set relative line numbers
 opt.backspace = "2"         -- Make backspace work as expected in insert mode.
@@ -39,6 +42,8 @@ opt.whichwrap = opt.whichwrap + "<,>,[,],l,h"   -- Move cursor to next line when
 opt.undofile = true                             -- Use undo file
 opt.undodir = HOME .. '/.config/nvim/undodir'   -- Set undo dir
 opt.scrolloff = 1                               -- Scroll 1 line before cursor hits bottom
+opt.mouse = ""                                  -- Disable mouse
+
 
 -- opt.spellang = 'en'
 -- opt.spellfile = HOME .. '/.config/nvim/spell/en.utf-8.add' -- Set custom spelling words path
