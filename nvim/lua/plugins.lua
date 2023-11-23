@@ -1,75 +1,73 @@
 
--- Package manager. https://github.com/savq/paq-nvim
+-- lazy.nvim
 
--- Only required if you have packer configured as `opt`
-
-vim.cmd [[packadd packer.nvim]]
-
-return require('packer').startup(function()
-  -- let Packer manage itself
-  use 'wbthomason/packer.nvim'
+return require('lazy').setup({
   -- Adds vimp utility module
-  use 'svermeulen/vimpeccable'
+  'svermeulen/vimpeccable',
   -- Git status of changed lines to the left.
-  use 'airblade/vim-gitgutter'
+  'airblade/vim-gitgutter',
   -- Git plugin
-  use 'tpope/vim-fugitive'
+  'tpope/vim-fugitive',
   -- Syntax highlight for pbxproj (TODO switch to treesitter later)
-  -- use 'cfdrake/vim-pbxproj'
+  -- 'cfdrake/vim-pbxproj'
   -- Send text to tmux pane
-  use 'christoomey/vim-tmux-navigator'
+  'christoomey/vim-tmux-navigator',
   -- Send text to tmux pane
-  use 'christoomey/vim-tmux-runner'
+  'christoomey/vim-tmux-runner',
   -- Markdown utility, go to link and so on.
-  use 'plasticboy/vim-markdown'
+  'plasticboy/vim-markdown',
   -- Startscreen.
-  use 'mhinz/vim-startify'
+  'mhinz/vim-startify',
   --
   -- File explorer
-  use 'nvim-tree/nvim-tree.lua'
+  'nvim-tree/nvim-tree.lua',
 
   -- nvim Commenter/uncommenter (replaces vim-commentary)
-  use { 'numToStr/Comment.nvim', config = function() require('Comment').setup() end }
+  { 'numToStr/Comment.nvim', opts = {}, lazy = false },
   -- Change surrounding.
-  use 'tpope/vim-surround'
+  'tpope/vim-surround',
   -- fuzzy file finder
-  use 'junegunn/fzf'
+  'junegunn/fzf',
   -- fzf binding
-  use 'junegunn/fzf.vim'
-  -- project wide search
-  use({ 'nvim-telescope/telescope.nvim', requires = { { 'nvim-lua/plenary.nvim' } }, run = 'which ripgrep || brew install ripgrep'})
+  'junegunn/fzf.vim',
+  -- project wide search, requires ripgrep
+  { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' }},
   -- Silversearcher plugin (search project)
-  use({ 'kelly-lin/telescope-ag', requires = { { 'nvim-telescope/telescope.nvim' } } })
+  { 'kelly-lin/telescope-ag', dependencies = { 'nvim-telescope/telescope.nvim' } },
   -- Disable search highlight after searching.
-  use 'romainl/vim-cool'
+  'romainl/vim-cool',
 
   -- Quick File Switcher
-  use({ 'ThePrimeagen/harpoon', requires = { { 'nvim-lua/plenary.nvim' } } })
+  { 'ThePrimeagen/harpoon', dependencies = { 'nvim-lua/plenary.nvim' } },
 
   -- Better syntax highlighting
-  use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
-  -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
-  use { 'nvim-treesitter/playground' }
-  -- Monokai with treesitter support
-  use 'tanvirtin/monokai.nvim'
-  -- Yaml utility, helps distinguish indendation
-  use 'Einenlum/yaml-revealer'
-  -- Github Copilot, AI completions
-  use 'github/copilot.vim'
+  { 'nvim-treesitter/nvim-treesitter' },
 
+  -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
+  'nvim-treesitter/playground',
+
+  -- Monokai with treesitter support
+  'tanvirtin/monokai.nvim',
+
+  -- Yaml utility, helps distinguish indendation
+  'Einenlum/yaml-revealer',
+
+  -- Github Copilot, AI completions
+  'github/copilot.vim',
 
   -- LSP setup
-  use 'neovim/nvim-lspconfig'
+  'neovim/nvim-lspconfig',
 
   -- LSP completion
-  use 'hrsh7th/nvim-cmp'
+  'hrsh7th/nvim-cmp',
+
   -- LSP completion
-  use 'hrsh7th/cmp-nvim-lsp'
+  'hrsh7th/cmp-nvim-lsp',
 
   -- snip manager required by nvim-cmp
-  use 'L3MON4D3/LuaSnip'
+  'L3MON4D3/LuaSnip',
 
   -- Linter spawner and parser
-  use 'mfussenegger/nvim-lint'
-end)
+  'mfussenegger/nvim-lint',
+})
 
