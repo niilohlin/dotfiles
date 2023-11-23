@@ -3,16 +3,29 @@
 set -o pipefail
 
 # Configure dock
-defaults write com.apple.dock autohide-delay -float 5; defaults write com.apple.dock autohide-time-modifier -int 0;killall Dock
+defaults write com.apple.dock autohide-delay -float 5
+defaults write com.apple.dock autohide-time-modifier -int 0
+defaults write com.apple.dock pinning -string start
+osascript -e "tell application \"System Events\" to set the autohide of the dock preferences to true"
+killall Dock
+
 # Natural scroll direction. Not inverted.
 defaults write -g com.apple.swipescrolldirection -bool FALSE
 
 # Show compile times in Xcode
 defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
+# Set default screenshot location
+defaults write com.apple.screencapture location /tmp/
+
 # link config files
 
 ln -s $HOME/dotfiles/ideavimrc $HOME/.ideavimrc
+ln -s $HOME/dotfiles/zshrc $HOME/.zshrc
+ln -s $HOME/dotfiles/zsh $HOME/.zsh
+ln -s $HOME/dotfiles/tmux.conf $HOME/.tmux.conf
+ln -s $HOME/dotfiles/gitconfig $HOME/.gitconfig
+ln -s $HOME/dotfiles/nvim $HOME/.config/nvim
 
 if ! command -v brew &> /dev/null
 then

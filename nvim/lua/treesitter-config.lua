@@ -1,13 +1,30 @@
 
 require('nvim-treesitter.configs').setup {
-    -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-    ensure_installed = "maintained",
+    ensure_installed = {
+        'bash',
+        'c',
+        'cpp',
+        'css',
+        'javascript',
+        'json',
+        'lua',
+        'python',
+        'regex',
+        'rust',
+        'toml',
+        'yaml',
+        'swift',
+        'haskell',
+    },
 
     -- Install languages synchronously (only applied to `ensure_installed`)
     sync_install = false,
 
     -- List of parsers to ignore installing
     ignore_install = { },
+
+    -- Automatically install missing parsers when entering buffer
+    auto_install = true,
 
     highlight = {
         -- `false` will disable the whole extension
@@ -23,3 +40,17 @@ require('nvim-treesitter.configs').setup {
         additional_vim_regex_highlighting = false,
     },
 }
+
+local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
+parser_config.pbxproj = {
+    install_info = {
+        url = '/Users/niilohlin/workspace/tree-sitter-pbxproj',
+        files = { 'src/parser.c' },
+        branch = 'main',
+        generate_requires_npm = false,
+        requires_generate_from_grammar = false,
+    },
+    filetype = 'pbxproj',
+}
+
+vim.treesitter.language.register('pbxproj', 'pbxproj')

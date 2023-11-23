@@ -20,8 +20,11 @@ opt.colorcolumn = "120"     -- Show max column highlight.
 opt.modifiable = true       -- Make buffers modifiable.
 opt.cursorline = true       -- Show a horizontal line where the cursor is
 opt.splitbelow = true       -- Show the preview window (code documentation) to the bottom of the screen.
+opt.wildmenu = true         -- Show a menu when using tab completion in command mode.
+opt.wildmode = { "longest", "full" }
+
 -- Status line, the line above the ex column TODO take a look at later and fix.
-opt.statusline = '%f%#warningmsg#%{SyntasticStatuslineFlag()}%*'
+-- opt.statusline = '%f%#warningmsg#%{SyntasticStatuslineFlag()}%*'
 
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 opt.updatetime = 500
@@ -43,7 +46,6 @@ opt.undofile = true                             -- Use undo file
 opt.undodir = HOME .. '/.config/nvim/undodir'   -- Set undo dir
 opt.scrolloff = 1                               -- Scroll 1 line before cursor hits bottom
 opt.mouse = ""                                  -- Disable mouse
-
 
 -- opt.spellang = 'en'
 -- opt.spellfile = HOME .. '/.config/nvim/spell/en.utf-8.add' -- Set custom spelling words path

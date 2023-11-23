@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.sil.ukelele.keyboardlayout.</string>
+	<string>org.sil.ukelele.keyboardlayout.workman_trulyergonomic_3.0</string>
 	<key>CFBundleName</key>
-	<string></string>
+	<string>workman_TrulyErgonomic_3.0</string>
 	<key>CFBundleVersion</key>
 	<string></string>
 </dict>
