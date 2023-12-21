@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-
 xhost +local:root > /dev/null 2>&1
 
 export HISTSIZE=10000
@@ -159,17 +158,18 @@ export LC_ALL=en_US.UTF-8
 
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
+export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/postgresql@16/lib"
+
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openjdk/include"
-export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
-export GROOVY_HOME=/usr/local/opt/groovy/libexec
-export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/postgresql@16/lib"
 export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/opt/postgresql@16/include"
 
 export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@16/lib/pkgconfig"
+export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
+
+export GROOVY_HOME=/usr/local/opt/groovy/libexec
 
 # LC_ALL="C" /opt/homebrew/opt/postgresql@16/bin/postgres -D /opt/homebrew/var/postgresql@16
-
 
 ## psycopg2
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/libpq/lib"
@@ -180,6 +180,8 @@ export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openssl@3/include"
 
 export LDFLAGS="${LDFLAGS} -L/opt/homebrew/Cellar/sdl2/2.26.4/lib/"
 export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/Cellar/sdl2/2.26.4/include/"
+
+export JAVA_HOME=$(/usr/libexec/java_home)
 
 #eval $(thefuck --alias)  # Swear based corrections
 #eval $(atuin init zsh)   # Use sqlite based shell history
@@ -215,5 +217,4 @@ export PATH=$HOME/.asdf/shims:$PATH
 if [ -z $TMUX ]; then
     exec tmux
 fi
-
 
