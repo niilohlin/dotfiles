@@ -152,6 +152,8 @@ fpath=(~/.zsh/completions $fpath)
 
 source ~/.zsh/pure/async.zsh
 source ~/.zsh/pure/pure.zsh
+source ~/.zsh/zsh-django/zsh-django.zsh
+source ~/.zsh/virtualenv-autodetect/virtualenv-autodetect.sh
 
 export LANG=C
 export LC_ALL=en_US.UTF-8

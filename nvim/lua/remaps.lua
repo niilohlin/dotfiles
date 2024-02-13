@@ -72,6 +72,7 @@ api.nvim_command('command NT :NvimTreeToggle') -- Toggle nvim-tree with :NT
 vimp.nnoremap('<leader>f', ':Telescope live_grep<CR>')  -- live grep search
 vimp.nnoremap('<leader>F', ':Telescope resume<CR>')     -- Resume last telescope search
 vimp.nnoremap('<leader>o', ':Telescope find_files<CR>') -- live find files
+vimp.nnoremap('<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
 
 -- vimp.nnoremap('gd', 'g<C-]>') -- go to tag
 

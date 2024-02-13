@@ -54,3 +54,7 @@
 	enabled = true
 [init]
 	defaultBranch = main
+[branch]
+	sort = -committerdate
+[maintenance]
+	repo = /Users/niilohlin/workspace/quickbit
