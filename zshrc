@@ -2,7 +2,7 @@
 
 xhost +local:root > /dev/null 2>&1
 
-export HISTSIZE=10000
+export HISTSIZE=100000
 export HISTFILESIZE=${HISTSIZE}
 export SAVEHIST=${HISTSIZE}
 export HISTFILE=~/.zsh_hist
@@ -91,32 +91,11 @@ ex ()
   fi
 }
 
-function cdAndLs {
-	\cd $1;
-	ls # --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F;
-}
-function mkdirAndCd {
-	\mkdir $1;
-	cd $1 # --group-directories-first --time-style=+"%d.%m.%Y %H:%M" --color=auto -F;
-}
-function cdr {
-    cd $1
-    NUMBER_OF_SUBDIRS=$(ls -d */ | wc -l)
-    if [ "$NUMBER_OF_SUBDIRS" -eq "1" ]
-    then
-        cdr $(ls)
-    fi
-}
-
-alias cd='cdAndLs'
-alias mkdir='mkdirAndCd'
-alias last_touched_file='ls -t *.crash | head -1 t branch --merged | egrep -v "(^\*|master|dev)"'
+# Automatically ls after cd and add it to a hook
+chpwd_functions+=(ls)
 
 set -o vi
-bindkey -M viins 'tn' vi-cmd-mode
-bindkey -a -s _ 0wi
 set keymap vi-insert
-# bind -m vi-instert "\C-l":clear-screen
 
 # prompt
 autoload -U colors && colors
@@ -191,6 +170,8 @@ export JAVA_HOME=$(/usr/libexec/java_home)
 #reattach-to-user-namespace -l ${SHELL}
 source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
+source ~/.zsh/zsh-cdtree/zsh-cdtree.zsh
+
 export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
 export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
