@@ -1,0 +1,12 @@
+
+sindresorhus/pure # Best prompt
+
+ikhomutov/zsh-django # Django plugin
+
+RobertDeRose/virtualenv-autodetect # python Virtualenv autodetect
+
+zsh-users/zsh-syntax-highlighting # Syntax highlighting
+
+zsh-users/zsh-autosuggestions # Autosuggestions
+
+Aloxaf/fzf-tab # FZF Tab completion

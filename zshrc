@@ -131,17 +131,19 @@ search() {
 # case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
+# Load the antidote plugin manager
+source ~/.zsh/antidote/antidote.zsh
+# Load the plugins from the file
+antidote load ~/.zsh/zsh-plugins.txt
+
 source ~/.zsh/git-completion.bash
 source ~/.zsh/fastlane-completion.zsh
+source ~/.zsh/zsh-cdtree/zsh-cdtree.zsh
 fpath=(~/.zsh $fpath)
 fpath=(~/.zsh/completions $fpath)
-# fpath+=~/.zsh/pure
 
-source ~/.zsh/pure/async.zsh
-source ~/.zsh/pure/pure.zsh
-source ~/.zsh/zsh-django/zsh-django.zsh
-source ~/.zsh/virtualenv-autodetect/virtualenv-autodetect.sh
-source ~/.zsh/fzf-tab/fzf-tab.plugin.zsh
+zstyle ':completion:*' menu no # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # use fzf-tmux-popup instead of fzf
 
 export LANG=C
 export LC_ALL=en_US.UTF-8
@@ -177,9 +179,6 @@ export JAVA_HOME=$(/usr/libexec/java_home)
 #eval $(atuin init zsh)   # Use sqlite based shell history
 
 #reattach-to-user-namespace -l ${SHELL}
-source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-source ~/.zsh/zsh-cdtree/zsh-cdtree.zsh
 
 export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
@@ -195,6 +194,7 @@ export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 export PATH="/usr/local/opt/bison/bin:$PATH"
 export PATH="/usr/local/opt/llvm/bin:$PATH"
 
+# Dynamic tree navigation
 source ~/.config/broot/launcher/bash/br
 
 export PATH=$HOME/.asdf/shims:$PATH
