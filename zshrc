@@ -54,7 +54,7 @@ function asht() {
 function gclean() {
     git branch --merged | egrep -v "(^\*|main|dev)" | xargs git branch -d
     git fetch --all --prune
-    exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v master | xargs -P 4 -I {} bash -c "( ! git cherry main {} | grep -q '^[^-]' ) && git branch -D {}"
+    exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v main | xargs -P 4 -I {} bash -c "( ! git cherry main {} | grep -q '^[^-]' ) && git branch -D {}"
     #git gc
 }
 
@@ -66,6 +66,14 @@ zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
 autoload -Uz compinit && compinit
 zstyle ':completion:*' menu yes select
 zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)(?)*==02=01}:${(s.:.)LS_COLORS}")'
+
+# This block fixes search so that it searches history based on what you started typing
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey -M viins "^[[A" up-line-or-beginning-search
+bindkey -M viins "^[[B" down-line-or-beginning-search
 
 # ex - archive extractor
 # usage: ex <file>
@@ -133,6 +141,7 @@ source ~/.zsh/pure/async.zsh
 source ~/.zsh/pure/pure.zsh
 source ~/.zsh/zsh-django/zsh-django.zsh
 source ~/.zsh/virtualenv-autodetect/virtualenv-autodetect.sh
+source ~/.zsh/fzf-tab/fzf-tab.plugin.zsh
 
 export LANG=C
 export LC_ALL=en_US.UTF-8
@@ -183,12 +192,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 export PYTHON_CONFIGURE_OPTS="--enable-framework"
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-
-PATH="/Users/niilohlin/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/Users/niilohlin/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/Users/niilohlin/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/Users/niilohlin/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/niilohlin/perl5"; export PERL_MM_OPT;
 export PATH="/usr/local/opt/bison/bin:$PATH"
 export PATH="/usr/local/opt/llvm/bin:$PATH"
 
@@ -200,4 +203,3 @@ export PATH=$HOME/.asdf/shims:$PATH
 if [ -z $TMUX ]; then
     exec tmux
 fi
-

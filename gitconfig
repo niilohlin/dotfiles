@@ -44,6 +44,8 @@
     wip = "!git add . && git commit -m \"WIP\" --no-verify"
     added = diff --cached
     remote-tags = ls-remote --tags
+; [includeIf "gitdir:~/workspace/"]
+;     path = ~/workspace/.gitconfig
 [url "ssh://git@github.com"]
 	insteadOf = https://github.com
 ; [url "git://git@github.com"]

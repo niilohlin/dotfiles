@@ -24,7 +24,7 @@ require('nvim-treesitter.configs').setup {
     ignore_install = { },
 
     -- Automatically install missing parsers when entering buffer
-    auto_install = true,
+    auto_install = false,
 
     highlight = {
         -- `false` will disable the whole extension
@@ -41,7 +41,20 @@ require('nvim-treesitter.configs').setup {
     },
 }
 
-local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
+local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+parser_config.make = {
+    install_info = {
+        url = "~/workspace/tree-sitter-make/", -- local path or git repo
+        files = {"src/parser.c"}, -- note that some parsers also require src/scanner.c or src/scanner.cc
+        -- optional entries:
+        branch = "main", -- default branch in case of git repo if different from master
+        generate_requires_npm = false, -- if stand-alone parser without npm dependencies
+        requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
+    }
+}
+
+vim.treesitter.language.register('make', 'make')
+
 parser_config.pbxproj = {
     install_info = {
         url = '/Users/niilohlin/workspace/tree-sitter-pbxproj',

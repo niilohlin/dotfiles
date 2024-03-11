@@ -41,17 +41,18 @@ _append_pwd_to_dirstack() {
 _go_back() {
     if (( $#dirstack > 1 )); then
         dir_to_go=$dirstack[-2]
-        cd -q $dir_to_go
+        dir_to_go=${dir_to_go/#$HOME/\~}
+        RBUFFER="cd $dir_to_go"
         _append_dir_to_undodirstack $dirstack[-1]
         shift -p dirstack
     fi
-    zle reset-prompt
 }
 
 _go_forward() {
     if (( $#undodirstack > 0 )); then
         dir_to_go=$undodirstack[-1]
-        cd -q $dir_to_go
+        dir_to_go=${dir_to_go/#$HOME/\~}
+        RBUFFER="cd $dir_to_go"
         _append_dir_to_dirstack $dir_to_go
         shift -p undodirstack
     fi
