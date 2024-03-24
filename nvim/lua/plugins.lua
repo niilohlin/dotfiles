@@ -2,9 +2,6 @@
 -- lazy.nvim
 
 return require('lazy').setup({
-  -- Adds vimp utility module
-  'svermeulen/vimpeccable',
-
   -- Git status of changed lines to the left.
   'airblade/vim-gitgutter',
 
