@@ -23,13 +23,15 @@ return require('lazy').setup({
   { 'numToStr/Comment.nvim', opts = {}, lazy = false },
   -- Change surrounding.
   'tpope/vim-surround',
-  -- fuzzy file finder
+
+  -- -- fuzzy file finder
   'junegunn/fzf',
-  -- fzf binding
+  -- -- fzf binding
   'junegunn/fzf.vim',
   -- project wide search, requires ripgrep
   { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' }},
   -- fzf native plugin, make it possible to fuzzy search in telescope
+  -- { 'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' },
   { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
   -- Silversearcher plugin (search project)
   { 'kelly-lin/telescope-ag', dependencies = { 'nvim-telescope/telescope.nvim' } },

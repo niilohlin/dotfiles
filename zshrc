@@ -41,13 +41,9 @@ alias vim='nvim'
 alias editvimconf='nvim ~/.config/nvim/vimrc'
 alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
 alias tree='broot'
-alias cd..='cd ..'
+alias less='vim -R' # use vim in readonly mode as a pager
 
 function copy() {
-    cat $1 | pbcopy
-}
-
-function asht() {
     cat $1 | pbcopy
 }
 
@@ -105,11 +101,6 @@ chpwd_functions+=(ls)
 set -o vi
 set keymap vi-insert
 
-# prompt
-autoload -U colors && colors
-PS1="%{%F{red}%}%n%{%f%}@%{%F{blue}%}%m %{%F{yellow}%}%~ %{$%f%}% "
-
-export PATH=$PATH:$HOME/bin/
 export PATH=$PATH:$HOME/dotfiles/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
@@ -126,8 +117,6 @@ search() {
     find . -iname "$1"
 }
 
-[ -s "/Users/niilohlin/.k/kvm/kvm.sh" ] && . "/Users/niilohlin/.k/kvm/kvm.sh" # Load kvm
-
 # case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
 
@@ -142,7 +131,7 @@ source ~/.zsh/zsh-cdtree/zsh-cdtree.zsh
 fpath=(~/.zsh $fpath)
 fpath=(~/.zsh/completions $fpath)
 
-zstyle ':completion:*' menu no # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+# zstyle ':completion:*' menu no # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # use fzf-tmux-popup instead of fzf
 
 export LANG=C
@@ -152,21 +141,15 @@ export LDFLAGS="${LDFLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/l
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
 export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/postgresql@16/lib"
 
-export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/zlib/include"
-export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openjdk/include"
 export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/opt/postgresql@16/include"
 
 export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@16/lib/pkgconfig"
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
 
-export GROOVY_HOME=/usr/local/opt/groovy/libexec
-
-# LC_ALL="C" /opt/homebrew/opt/postgresql@16/bin/postgres -D /opt/homebrew/var/postgresql@16
-
 ## psycopg2
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/libpq/lib"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/libpq/include"
-# export LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install psycopg2
+
 export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl@3/lib"
 export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openssl@3/include"
 
@@ -174,11 +157,6 @@ export LDFLAGS="${LDFLAGS} -L/opt/homebrew/Cellar/sdl2/2.26.4/lib/"
 export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/Cellar/sdl2/2.26.4/include/"
 
 export JAVA_HOME=$(/usr/libexec/java_home)
-
-#eval $(thefuck --alias)  # Swear based corrections
-#eval $(atuin init zsh)   # Use sqlite based shell history
-
-#reattach-to-user-namespace -l ${SHELL}
 
 export PATH="/usr/local/opt/icu4c/bin:$PATH"
 export PATH="/usr/local/opt/icu4c/sbin:$PATH"
@@ -199,7 +177,26 @@ source ~/.config/broot/launcher/bash/br
 
 export PATH=$HOME/.asdf/shims:$PATH
 
+# ci", ci', ci`, di", etc
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+    for c in {a,i}{\',\",\`}; do
+        bindkey -M $m $c select-quoted
+    done
+done
+
+# ci{, ci(, ci<, di{, etc
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+    for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+        bindkey -M $m $c select-bracketed
+    done
+done
+
 # Start tmux if not already running
+export TERM=xterm-256color
 if [ -z $TMUX ]; then
     exec tmux
 fi

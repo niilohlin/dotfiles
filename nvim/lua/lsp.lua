@@ -3,6 +3,7 @@ local lspconfig = require('lspconfig')
 lspconfig.sourcekit.setup{}
 lspconfig.marksman.setup{}
 lspconfig.pylsp.setup{}
+lspconfig.lua_ls.setup{}
 
 -- Global mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -29,6 +30,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
     vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
     vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
+    -- Search workspace symbols
+    vim.keymap.set('n', '<leader>t', vim.lsp.buf.workspace_symbol, opts)
     vim.keymap.set('n', '<leader>wl', function()
       print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
     end, opts)
@@ -53,7 +56,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
 --         },
 --         -- Make the server aware of Neovim runtime files
 --         workspace = {
---           library = { vim.env.VIMRUNTIME }
+--           -- library = { vim.env.VIMRUNTIME }
 --           -- or pull in all of 'runtimepath'. NOTE: this is a lot slower
 --           -- library = vim.api.nvim_get_runtime_file("", true)
 --         }
@@ -62,7 +65,10 @@ vim.api.nvim_create_autocmd('LspAttach', {
 --       client.notify("workspace/didChangeConfiguration", { settings = client.config.settings })
 --     end
 --     return true
---   end
+--   end,
+--   settings = {
+--       Lua = {}
+--   }
 -- }
 
 -- Set up nvim-cmp.
@@ -125,7 +131,15 @@ cmp.setup.cmdline({ '/', '?' }, {
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 require('lspconfig')['lua_ls'].setup {
-    capabilities = capabilities
+    capabilities = capabilities,
+    settings = {
+        Lua = {
+            diagnostics = {
+                -- Get the language server to recognize the `vim` global
+                globals = {'vim'},
+            },
+        },
+    },
 }
 require('lspconfig')['sourcekit'].setup {
     capabilities = capabilities

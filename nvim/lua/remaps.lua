@@ -43,11 +43,13 @@ vim.keymap.set('n', 'Q', '<nop>')
 vim.keymap.set('n', '<leader>a', "ma:s/, /,\\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a")
 
 vim.keymap.set('n', '<leader>n', ':cnext <cr>') -- Go to next error
-vim.keymap.set('n', '<leader>N', ':cprev <cr>') -- Go to previous issueerror
+vim.keymap.set('n', '<leader>p', ':cprev <cr>') -- Go to previous issueerror
 
 vim.keymap.set('n', '<F12>', ':%s/\\<<C-r><C-w>\\>//g<Left><Left>') -- Rename word under cursor
 
 vim.keymap.set('n', '<leader>j', ':NvimTreeFindFile<CR>') -- Show current file in NerdTree
+
+vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float) -- Show current file in NerdTree
 
 function Open_netrw_in_split()
     -- if api.nvim_eval('exists("g:netrw_winnr")') == 1 then
@@ -72,6 +74,7 @@ vim.keymap.set('n', '<leader>F', ':Telescope resume<CR>')     -- Resume last tel
 vim.keymap.set('n', '<leader>o', ':Telescope find_files<CR>') -- live find files
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
+vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 
 -- vim.keymap.set('n', 'gd', 'g<C-]>') -- go to tag
 

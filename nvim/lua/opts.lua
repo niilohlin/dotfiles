@@ -1,7 +1,7 @@
 local HOME = os.getenv("HOME")
 local cmd = vim.cmd
 
-opt = vim.opt
+local opt = vim.opt
 -- options
 opt.showcmd = true          -- Show the current command in the bottom right
 opt.incsearch = true        -- Incremental search
