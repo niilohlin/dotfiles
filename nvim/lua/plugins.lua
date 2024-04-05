@@ -56,6 +56,9 @@ return require('lazy').setup({
   -- Github Copilot, AI completions
   'github/copilot.vim',
 
+  -- Better wild menu, while typing
+  'gelguy/wilder.nvim',
+
   -- LSP setup
   'neovim/nvim-lspconfig',
 
