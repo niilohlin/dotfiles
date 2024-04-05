@@ -1,13 +1,13 @@
 #!/bin/zsh
 
-xhost +local:root > /dev/null 2>&1
-
 export HISTSIZE=100000
 export HISTFILESIZE=${HISTSIZE}
 export SAVEHIST=${HISTSIZE}
 export HISTFILE=~/.zsh_hist
 
+# Ignore duplicate commands
 setopt hist_ignore_all_dups
+# Ignore commands that start with a space
 setopt hist_ignore_space
 setopt appendhistory
 setopt sharehistory
