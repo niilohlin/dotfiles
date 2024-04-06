@@ -59,6 +59,9 @@ return require('lazy').setup({
   -- Better wild menu, while typing
   'gelguy/wilder.nvim',
 
+  -- Make anything into an lsp, like linter output etc.
+  'mfussenegger/nvim-lint',
+
   -- LSP setup
   'neovim/nvim-lspconfig',
 

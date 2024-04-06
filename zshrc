@@ -9,10 +9,14 @@ export HISTFILE=~/.zsh_hist
 setopt hist_ignore_all_dups
 # Ignore commands that start with a space
 setopt hist_ignore_space
+# Append history rather than replace it
 setopt appendhistory
+# Save history after each command
 setopt sharehistory
+# Save history after each command (should not be combined with sharehistory)
 setopt incappendhistory
 
+# sort tmp directory by modified date
 function ls() {
     if [[ $PWD == '/tmp' ]]
     then
@@ -43,19 +47,11 @@ alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
 alias tree='broot'
 alias less='vim -R' # use vim in readonly mode as a pager
 
-function copy() {
-    cat $1 | pbcopy
-}
-
 function gclean() {
     git branch --merged | egrep -v "(^\*|main|dev)" | xargs git branch -d
     git fetch --all --prune
     exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v main | xargs -P 4 -I {} bash -c "( ! git cherry main {} | grep -q '^[^-]' ) && git branch -D {}"
     #git gc
-}
-
-function commitsAtDate() {
-    git log --pretty='format:%C(yellow)%h %G? %ad%Cred%d %Creset%s%C(cyan) [%cn]' --decorate --after="$1 00:00" --before="$1 23:59" --author "`git config user.name`";
 }
 
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
@@ -108,7 +104,6 @@ export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
 
 
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
-alias asht asdf
 
 PATH="$PATH:$(/opt/homebrew/bin/brew --prefix)/opt/llvm@12/bin"
 eval $(/usr/libexec/path_helper -s)
