@@ -49,7 +49,9 @@ vim.keymap.set('n', '<F12>', ':%s/\\<<C-r><C-w>\\>//g<Left><Left>') -- Rename wo
 
 vim.keymap.set('n', '<leader>j', ':NvimTreeFindFile<CR>') -- Show current file in NerdTree
 
-vim.keymap.set('n', '<leader>d', vim.diagnostic.open_float) -- Show current file in NerdTree
+vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
+
+vim.keymap.set('n', '<leader>d', ':GitGutterUndoHunk<CR>') -- Discard git
 
 function Open_netrw_in_split()
     -- if api.nvim_eval('exists("g:netrw_winnr")') == 1 then
@@ -76,19 +78,9 @@ vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live 
 vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 
--- vim.keymap.set('n', 'gd', 'g<C-]>') -- go to tag
-
-local tb = require('telescope.builtin')
-
 -- Open the current selection in a Telescope live_grep buffer
 -- vim.keymap.set('v', {'expr', 'silent'}, '<leader>f', function()
 -- 	local text = vim.getVisualSelection()
 -- 	tb.live_grep({ default_text = text })
 -- end)
-
-
-vim.keymap.set('n', '<leader>ha', ':lua require("harpoon.mark").add_file()<CR>') -- Add file to harpoon
-vim.keymap.set('n', '<leader>hh', ':lua require("harpoon.ui").toggle_quick_menu()<CR>') -- Toggle harpoon menu
-vim.keymap.set('n', '<leader>hn', ':lua require("harpoon.ui").nav_next()<CR>') -- Navigate to next harpoon mark
-vim.keymap.set('n', '<leader>hp', ':lua require("harpoon.ui").nav_prev()<CR>') -- Navigate to previous harpoon mark
 

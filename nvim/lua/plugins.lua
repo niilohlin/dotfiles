@@ -38,9 +38,6 @@ return require('lazy').setup({
   -- Disable search highlight after searching.
   'romainl/vim-cool',
 
-  -- Quick File Switcher
-  { 'ThePrimeagen/harpoon', dependencies = { 'nvim-lua/plenary.nvim' } },
-
   -- Better syntax highlighting
   { 'nvim-treesitter/nvim-treesitter' },
 
