@@ -59,6 +59,9 @@ return require('lazy').setup({
   -- Make anything into an lsp, like linter output etc.
   'mfussenegger/nvim-lint',
 
+  -- Indentation, helps with python indentation navigation
+  'jeetsukumaran/vim-indentwise',
+
   -- LSP setup
   'neovim/nvim-lspconfig',
 

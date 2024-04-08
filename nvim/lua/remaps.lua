@@ -27,12 +27,12 @@ vim.keymap.set('n', 'V', 'v')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Map p & P to paste and indent
--- vim.keymap.set('n', 'p', ']p')
--- vim.keymap.set('n', 'P', '[P')
+vim.keymap.set('n', 'p', ']p')
+vim.keymap.set('n', 'P', '[P')
 
 -- Map ]p & [P to ordinary paste
--- vim.keymap.set('n', ']p', 'p')
--- vim.keymap.set('n', '[P', 'P')
+vim.keymap.set('n', ']p', 'p')
+vim.keymap.set('n', '[P', 'P')
 
 -- Terminal remap escape
 -- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
@@ -77,6 +77,12 @@ vim.keymap.set('n', '<leader>o', ':Telescope find_files<CR>') -- live find files
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
+vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
+
+
+-- Plugin is 'jeetsukumaran/vim-indentwise'
+vim.keymap.set('n', '[&', '<Plug>(IndentWiseBlockScopeBoundaryBegin)') -- Go to beginning/end of block scope
+vim.keymap.set('n', ']&', '<Plug>(IndentWiseBlockScopeBoundaryEnd)')   --
 
 -- Open the current selection in a Telescope live_grep buffer
 -- vim.keymap.set('v', {'expr', 'silent'}, '<leader>f', function()

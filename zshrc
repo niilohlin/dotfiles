@@ -54,9 +54,13 @@ function gclean() {
     #git gc
 }
 
+# Ignore ORIG_HEAD and anything that looks like a remote branch
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
+# Load zsh autocomplete
 autoload -Uz compinit && compinit
+# Enable menu selection
 zstyle ':completion:*' menu yes select
+# Highlight the completion in the list, probably not needed since we're using fzf-tab
 zstyle -e ':completion:*:default' list-colors 'reply=("${PREFIX:+=(#bi)($PREFIX:t)(?)*==02=01}:${(s.:.)LS_COLORS}")'
 
 # This block fixes search so that it searches history based on what you started typing
@@ -66,30 +70,6 @@ zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 bindkey -M viins "^[[A" up-line-or-beginning-search
 bindkey -M viins "^[[B" down-line-or-beginning-search
-
-# ex - archive extractor
-# usage: ex <file>
-ex ()
-{
-  if [ -f $1 ] ; then
-    case $1 in
-      *.tar.bz2)   tar xjf $1   ;;
-      *.tar.gz)    tar xzf $1   ;;
-      *.bz2)       bunzip2 $1   ;;
-      *.rar)       unrar x $1     ;;
-      *.gz)        gunzip $1    ;;
-      *.tar)       tar xf $1    ;;
-      *.tbz2)      tar xjf $1   ;;
-      *.tgz)       tar xzf $1   ;;
-      *.zip)       unzip $1     ;;
-      *.Z)         uncompress $1;;
-      *.7z)        7z x $1      ;;
-      *)           echo "'$1' cannot be extracted via ex()" ;;
-    esac
-  else
-    echo "'$1' is not a valid file"
-  fi
-}
 
 # Automatically ls after cd and add it to a hook
 chpwd_functions+=(ls)

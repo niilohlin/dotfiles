@@ -22,8 +22,8 @@ wilder.set_option('pipeline', {
     -- This is because it's annoying that they window opens when empty.
     wilder.debounce(300),
     wilder.branch(
-        wilder.cmdline_pipeline(),
-        wilder.search_pipeline()
+        wilder.cmdline_pipeline()
+        -- wilder.search_pipeline()
     )
 })
 
