@@ -79,13 +79,9 @@ set keymap vi-insert
 
 export PATH=$PATH:$HOME/dotfiles/
 export PATH=$PATH:/usr/local/bin/
-export PATH=$PATH:/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
-export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
-
 
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
 
-PATH="$PATH:$(/opt/homebrew/bin/brew --prefix)/opt/llvm@12/bin"
 eval $(/usr/libexec/path_helper -s)
 
 search() {
@@ -112,40 +108,7 @@ zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # use fzf-tmux-popup instead of f
 export LANG=C
 export LC_ALL=en_US.UTF-8
 
-export LDFLAGS="${LDFLAGS} -L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib"
-export LDFLAGS="${LDFLAGS} -L/usr/local/opt/zlib/lib"
-export LDFLAGS="${LDFLAGS} -L/opt/homebrew/opt/postgresql@16/lib"
-
-export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/opt/postgresql@16/include"
-
-export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@16/lib/pkgconfig"
-export PKG_CONFIG_PATH="${PKG_CONFIG_PATH} /usr/local/opt/zlib/lib/pkgconfig"
-
-## psycopg2
-export LDFLAGS="${LDFLAGS} -L/usr/local/opt/libpq/lib"
-export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/libpq/include"
-
-export LDFLAGS="${LDFLAGS} -L/usr/local/opt/openssl@3/lib"
-export CPPFLAGS="${CPPFLAGS} -I/usr/local/opt/openssl@3/include"
-
-export LDFLAGS="${LDFLAGS} -L/opt/homebrew/Cellar/sdl2/2.26.4/lib/"
-export CPPFLAGS="${CPPFLAGS} -I/opt/homebrew/Cellar/sdl2/2.26.4/include/"
-
-export JAVA_HOME=$(/usr/libexec/java_home)
-
-export PATH="/usr/local/opt/icu4c/bin:$PATH"
-export PATH="/usr/local/opt/icu4c/sbin:$PATH"
-export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-export PATH="$HOME/.local/share/nvim/site/pack/pack/paqs/start/paq-nvim/lua:$PATH"
-export PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"
-
 eval "$(/opt/homebrew/bin/brew shellenv)"
-
-export PYTHON_CONFIGURE_OPTS="--enable-framework"
-
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-export PATH="/usr/local/opt/bison/bin:$PATH"
-export PATH="/usr/local/opt/llvm/bin:$PATH"
 
 # Dynamic tree navigation
 source ~/.config/broot/launcher/bash/br
