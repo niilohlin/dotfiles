@@ -1,0 +1,8 @@
+#!/bin/env zsh
+
+set -e
+set -o pipefail
+
+git branch --merged | egrep -v "(^\*|main|dev)" | xargs git branch -d
+git fetch --all --prune
+exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v main | xargs -P 4 -I {} bash -c "( ! git cherry main {} | grep -q '^[^-]' ) && git branch -D {}"

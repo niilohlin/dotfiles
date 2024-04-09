@@ -74,8 +74,8 @@ api.nvim_command('command NT lua Open_netrw_in_split()')
 vim.keymap.set('n', '<leader>f', ':Telescope live_grep<CR>')  -- live grep search
 vim.keymap.set('n', '<leader>F', ':Telescope resume<CR>')     -- Resume last telescope search
 vim.keymap.set('n', '<leader>o', ':Telescope find_files<CR>') -- live find files
-vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
+vim.keymap.set('n', '<Leader>;', ':Telescope oldfiles<CR>') -- Open old files
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
 
