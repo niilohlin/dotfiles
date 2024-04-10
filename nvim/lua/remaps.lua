@@ -34,24 +34,16 @@ vim.keymap.set('n', 'P', '[P')
 vim.keymap.set('n', ']p', 'p')
 vim.keymap.set('n', '[P', 'P')
 
--- Terminal remap escape
--- vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
-
 -- Normal remaps
-
--- Should be made into a Lua function later, but split commas to newlines. f(a, b, c) -> f(a,\nb,\nc\n)
-vim.keymap.set('n', '<leader>a', "ma:s/, /,\\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a")
 
 vim.keymap.set('n', '<leader>n', ':cnext <cr>') -- Go to next error
 vim.keymap.set('n', '<leader>p', ':cprev <cr>') -- Go to previous issueerror
-
-vim.keymap.set('n', '<F12>', ':%s/\\<<C-r><C-w>\\>//g<Left><Left>') -- Rename word under cursor
 
 vim.keymap.set('n', '<leader>j', ':NvimTreeFindFile<CR>') -- Show current file in NerdTree
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 
-vim.keymap.set('n', '<leader>d', ':GitGutterUndoHunk<CR>') -- Discard git
+vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 
 function Open_netrw_in_split()
     -- if api.nvim_eval('exists("g:netrw_winnr")') == 1 then
@@ -79,10 +71,9 @@ vim.keymap.set('n', '<Leader>;', ':Telescope oldfiles<CR>') -- Open old files
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
 
-
--- Plugin is 'jeetsukumaran/vim-indentwise'
-vim.keymap.set('n', '[&', '<Plug>(IndentWiseBlockScopeBoundaryBegin)') -- Go to beginning/end of block scope
-vim.keymap.set('n', ']&', '<Plug>(IndentWiseBlockScopeBoundaryEnd)')   --
+-- disable { and } to avoid jumping to the next paragraph
+vim.keymap.set('n', '{', '<nop>')
+vim.keymap.set('n', '}', '<nop>')
 
 -- Open the current selection in a Telescope live_grep buffer
 -- vim.keymap.set('v', {'expr', 'silent'}, '<leader>f', function()

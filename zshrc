@@ -31,7 +31,6 @@ alias ll='eza -l --group-directories-first --color=auto -F'
 alias la='eza -la --group-directories-first --color=auto -F'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
-alias df='df -h'                          # human-readable sizes
 alias free='free -m'                      # show sizes in MB
 alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph"
 alias gs="git status";
@@ -40,19 +39,9 @@ alias gdc="git diff --cached";
 alias gc="git commit";
 alias ga="git add";
 alias gb='git branch'
-alias gsummary='grep "^Updating" | sed "s/Updating //" | xargs git log --oneline | grep "Merge pull request" | awk "{print $1;}" | xargs git show -s --format=%B | grep -v -e "^$" | grep -v "Merge pull request"'
 alias vim='nvim'
-alias editvimconf='nvim ~/.config/nvim/vimrc'
-alias vimtags='/usr/local/Cellar/ctags/5.8_1/bin/ctags'
 alias tree='broot'
 alias less='vim -R' # use vim in readonly mode as a pager
-
-function gclean() {
-    git branch --merged | egrep -v "(^\*|main|dev)" | xargs git branch -d
-    git fetch --all --prune
-    exec git for-each-ref refs/heads/ "--format=%(refname:short)" | grep -v main | xargs -P 4 -I {} bash -c "( ! git cherry main {} | grep -q '^[^-]' ) && git branch -D {}"
-    #git gc
-}
 
 # Ignore ORIG_HEAD and anything that looks like a remote branch
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
@@ -82,11 +71,8 @@ export PATH=$PATH:/usr/local/bin/
 
 . /opt/homebrew/opt/asdf/libexec/asdf.sh
 
+# Load /etc/paths.d/ into the PATH
 eval $(/usr/libexec/path_helper -s)
-
-search() {
-    find . -iname "$1"
-}
 
 # case insensitive.
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
