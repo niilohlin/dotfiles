@@ -9,9 +9,6 @@
 [user]
 	name = Niil Öhlin
 	email = niilohlin@gmail.com
-[difftool "sourcetree"]
-	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path =
 [mergetool "sourcetree"]
 	cmd = /Users/niil.ohlin/Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true

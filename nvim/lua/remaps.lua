@@ -26,13 +26,13 @@ vim.keymap.set('n', 'V', 'v')
 -- Never use Q for ex mode.
 vim.keymap.set('n', 'Q', '<nop>')
 
--- Map p & P to paste and indent
-vim.keymap.set('n', 'p', ']p')
-vim.keymap.set('n', 'P', '[P')
-
--- Map ]p & [P to ordinary paste
-vim.keymap.set('n', ']p', 'p')
-vim.keymap.set('n', '[P', 'P')
+-- -- Map p & P to paste and indent
+-- vim.keymap.set('n', 'p', ']p')
+-- vim.keymap.set('n', 'P', '[P')
+--
+-- -- Map ]p & [P to ordinary paste
+-- vim.keymap.set('n', ']p', 'p')
+-- vim.keymap.set('n', '[P', 'P')
 
 -- Normal remaps
 

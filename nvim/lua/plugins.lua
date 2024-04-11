@@ -62,6 +62,9 @@ return require('lazy').setup({
   -- LSP setup
   'neovim/nvim-lspconfig',
 
+  -- Local jump list experimental plugin
+  { dir = '~/workspace/file-jumps', lazy = false },
+
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10
   { 'hrsh7th/nvim-cmp', version = '763c720d512516c4af25a510a88b2d073e3c41a9' },
