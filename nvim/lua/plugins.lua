@@ -63,7 +63,13 @@ return require('lazy').setup({
   'neovim/nvim-lspconfig',
 
   -- Local jump list experimental plugin
-  { dir = '~/workspace/file-jumps', lazy = false },
+  { dir = '~/workspaceifile-jumps', lazy = false },
+
+  -- Vim trainer
+  'ThePrimeagen/vim-be-good',
+
+  -- Targets, text objects, adds objects like ci,
+  'wellle/targets.vim',
 
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10

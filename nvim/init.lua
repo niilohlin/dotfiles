@@ -11,16 +11,14 @@ if not vim.loop.fs_stat(lazypath) then
 end
 
 vim.opt.rtp:prepend(lazypath)
-
-require('custom_functions')
+require('autocmd')
 require('opts')
 require('remaps')
 require('colorscheme')
-require('gui')
 require('onwrite')
 require('globals')
 require('plugins')
 require('lint-conf')
 require('post_plugins')
 require('lsp')
-require('treesitter-config')
+

@@ -5,7 +5,6 @@ local api = vim.api
 g.mapleader = ' '
 
 -- Insert remaps.
--- vim.keymap.set('i', 'tn', '<ESC>')
 -- Makes so that indendation does not disappear when entering a new line.
 vim.keymap.set('i', '<CR>', '<CR>a<BS>')
 -- Complete file name
@@ -26,41 +25,18 @@ vim.keymap.set('n', 'V', 'v')
 -- Never use Q for ex mode.
 vim.keymap.set('n', 'Q', '<nop>')
 
--- -- Map p & P to paste and indent
--- vim.keymap.set('n', 'p', ']p')
--- vim.keymap.set('n', 'P', '[P')
---
--- -- Map ]p & [P to ordinary paste
--- vim.keymap.set('n', ']p', 'p')
--- vim.keymap.set('n', '[P', 'P')
-
 -- Normal remaps
 
 vim.keymap.set('n', '<leader>n', ':cnext <cr>') -- Go to next error
 vim.keymap.set('n', '<leader>p', ':cprev <cr>') -- Go to previous issueerror
 
-vim.keymap.set('n', '<leader>j', ':NvimTreeFindFile<CR>') -- Show current file in NerdTree
+vim.keymap.set('n', '<leader>j', ':Explore<CR>') -- Show current file in NerdTree
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 
 vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 
-function Open_netrw_in_split()
-    -- if api.nvim_eval('exists("g:netrw_winnr")') == 1 then
-    --     -- close the netrw window
-    --     local i = api.nvim_command('bufwinnr(g:netrw_winnr)')
-    --     api.nvim_command(i .. 'wincmd w')
-    --     api.nvim_command('q')
-    -- end
-
-    api.nvim_command('vsplit')
-    api.nvim_command('vertical resize 30')
-    api.nvim_command('Explore')
-    -- set the window id
-    api.nvim_command('let g:netrw_winnr = winnr()')
-end
 api.nvim_command('command W w') -- Remap :W to :w
--- call Open_netrw_in_split() when :NT is called
 api.nvim_command('command NT lua Open_netrw_in_split()')
 
 vim.keymap.set('n', '<leader>f', ':Telescope live_grep<CR>')  -- live grep search
@@ -74,6 +50,9 @@ vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
 -- disable { and } to avoid jumping to the next paragraph
 vim.keymap.set('n', '{', '<nop>')
 vim.keymap.set('n', '}', '<nop>')
+
+vim.keymap.set('n', 'H', ':FileJumpBackward<CR>') --
+vim.keymap.set('n', 'L', ':FileJumpForward<CR>') --
 
 -- Open the current selection in a Telescope live_grep buffer
 -- vim.keymap.set('v', {'expr', 'silent'}, '<leader>f', function()
