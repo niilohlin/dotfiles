@@ -23,9 +23,6 @@ opt.splitbelow = true       -- Show the preview window (code documentation) to t
 opt.wildmenu = true         -- Show a menu when using tab completion in command mode.
 opt.wildmode = { "longest", "full" }
 
--- Status line, the line above the ex column TODO take a look at later and fix.
--- opt.statusline = '%f%#warningmsg#%{SyntasticStatuslineFlag()}%*'
-
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 opt.updatetime = 500
 -- Remove 'Press Enter to continue' message when type information is longer than one line.
@@ -49,3 +46,10 @@ opt.mouse = ""                                  -- Disable mouse
 
 -- opt.spellang = 'en'
 -- opt.spellfile = HOME .. '/.config/nvim/spell/en.utf-8.add' -- Set custom spelling words path
+
+local g = vim.g
+g.markdown_enable_spell_checking = 0
+
+g.python_host_prog='~/.asdf/shims/python'
+g.python2_host_prog='/usr/local/bin/python2'
+g.python3_host_prog='~/.asdf/shims/python3'

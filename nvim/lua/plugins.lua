@@ -71,6 +71,9 @@ return require('lazy').setup({
   -- Targets, text objects, adds objects like ci,
   'wellle/targets.vim',
 
+  -- Indent object, adds objects like ai "delete around indent"
+  'michaeljsmith/vim-indent-object',
+
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10
   { 'hrsh7th/nvim-cmp', version = '763c720d512516c4af25a510a88b2d073e3c41a9' },
