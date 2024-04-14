@@ -54,7 +54,7 @@ return require('lazy').setup({
   'github/copilot.vim',
 
   -- Better wild menu, while typing
-  'gelguy/wilder.nvim',
+  'hrsh7th/cmp-cmdline',
 
   -- Make anything into an lsp, like linter output etc.
   'mfussenegger/nvim-lint',
