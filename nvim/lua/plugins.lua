@@ -21,8 +21,12 @@ return require('lazy').setup({
 
   -- nvim Commenter/uncommenter (replaces vim-commentary)
   { 'numToStr/Comment.nvim', opts = {}, lazy = false },
+
   -- Change surrounding.
   'tpope/vim-surround',
+
+  -- Reapeat surround commands
+  'tpope/vim-repeat',
 
   -- -- fuzzy file finder
   'junegunn/fzf',
@@ -39,7 +43,10 @@ return require('lazy').setup({
   'romainl/vim-cool',
 
   -- Better syntax highlighting
-  { 'nvim-treesitter/nvim-treesitter' },
+  'nvim-treesitter/nvim-treesitter',
+
+  -- Treesitter text objects
+  'nvim-treesitter/nvim-treesitter-textobjects',
 
   -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
   'nvim-treesitter/playground',
@@ -52,6 +59,9 @@ return require('lazy').setup({
 
   -- Github Copilot, AI completions
   'github/copilot.vim',
+
+  -- Inline lsp diagnostics
+  { url = "https://git.sr.ht/~whynothugo/lsp_lines.nvim" },
 
   -- Better wild menu, while typing
   'hrsh7th/cmp-cmdline',

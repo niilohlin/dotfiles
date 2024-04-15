@@ -15,18 +15,28 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
   end,
 })
 
-vim.api.nvim_create_autocmd(
-  "FileType",
-  { pattern = "javascript", command = "setlocal tabstop=2 shiftwidth=2" }
-)
-vim.api.nvim_create_autocmd(
-  "FileType",
-  { pattern = "typescript", command = "setlocal tabstop=2 shiftwidth=2" }
-)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "javascript", "*.js", "*.jsx" },
+  callback = function()
+    vim.cmd([[ setlocal shiftwidth=2 ]])
+    vim.cmd([[ setlocal tabstop=2 ]])
+    vim.cmd([[ setlocal softtabstop=2 ]])
+  end,
+})
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "typescript", "*.ts", "*.tsx" },
+  callback = function()
+    vim.cmd([[ setlocal shiftwidth=2 ]])
+    vim.cmd([[ setlocal tabstop=2 ]])
+    vim.cmd([[ setlocal softtabstop=2 ]])
+  end,
+})
+
 vim.api.nvim_create_autocmd(
   "FileType",
   { pattern = "lua", command = "setlocal tabstop=2 shiftwidth=2" }
 )
+
 vim.api.nvim_create_autocmd(
   "FileType",
   { pattern = "markdown", command = "set spell nofoldenable" }
@@ -68,3 +78,12 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   }
 )
 
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    pattern = "yaml",
+    callback = function()
+      vim.cmd([[ setlocal shiftwidth=2 ]])
+      vim.cmd([[ setlocal tabstop=2 ]])
+      vim.cmd([[ setlocal softtabstop=2 ]])
+    end,
+  }
+)
