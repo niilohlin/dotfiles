@@ -44,9 +44,6 @@ opt.undodir = HOME .. '/.config/nvim/undodir'   -- Set undo dir
 opt.scrolloff = 1                               -- Scroll 1 line before cursor hits bottom
 opt.mouse = ""                                  -- Disable mouse
 
--- opt.spellang = 'en'
--- opt.spellfile = HOME .. '/.config/nvim/spell/en.utf-8.add' -- Set custom spelling words path
-
 local g = vim.g
 g.markdown_enable_spell_checking = 0
 

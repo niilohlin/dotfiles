@@ -72,14 +72,14 @@ return require('lazy').setup({
   -- LSP setup
   'neovim/nvim-lspconfig',
 
-  -- Local jump list experimental plugin
-  { dir = '~/workspaceifile-jumps', lazy = false },
+  -- -- Local jump list experimental plugin
+  -- { dir = '~/workspaceifile-jumps', lazy = false },
 
   -- Vim trainer
   'ThePrimeagen/vim-be-good',
 
-  -- Targets, text objects, adds objects like ci,
-  'wellle/targets.vim',
+  -- -- Targets, text objects, adds objects like ci,
+  -- 'wellle/targets.vim',
 
   -- Indent object, adds objects like ai "delete around indent"
   'michaeljsmith/vim-indent-object',

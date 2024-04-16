@@ -18,10 +18,6 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 -- Go to tag
 vim.keymap.set('i', '<C-]>', '<C-X><C-]>')
 
--- Switch v and V behavior.
-vim.keymap.set('n', 'v', 'V')
-vim.keymap.set('n', 'V', 'v')
-
 -- Never use Q for ex mode.
 vim.keymap.set('n', 'Q', '<nop>')
 
@@ -52,7 +48,3 @@ vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
 -- disable { and } to untrain myself from using them
 vim.keymap.set('n', '{', '<nop>')
 vim.keymap.set('n', '}', '<nop>')
-
-vim.keymap.set('n', 'H', ':FileJumpBackward<CR>') --
-vim.keymap.set('n', 'L', ':FileJumpForward<CR>') --
-

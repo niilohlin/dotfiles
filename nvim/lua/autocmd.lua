@@ -1,4 +1,11 @@
 
+local function set_tab_length(tab_length)
+  vim.opt.tabstop = tab_length
+  vim.opt.shiftwidth = tab_length
+  vim.opt.softtabstop = tab_length
+  vim.opt.expandtab = true
+end
+
 -- Set cursor position to old spot
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   callback = function()
@@ -16,26 +23,18 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript", "*.js", "*.jsx" },
+  pattern = { "javascript", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx" },
   callback = function()
-    vim.cmd([[ setlocal shiftwidth=2 ]])
-    vim.cmd([[ setlocal tabstop=2 ]])
-    vim.cmd([[ setlocal softtabstop=2 ]])
-  end,
-})
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "typescript", "*.ts", "*.tsx" },
-  callback = function()
-    vim.cmd([[ setlocal shiftwidth=2 ]])
-    vim.cmd([[ setlocal tabstop=2 ]])
-    vim.cmd([[ setlocal softtabstop=2 ]])
+    set_tab_length(2)
   end,
 })
 
-vim.api.nvim_create_autocmd(
-  "FileType",
-  { pattern = "lua", command = "setlocal tabstop=2 shiftwidth=2" }
-)
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "lua",
+  callback = function()
+    set_tab_length(2)
+  end
+})
 
 vim.api.nvim_create_autocmd(
   "FileType",
@@ -81,9 +80,22 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     pattern = "yaml",
     callback = function()
-      vim.cmd([[ setlocal shiftwidth=2 ]])
-      vim.cmd([[ setlocal tabstop=2 ]])
-      vim.cmd([[ setlocal softtabstop=2 ]])
+      set_tab_length(2)
     end,
   }
 )
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = { "Fastfile", "Appfile", "Snapfile", "Scanfile", "Gymfile", "Matchfile", "Deliverfile", "Dangerfile", "*.gemspec" },
+  callback = function()
+    vim.cmd([[ set ft=ruby ]])
+    vim.cmd([[compiler ruby]])
+
+    set_tab_length(2)
+  end,
+})
+
+vim.api.nvim_create_autocmd({ "BufNewFile" }, {
+  pattern = "*.rb",
+  command = "0r ~/.config/nvim/skeleton/skeleton.rb",
+})
