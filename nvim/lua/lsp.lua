@@ -2,7 +2,6 @@
 local lspconfig = require('lspconfig')
 lspconfig.sourcekit.setup{}
 lspconfig.marksman.setup{}
-lspconfig.pylsp.setup{}
 lspconfig.lua_ls.setup{}
 
 -- Global mappings.
@@ -147,3 +146,21 @@ require('lspconfig')['sourcekit'].setup {
 require('lspconfig')['tsserver'].setup {
     capabilities = capabilities
 }
+
+lspconfig.pylsp.setup {
+  settings = {
+    pylsp = {
+      plugins = {
+        pylint = { enabled = true, executable = 'pylint' },
+        mypy = { enabled = true, executable = 'mypy' },
+        rope = { enabled = true, executable = 'rope' },
+        rope_autoimport = {
+          enabled = true,
+          completions = { enabled = true }
+        },
+      }
+    }
+  },
+  capabilities = capabilities
+}
+

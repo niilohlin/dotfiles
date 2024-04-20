@@ -17,6 +17,6 @@ require('remaps')
 require('colorscheme')
 require('plugins')
 require('lint-conf')
+require('treesitter-config')
 require('post_plugins')
 require('lsp')
-

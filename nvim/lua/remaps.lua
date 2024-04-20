@@ -35,7 +35,6 @@ vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 vim.keymap.set('v', '<leader>p', '"_dP') -- Paste without copying to clipboard
 
 api.nvim_command('command W w') -- Remap :W to :w
-api.nvim_command('command NT lua Open_netrw_in_split()')
 
 vim.keymap.set('n', '<leader>f', ':Telescope live_grep<CR>')  -- live grep search
 vim.keymap.set('n', '<leader>F', ':Telescope resume<CR>')     -- Resume last telescope search

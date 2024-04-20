@@ -120,7 +120,7 @@ for m in visual viopp; do
 done
 
 # Start tmux if not already running
-export TERM=xterm-256color
-if [ -z $TMUX ]; then
-    exec tmux
-fi
+# export TERM=xterm-256color
+# if [ -z $TMUX ]; then
+#     exec tmux
+# fi
