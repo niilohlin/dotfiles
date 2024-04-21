@@ -43,6 +43,7 @@ vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ h
 vim.keymap.set('n', '<Leader>;', ':Telescope oldfiles<CR>') -- Open old files
 vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>') -- live find symbols
 vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>') -- Open buffers
+vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>') -- Replace Returns:  Replace all \n with new lines
 
 -- disable { and } to untrain myself from using them
 vim.keymap.set('n', '{', '<nop>')

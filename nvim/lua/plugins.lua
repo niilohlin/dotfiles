@@ -72,8 +72,8 @@ return require('lazy').setup({
   -- LSP setup
   'neovim/nvim-lspconfig',
 
-  -- -- Local jump list experimental plugin
-  -- { dir = '~/workspaceifile-jumps', lazy = false },
+  -- Generic log highlighting
+  'MTDL9/vim-log-highlighting',
 
   -- Vim trainer
   'ThePrimeagen/vim-be-good',

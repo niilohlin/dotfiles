@@ -99,3 +99,11 @@ vim.api.nvim_create_autocmd({ "BufNewFile" }, {
   pattern = "*.rb",
   command = "0r ~/.config/nvim/skeleton/skeleton.rb",
 })
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = { "*.log", "*.logs", "*.out", "output" },
+  callback = function()
+    vim.cmd([[ set ft=log ]])
+  end,
+})
+
