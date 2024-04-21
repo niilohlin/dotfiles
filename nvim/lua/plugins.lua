@@ -1,5 +1,5 @@
 
--- lazy.nvim
+-- lazy.nvim package manager
 
 return require('lazy').setup({
   -- Git status of changed lines to the left.
@@ -9,7 +9,8 @@ return require('lazy').setup({
   'tpope/vim-fugitive',
 
   -- Syntax highlight for pbxproj (TODO switch to treesitter later)
-  -- 'cfdrake/vim-pbxproj'
+  'cfdrake/vim-pbxproj',
+
   -- Send text to tmux pane
   'christoomey/vim-tmux-navigator',
 
@@ -20,7 +21,7 @@ return require('lazy').setup({
   'plasticboy/vim-markdown',
 
   -- nvim Commenter/uncommenter (replaces vim-commentary)
-  { 'numToStr/Comment.nvim', opts = {}, lazy = false },
+  { 'numToStr/Comment.nvim', lazy = false },
 
   -- Change surrounding.
   'tpope/vim-surround',
@@ -30,15 +31,19 @@ return require('lazy').setup({
 
   -- -- fuzzy file finder
   'junegunn/fzf',
-  -- -- fzf binding
+
+  -- fzf binding
   'junegunn/fzf.vim',
+
   -- project wide search, requires ripgrep
   { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' }},
+
   -- fzf native plugin, make it possible to fuzzy search in telescope
-  -- { 'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' },
   { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+
   -- Silversearcher plugin (search project)
   { 'kelly-lin/telescope-ag', dependencies = { 'nvim-telescope/telescope.nvim' } },
+
   -- Disable search highlight after searching.
   'romainl/vim-cool',
 
@@ -59,9 +64,6 @@ return require('lazy').setup({
 
   -- Github Copilot, AI completions
   'github/copilot.vim',
-
-  -- Inline lsp diagnostics
-  { url = "https://git.sr.ht/~whynothugo/lsp_lines.nvim" },
 
   -- Better wild menu, while typing
   'hrsh7th/cmp-cmdline',
@@ -86,16 +88,16 @@ return require('lazy').setup({
 
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10
-  { 'hrsh7th/nvim-cmp', version = '763c720d512516c4af25a510a88b2d073e3c41a9' },
+  { 'hrsh7th/nvim-cmp' },
 
   -- LSP completion
   'hrsh7th/cmp-nvim-lsp',
 
   -- snip manager required by nvim-cmp
   {
-      "L3MON4D3/LuaSnip",
+      'L3MON4D3/LuaSnip',
       -- follow latest release.
-      version = "v2.1.1", -- This is not the latest release, but it works.
+      version = 'v2.3.0',
       -- install jsregexp (optional!).
       -- build = "make install_jsregexp"
   },
@@ -103,4 +105,3 @@ return require('lazy').setup({
   -- Linter spawner and parser
   'mfussenegger/nvim-lint',
 })
-

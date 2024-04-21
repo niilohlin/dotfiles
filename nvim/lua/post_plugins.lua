@@ -16,18 +16,6 @@ cmp.setup.cmdline(':', {
   })
 })
 
-local lsp_lines = require('lsp_lines')
-lsp_lines.setup()
-vim.diagnostic.config({ virtual_text = true, })
-local lsp_lines_enabled = false
-lsp_lines.toggle()
-
-vim.keymap.set("", "<Leader>l", function ()
-  lsp_lines.toggle()
-  vim.diagnostic.config({ virtual_text = lsp_lines_enabled, })
-  lsp_lines_enabled = not lsp_lines_enabled
-end, { desc = "Toggle lsp_lines" })
-
 require'nvim-treesitter.configs'.setup {
   textobjects = {
     select = {
