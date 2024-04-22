@@ -7,6 +7,15 @@ TMPFILE=$(mktemp).out
 # -S: start at the beginning of the history
 tmux capture-pane -J -pS - > $TMPFILE
 
-# create a new window with the output
+PANE_TOP=$(tmux display-message -p '#{pane_top}')
+PANE_LEFT=$(tmux display-message -p '#{pane_left}')
+PANE_RIGHT=$(tmux display-message -p '#{pane_right}')
+PANE_BOTTOM=$(($(tmux display-message -p '#{pane_bottom}') + 1))
 
-tmux new-window -n "output" "nvim -c 'norm G' $TMPFILE"
+WIDTH=$(($PANE_RIGHT - $PANE_LEFT))
+HEIGHT=$(($PANE_BOTTOM - $PANE_TOP))
+
+# -E: close popup on exit
+# -B: Do not show popup border
+tmux display-popup -E -B -x $PANE_LEFT -y $PANE_BOTTOM -w $WIDTH -h $HEIGHT "nvim -c 'norm G' $TMPFILE"
+

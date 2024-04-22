@@ -84,7 +84,6 @@ antidote load ~/.zsh/zsh-plugins.txt
 
 source ~/.zsh/git-completion.bash
 source ~/.zsh/fastlane-completion.zsh
-source ~/.zsh/zsh-cdtree/zsh-cdtree.zsh
 fpath=(~/.zsh $fpath)
 fpath=(~/.zsh/completions $fpath)
 
