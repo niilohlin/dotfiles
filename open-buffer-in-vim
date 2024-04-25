@@ -18,4 +18,3 @@ HEIGHT=$(($PANE_BOTTOM - $PANE_TOP))
 # -E: close popup on exit
 # -B: Do not show popup border
 tmux display-popup -E -B -x $PANE_LEFT -y $PANE_BOTTOM -w $WIDTH -h $HEIGHT "nvim -c 'norm G' $TMPFILE"
-
