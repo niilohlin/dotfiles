@@ -63,3 +63,5 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 
+
+require('Comment').setup()

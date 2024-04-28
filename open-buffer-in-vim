@@ -1,5 +1,8 @@
 #!/usr/bin/env zsh
 
+set -e
+set -o pipefail
+
 TMPFILE=$(mktemp).out
 
 # -J: join lines, removes soft wraps
@@ -7,14 +10,22 @@ TMPFILE=$(mktemp).out
 # -S: start at the beginning of the history
 tmux capture-pane -J -pS - > $TMPFILE
 
-PANE_TOP=$(tmux display-message -p '#{pane_top}')
-PANE_LEFT=$(tmux display-message -p '#{pane_left}')
-PANE_RIGHT=$(tmux display-message -p '#{pane_right}')
-PANE_BOTTOM=$(($(tmux display-message -p '#{pane_bottom}') + 1))
+# -P: print window id
+# -d: open window in the background
+# -R: read-only mode
+WINDOW_ID=$(tmux new-window -P -d "nvim -R -c 'norm G' -c 'set laststatus=0' -c 'set noshowcmd' -c 'set noruler' -c 'set noshowmode' -c 'set cmdheight=0' $TMPFILE")
 
-WIDTH=$(($PANE_RIGHT - $PANE_LEFT))
-HEIGHT=$(($PANE_BOTTOM - $PANE_TOP))
+CURRENT_WINDOW_ID=$(tmux display-message -p '#{window_id}')
 
-# -E: close popup on exit
-# -B: Do not show popup border
-tmux display-popup -E -B -x $PANE_LEFT -y $PANE_BOTTOM -w $WIDTH -h $HEIGHT "nvim -c 'norm G' $TMPFILE"
+tmux swap-pane -s $WINDOW_ID -t $CURRENT_WINDOW_ID
+
+# remain on exit makes it so that "pane-died" is triggered when the pane exits, without closing the pane
+# and window.
+tmux set-window-option -t $CURRENT_WINDOW_ID remain-on-exit on
+
+tmux set-hook pane-died "run-shell '\
+    tmux swap-pane -s $CURRENT_WINDOW_ID -t $WINDOW_ID;\
+    tmux kill-window -t $WINDOW_ID;\
+    tmux set-hook -u pane-died;\
+    tmux set-window-option -t $CURRENT_WINDOW_ID remain-on-exit off;\
+    '"

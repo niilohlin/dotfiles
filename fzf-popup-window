@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+set -e
+set -o pipefail
+
+title=$1
+
+if [[ -z $title ]]; then
+    title="fzf-popup"
+fi
+
+
+: ${tmp_dir:=${TMPPREFIX:-/tmp/zsh}-fzf-popup-$USER}
+
+[[ -d $tmp_dir ]] || mkdir -p $tmp_dir
+cat > $tmp_dir/input.$$
+
+echo -E "cat $tmp_dir/input.$$ | fzf > $tmp_dir/result-$$"  > $tmp_dir/fzf-$$
+{
+    tmux popup -d "$PWD" -E -T "$title" "source $tmp_dir/fzf-$$"
+    selected="$(<$tmp_dir/result-$$)"
+} always {
+    rm $tmp_dir/*-$$
+}
+echo -E $selected

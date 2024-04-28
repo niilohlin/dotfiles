@@ -15,8 +15,6 @@ vim.keymap.set('i', '<C-L>', '<C-X><C-L>')
 vim.keymap.set('i', '<C-D>', '<C-X><C-D>')
 -- Omni complete
 vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
--- Go to tag
-vim.keymap.set('i', '<C-]>', '<C-X><C-]>')
 
 -- Never use Q for ex mode.
 vim.keymap.set('n', 'Q', '<nop>')
@@ -48,3 +46,5 @@ vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>') -- Replace Returns:  Re
 -- disable { and } to untrain myself from using them
 vim.keymap.set('n', '{', '<nop>')
 vim.keymap.set('n', '}', '<nop>')
+
+vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
