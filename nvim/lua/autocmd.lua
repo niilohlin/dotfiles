@@ -1,4 +1,3 @@
-
 local function set_tab_length(tab_length)
   vim.opt.tabstop = tab_length
   vim.opt.shiftwidth = tab_length
@@ -61,28 +60,27 @@ vim.api.nvim_create_autocmd({ "BufNewFile" }, {
 
 
 vim.api.nvim_create_autocmd({ "FileType" }, {
-    pattern = "swift",
-    callback = function()
-      vim.cmd([[ call clearmatches() ]])
-      vim.cmd([[ call matchadd('ColorColumn', '\%121v, 100) ]])
-      vim.cmd([[ setlocal textwidth=120 ]])
-
-    end,
-  }
+  pattern = "swift",
+  callback = function()
+    vim.cmd([[ call clearmatches() ]])
+    vim.cmd([[ call matchadd('ColorColumn', '\%121v, 100) ]])
+    vim.cmd([[ setlocal textwidth=120 ]])
+  end,
+}
 )
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = "*.stencil",
-    command = "set filetype=swift",
-  }
+  pattern = "*.stencil",
+  command = "set filetype=swift",
+}
 )
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    pattern = "yaml",
-    callback = function()
-      set_tab_length(2)
-    end,
-  }
+  pattern = "yaml",
+  callback = function()
+    set_tab_length(2)
+  end,
+}
 )
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
@@ -106,4 +104,3 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     vim.cmd([[ set ft=log ]])
   end,
 })
-

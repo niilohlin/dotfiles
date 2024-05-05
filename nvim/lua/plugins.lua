@@ -1,4 +1,3 @@
-
 -- lazy.nvim package manager
 
 return require('lazy').setup({
@@ -21,7 +20,7 @@ return require('lazy').setup({
   'plasticboy/vim-markdown',
 
   -- nvim Commenter/uncommenter (replaces vim-commentary)
-  { 'numToStr/Comment.nvim', lazy = false },
+  { 'numToStr/Comment.nvim',                    lazy = false },
 
   -- Change surrounding.
   'tpope/vim-surround',
@@ -36,13 +35,13 @@ return require('lazy').setup({
   'junegunn/fzf.vim',
 
   -- project wide search, requires ripgrep
-  { 'nvim-telescope/telescope.nvim', dependencies = { 'nvim-lua/plenary.nvim' }},
+  { 'nvim-telescope/telescope.nvim',            dependencies = { 'nvim-lua/plenary.nvim' } },
 
   -- fzf native plugin, make it possible to fuzzy search in telescope
   { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
 
   -- Silversearcher plugin (search project)
-  { 'kelly-lin/telescope-ag', dependencies = { 'nvim-telescope/telescope.nvim' } },
+  { 'kelly-lin/telescope-ag',                   dependencies = { 'nvim-telescope/telescope.nvim' } },
 
   -- Disable search highlight after searching.
   'romainl/vim-cool',
@@ -95,11 +94,11 @@ return require('lazy').setup({
 
   -- snip manager required by nvim-cmp
   {
-      'L3MON4D3/LuaSnip',
-      -- follow latest release.
-      version = 'v2.3.0',
-      -- install jsregexp (optional!).
-      -- build = "make install_jsregexp"
+    'L3MON4D3/LuaSnip',
+    -- follow latest release.
+    version = 'v2.3.0',
+    -- install jsregexp (optional!).
+    -- build = "make install_jsregexp"
   },
 
   -- Linter spawner and parser
