@@ -8,8 +8,9 @@ else
     else
         : ${tmp_dir:=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER}
         sessions=$(tmux list-sessions)
-        session_names=$(echo $sessions | cut -d ':' -f 1)
-        directories=$(find ~/workspace/quickbit ~/dotfiles ~/workspace ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names$")
+        # session names with a dollar appended at the end of it so that we can filter them out from the directories
+        session_names=$(echo $sessions | sed -n 's/^\([^:]*\):.*/\1$/p')
+        directories=$(find ~/workspace/quickbit ~/dotfiles ~/workspace ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names")
 
         selected=$({ echo $sessions; echo $directories } | fzf-tmux -p --preview 'tmux list-windows -t $(echo {} | cut -d ":" -f 1) 2> /dev/null || ls -l {}')
         if [[ ! -d $selected ]]; then

@@ -28,20 +28,48 @@ vim.keymap.set('n', '<leader>j', ':Explore<CR>') -- Show current file in NerdTre
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 
-vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>')                                           -- Discard git
+vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 
-vim.keymap.set('v', '<leader>p', '"_dP')                                                              -- Paste without copying to clipboard
+vim.keymap.set('v', '<leader>p', '"_dP')                    -- Paste without copying to clipboard
 
-api.nvim_command('command W w')                                                                       -- Remap :W to :w
+api.nvim_command('command W w')                             -- Remap :W to :w
 
-vim.keymap.set('n', '<leader>f', ':Telescope live_grep<CR>')                                          -- live grep search
-vim.keymap.set('n', '<leader>F', ':Telescope resume<CR>')                                             -- Resume last telescope search
-vim.keymap.set('n', '<leader>o', ':Telescope find_files<CR>')                                         -- live find files
-vim.keymap.set('n', '<Leader>O', ':lua require"telescope.builtin".find_files({ hidden = true })<CR>') -- live find files (including hidden files)
-vim.keymap.set('n', '<Leader>;', ':Telescope oldfiles<CR>')                                           -- Open old files
-vim.keymap.set('n', '<leader>s', ':Telescope lsp_document_symbols<CR>')                               -- live find symbols
-vim.keymap.set('n', '<leader>b', ':Telescope buffers<CR>')                                            -- Open buffers
-vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>')                                              -- Replace Returns:  Replace all \n with new lines
+local builtin = require('telescope.builtin')
+vim.keymap.set('n', '<leader>ff', builtin.find_files, {}) -- find files
+vim.keymap.set('n', '<leader>fr', builtin.resume, {})     -- Resume last telescope search
+vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})  -- live grep
+vim.keymap.set('n', '<Leader>fF', function()
+  builtin.find_files({ hidden = true })
+end, {})                                                        -- live find files (including hidden files)
+vim.keymap.set('n', '<Leader>fo', builtin.oldfiles)             -- Open old files
+vim.keymap.set('n', '<leader>fs', builtin.lsp_document_symbols) -- live find symbols
+vim.keymap.set('n', '<leader>fb', builtin.buffers, {})          -- Open buffers
+vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>')        -- Replace Returns:  Replace all \n with new lines
+
+local function has_workspace_symbols()
+  if not vim.lsp.buf_get_clients() then
+    return false
+  end
+
+  for _, client in ipairs(vim.lsp.get_active_clients()) do
+    if client.server_capabilities.workspaceSymbolProvider then
+      return true
+    end
+  end
+
+  return false
+end
+
+vim.keymap.set('n', '<leader>o', function()
+  if has_workspace_symbols() then
+    builtin.lsp_dynamic_workspace_symbols()
+  elseif vim.fn.filereadable('tags') then
+    builtin.tags()
+  else
+    builtin.live_grep()
+  end
+end, {}) -- Search for tags or lsp workspace symbols
+
 
 -- disable { and } to untrain myself from using them
 vim.keymap.set('n', '{', '<nop>')
