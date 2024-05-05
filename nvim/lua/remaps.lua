@@ -48,3 +48,5 @@ vim.keymap.set('n', '{', '<nop>')
 vim.keymap.set('n', '}', '<nop>')
 
 vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
+
+vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste

@@ -106,6 +106,12 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 lspconfig.lua_ls.setup {
   capabilities = capabilities,
+  on_attach = function(client, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "lua vim.lsp.buf.format { async = true }",
+    })
+  end,
   settings = {
     Lua = {
       diagnostics = {
