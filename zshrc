@@ -69,7 +69,7 @@ set keymap vi-insert
 export PATH=$PATH:$HOME/dotfiles/
 export PATH=$PATH:/usr/local/bin/
 
-. /opt/homebrew/opt/asdf/libexec/asdf.sh
+eval "$(/opt/homebrew/bin/mise activate zsh)"
 
 # Load /etc/paths.d/ into the PATH
 eval $(/usr/libexec/path_helper -s)
@@ -97,8 +97,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Dynamic tree navigation
 source ~/.config/broot/launcher/bash/br
-
-export PATH=$HOME/.asdf/shims:$PATH
 
 # ci", ci', ci`, di", etc
 autoload -U select-quoted

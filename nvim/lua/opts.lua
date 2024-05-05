@@ -48,6 +48,6 @@ opt.mouse = ""                                  -- Disable mouse
 local g = vim.g
 g.markdown_enable_spell_checking = 0
 
-g.python_host_prog='~/.asdf/shims/python'
+g.python_host_prog='~/.local/share/mise/installs/python/3/bin/python3'
 g.python2_host_prog='/usr/local/bin/python2'
-g.python3_host_prog='~/.asdf/shims/python3'
+g.python3_host_prog='~/.local/share/mise/installs/python/3/bin/python3'
