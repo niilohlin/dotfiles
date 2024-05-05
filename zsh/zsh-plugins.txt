@@ -19,3 +19,6 @@ Aloxaf/fzf-tab
 
 # Syntax highlighting
 zdharma-continuum/fast-syntax-highlighting
+
+# AWS plugin
+ohmyzsh/ohmyzsh path:plugins/aws
