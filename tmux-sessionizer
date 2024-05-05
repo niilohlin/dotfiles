@@ -7,7 +7,14 @@ else
         selected=$(find ~/workspace/quickbit ~/dotfiles ~/workspace ~ -mindepth 1 -maxdepth 1 -type d | fzf)
     else
         : ${tmp_dir:=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER}
-        selected=$({ tmux list-sessions -F '#{session_name}'; find ~/workspace/quickbit ~/dotfiles ~/workspace ~ -mindepth 1 -maxdepth 1 -type d } | fzf-popup-window " go to session ")
+        sessions=$(tmux list-sessions)
+        session_names=$(echo $sessions | cut -d ':' -f 1)
+        directories=$(find ~/workspace/quickbit ~/dotfiles ~/workspace ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names$")
+
+        selected=$({ echo $sessions; echo $directories } | fzf-tmux -p --preview 'tmux list-windows -t $(echo {} | cut -d ":" -f 1) 2> /dev/null || ls -l {}')
+        if [[ ! -d $selected ]]; then
+            selected=$(echo $selected | cut -d ':' -f 1)
+        fi
     fi
 fi
 

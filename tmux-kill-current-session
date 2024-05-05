@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+
+current_session=$(tmux display-message -p -F '#S')
+last_session=$(tmux display-message -p -F '#{client_last_session}')
+
+# switch to last session
+
+if [ "$current_session" != "$last_session" ]; then
+  tmux switch-client -t "$last_session"
+else
+  tmux new-session
+fi
+
+tmux kill-session -t "$current_session"
