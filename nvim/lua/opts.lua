@@ -26,8 +26,8 @@ opt.wildmode = { "longest", "full" }
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
--- opt.cmdheight = 2
-opt.cmdheight = 0          -- Hide the command line when not needed.
+opt.cmdheight = 2
+-- opt.cmdheight = 0          -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
 local tabLength = 4
