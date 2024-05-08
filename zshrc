@@ -33,6 +33,7 @@ alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
 alias free='free -m'                      # show sizes in MB
 alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph"
+alias gap="git add -p"
 alias gs="git status";
 alias gd="git diff";
 alias gdc="git diff --cached";

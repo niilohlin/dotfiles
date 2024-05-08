@@ -20,6 +20,8 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Normal remaps
+vim.keymap.set('n', '<C-U>', '<C-U>zz') -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
 
 vim.keymap.set('n', '<leader>n', ':cnext <cr>')  -- Go to next error
 vim.keymap.set('n', '<leader>p', ':cprev <cr>')  -- Go to previous issueerror

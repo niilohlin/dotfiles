@@ -63,7 +63,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = "swift",
   callback = function()
     vim.cmd([[ call clearmatches() ]])
-    vim.cmd([[ call matchadd('ColorColumn', '\%121v, 100) ]])
+    vim.cmd([[ call matchadd('ColorColumn', '\%121v', 100) ]])
     vim.cmd([[ setlocal textwidth=120 ]])
   end,
 }

@@ -55,8 +55,11 @@ return require('lazy').setup({
   -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
   'nvim-treesitter/playground',
 
-  -- Monokai with treesitter support
-  'tanvirtin/monokai.nvim',
+  -- -- Monokai with treesitter support
+  -- 'tanvirtin/monokai.nvim',
+
+  -- Gruvbox with treesitter support
+  'ellisonleao/gruvbox.nvim',
 
   -- Yaml utility, helps distinguish indendation
   'Einenlum/yaml-revealer',
