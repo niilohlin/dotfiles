@@ -1,5 +1,23 @@
 require('telescope').load_extension('fzf')
 
+
+local my_prefix = function(fs_entry)
+  if fs_entry.fs_type == 'directory' then
+    return 'D ', 'MiniFilesDirectory'
+  elseif fs_entry.fs_type == 'file' then
+    return 'F ', 'MiniFilesFile'
+  end
+  return MiniFiles.default_prefix(fs_entry)
+end
+
+require('mini.files').setup({ content = { prefix = my_prefix } })
+
+-- require('mini.files').setup({ content = { prefix = function() end } })
+
+-- Disable netrw.
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- `:` cmdline setup.
 local cmp = require('cmp')
 cmp.setup.cmdline(':', {

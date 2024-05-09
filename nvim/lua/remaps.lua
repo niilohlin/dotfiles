@@ -26,7 +26,7 @@ vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
 vim.keymap.set('n', '<leader>n', ':cnext <cr>')  -- Go to next error
 vim.keymap.set('n', '<leader>p', ':cprev <cr>')  -- Go to previous issueerror
 
-vim.keymap.set('n', '<leader>j', ':Explore<CR>') -- Show current file in NerdTree
+vim.keymap.set('n', '<leader>j', ':lua MiniFiles.open()<CR>') -- Show current file in mini.files
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 

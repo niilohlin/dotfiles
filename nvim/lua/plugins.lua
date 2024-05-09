@@ -55,9 +55,6 @@ return require('lazy').setup({
   -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
   'nvim-treesitter/playground',
 
-  -- -- Monokai with treesitter support
-  -- 'tanvirtin/monokai.nvim',
-
   -- Gruvbox with treesitter support
   'ellisonleao/gruvbox.nvim',
 
@@ -84,6 +81,9 @@ return require('lazy').setup({
 
   -- -- Targets, text objects, adds objects like ci,
   -- 'wellle/targets.vim',
+
+  -- File explorer
+  { 'echasnovski/mini.files', version = '*' },
 
   -- Indent object, adds objects like ai "delete around indent"
   'michaeljsmith/vim-indent-object',

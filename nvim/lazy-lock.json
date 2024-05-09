@@ -8,6 +8,7 @@
   "fzf.vim": { "branch": "master", "commit": "45d96c9cb1213204479593236dfabf911ff15443" },
   "gruvbox.nvim": { "branch": "main", "commit": "c442515506caa166118e157980f62a9ac24fa8c3" },
   "lazy.nvim": { "branch": "main", "commit": "31ddbea7c10b6920c9077b66c97951ca8682d5c8" },
+  "mini.files": { "branch": "main", "commit": "eab771c69b787a3f042dc6505d15613c282aa786" },
   "nvim-cmp": { "branch": "main", "commit": "ce16de5665c766f39c271705b17fff06f7bcb84f" },
   "nvim-lint": { "branch": "master", "commit": "f098232d70cebe90e27404928c9bc19ca7a5a7b5" },
   "nvim-lspconfig": { "branch": "master", "commit": "ed8b8a15acc441aec669f97d75f2c1f2ac8c8aa5" },
