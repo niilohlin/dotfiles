@@ -509,24 +509,8 @@ lspconfig.pylsp.setup {
 --   capabilities = capabilities
 -- }
 
-vim.api.nvim_create_autocmd('QuickFixCmdPre', {
-  callback = function()
-    Clear_signs()
-  end,
-})
-
-vim.api.nvim_create_autocmd('QuickFixCmdPost', {
-  callback = function()
-    Place_signs()
-  end,
-})
-local number_of_signs = 0
-
-vim.fn.sign_define('QFErr', { text = '!', texthl = 'QFErrMarker' })
-vim.fn.sign_define('QFWarn', { text = '?', texthl = 'QFWarnMarker' })
-vim.fn.sign_define('QFInfo', { text = 'i', texthl = 'QFInfoMarker' })
-
-function Place_signs()
+local ns_id = vim.api.nvim_create_namespace('quickfix diagnostics')
+local function set_qf_diagnostics()
   local errors = vim.fn.getqflist()
   for _, error in ipairs(errors) do
     if error.bufnr < 0 then
@@ -539,21 +523,37 @@ function Place_signs()
     if error.lnum == 0 then
       goto continue
     end
-    number_of_signs = number_of_signs + 1
-    if error.type == 'E' then
-      vim.fn.sign_place(number_of_signs, 'QFErr', 'QFErr', bufname, { lnum = error.lnum })
-    elseif error.type == 'W' then
-      vim.fn.sign_place(number_of_signs, 'QFWarn', 'QFWarn', bufname, { lnum = error.lnum })
-    else
-      vim.fn.sign_place(number_of_signs, 'QFInfo', 'QFInfo', bufname, { lnum = error.lnum })
-    end
+    vim.diagnostic.set(ns_id, error.bufnr, vim.diagnostic.fromqflist({error}))
     ::continue::
   end
 end
 
-function Clear_signs()
-  vim.fn.sign_unplace('QFErr')
-  vim.fn.sign_unplace('QFWarn')
-  vim.fn.sign_unplace('QFInfo')
-  vim.api.nvim_command('redraw!')
+local function clear_qf_diagnostics()
+  local errors = vim.fn.getqflist()
+  for _, error in ipairs(errors) do
+    if error.bufnr < 0 then
+      goto continue
+    end
+    local bufname = vim.fn.bufname(error.bufnr)
+    if bufname == "" then
+      goto continue
+    end
+    if error.lnum == 0 then
+      goto continue
+    end
+    vim.diagnostic.set(ns_id, error.bufnr, {})
+    ::continue::
+  end
 end
+
+vim.api.nvim_create_autocmd('QuickFixCmdPost', {
+  callback = function()
+    set_qf_diagnostics()
+  end,
+})
+
+vim.api.nvim_create_autocmd('QuickFixCmdPre', {
+  callback = function()
+    clear_qf_diagnostics()
+  end,
+})
