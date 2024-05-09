@@ -1,5 +1,3 @@
-local HOME = os.getenv("HOME")
-local cmd = vim.cmd
 
 local opt = vim.opt
 -- options
@@ -40,7 +38,7 @@ opt.listchars = { tab = '› ', trail = '·', extends = '›', precedes = '‹',
 opt.whichwrap = opt.whichwrap + "<,>,[,],l,h" -- Move cursor to next line when typing these characters.
 
 opt.undofile = true -- Use undo file
-opt.undodir = HOME .. '/.config/nvim/undodir' -- Set undo dir
+opt.undodir = os.getenv("HOME") .. '/.config/nvim/undodir' -- Set undo dir
 opt.scrolloff = 1 -- Scroll 1 line before cursor hits bottom
 opt.mouse = "" -- Disable mouse
 
