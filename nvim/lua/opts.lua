@@ -11,7 +11,6 @@ opt.smartcase = true                 -- But not when searching with uppercase le
 opt.smartindent = true               -- Language-aware indent
 opt.autowrite = true                 -- Automatically write on :n and :p
 opt.autoread = true                  -- Automatically read file from disk on change
-cmd([[ au CursorHold * checktime ]]) -- When idle, check time and check if the file has changed from disk
 opt.number = true                    -- Set line numbers
 opt.relativenumber = true            -- Set relative line numbers
 opt.backspace = "2"                  -- Make backspace work as expected in insert mode.

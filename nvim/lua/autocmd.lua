@@ -104,3 +104,12 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     vim.cmd([[ set ft=log ]])
   end,
 })
+
+vim.api.nvim_create_autocmd({ "CursorHold" }, {
+  callback = function()
+    -- check if the current buffer is a terminal
+    if vim.fn.getbufvar(vim.fn.bufnr("%"), "&buftype") ~= 'nofile' then
+      vim.api.nvim_command("checktime")
+    end
+  end,
+})

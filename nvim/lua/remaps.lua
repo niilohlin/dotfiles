@@ -23,9 +23,6 @@ vim.keymap.set('n', 'Q', '<nop>')
 vim.keymap.set('n', '<C-U>', '<C-U>zz') -- Move cursor to middle of screen
 vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
 
-vim.keymap.set('n', '<leader>n', ':cnext <cr>')  -- Go to next error
-vim.keymap.set('n', '<leader>p', ':cprev <cr>')  -- Go to previous issueerror
-
 vim.keymap.set('n', '<leader>j', ':lua MiniFiles.open()<CR>') -- Show current file in mini.files
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
@@ -80,3 +77,9 @@ vim.keymap.set('n', '}', '<nop>')
 vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
 
 vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste
+
+vim.keymap.set('n', ']c', ':cnext<CR>')                 -- Go to next quickfix
+vim.keymap.set('n', '[c', ':cprev<CR>')                 -- Go to previous quickfix
+
+vim.keymap.set('n', ']b', ':bnext<CR>')                 -- Go to next buffer
+vim.keymap.set('n', '[b', ':bprev<CR>')                 -- Go to previous buffer

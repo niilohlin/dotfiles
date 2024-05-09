@@ -157,3 +157,12 @@ lspconfig.pylsp.setup {
   },
   capabilities = capabilities
 }
+
+-- lspconfig.ruff_lsp.setup {
+--   init_options = {
+--     settings = {
+--       args = {},
+--     }
+--   },
+--   capabilities = capabilities
+-- }
