@@ -29,6 +29,7 @@
   "vim-log-highlighting": { "branch": "master", "commit": "1037e26f3120e6a6a2c0c33b14a84336dee2a78f" },
   "vim-markdown": { "branch": "master", "commit": "a657e697376909c41475a686eeef7fc7a4972d94" },
   "vim-pbxproj": { "branch": "master", "commit": "d230f2cc70faf47ec0b97ffefa8235991438aca8" },
+  "vim-qf-diagnostics": { "branch": "master", "commit": "b5d6d02fb6827140a7eea80ca36d90f2fd4da5f2" },
   "vim-repeat": { "branch": "master", "commit": "24afe922e6a05891756ecf331f39a1f6743d3d5a" },
   "vim-surround": { "branch": "master", "commit": "3d188ed2113431cf8dac77be61b842acb64433d9" },
   "vim-tmux-navigator": { "branch": "master", "commit": "a26954a585b02a2ac02f87145e204f8798a7cbc2" },

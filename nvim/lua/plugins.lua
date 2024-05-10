@@ -56,12 +56,14 @@ require('lazy').setup({
   'nvim-treesitter/playground',
 
   -- Gruvbox with treesitter support
-  { 'ellisonleao/gruvbox.nvim',
-  config = function()
-    local gruvbox = require('gruvbox')
-    gruvbox.setup()
-    vim.cmd('colorscheme gruvbox')
-  end },
+  {
+    'ellisonleao/gruvbox.nvim',
+    config = function()
+      local gruvbox = require('gruvbox')
+      gruvbox.setup()
+      vim.cmd('colorscheme gruvbox')
+    end
+  },
 
   -- Yaml utility, helps distinguish indendation
   'Einenlum/yaml-revealer',
@@ -103,18 +105,20 @@ require('lazy').setup({
             ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
           },
         },
-        -- you can enable a preset for easier configuration
         presets = {
-          bottom_search = true, -- use a classic bottom cmdline for search
-          command_palette = true, -- position the cmdline and popupmenu together
+          command_palette = true,       -- position the cmdline and popupmenu together
           long_message_to_split = true, -- long messages will be sent to a split
-          inc_rename = false, -- enables an input dialog for inc-rename.nvim
-          lsp_doc_border = false, -- add a border to hover docs and signature help
+          inc_rename = false,           -- enables an input dialog for inc-rename.nvim
+          lsp_doc_border = false,       -- add a border to hover docs and signature help
         },
         cmdline = {
           format = {
-            cmdline = { icon = ":" }
-          }
+            cmdline = { icon = ":" },
+            search_down = { icon = "/" },
+            search_up = { icon = "?" },
+            lua = { icon = "lua" },
+            help = { icon = "help" },
+          },
         }
       })
     end
@@ -171,8 +175,8 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Normal remaps
-vim.keymap.set('n', '<C-U>', '<C-U>zz') -- Move cursor to middle of screen
-vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-U>', '<C-U>zz')                       -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-D>', '<C-D>zz')                       -- Move cursor to middle of screen
 
 vim.keymap.set('n', '<leader>j', ':lua MiniFiles.open()<CR>') -- Show current file in mini.files
 
@@ -182,7 +186,7 @@ vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 
 vim.keymap.set('v', '<leader>p', '"_dP')                    -- Paste without copying to clipboard
 
-vim.api.nvim_command('command W w')                             -- Remap :W to :w
+vim.api.nvim_command('command W w')                         -- Remap :W to :w
 
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<leader>ff', builtin.find_files, {}) -- find files
@@ -229,11 +233,11 @@ vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence o
 
 vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste
 
-vim.keymap.set('n', ']c', ':cnext<CR>')                 -- Go to next quickfix
-vim.keymap.set('n', '[c', ':cprev<CR>')                 -- Go to previous quickfix
+vim.keymap.set('n', ']c', ':cnext<CR>')            -- Go to next quickfix
+vim.keymap.set('n', '[c', ':cprev<CR>')            -- Go to previous quickfix
 
-vim.keymap.set('n', ']b', ':bnext<CR>')                 -- Go to next buffer
-vim.keymap.set('n', '[b', ':bprev<CR>')                 -- Go to previous buffer
+vim.keymap.set('n', ']b', ':bnext<CR>')            -- Go to next buffer
+vim.keymap.set('n', '[b', ':bprev<CR>')            -- Go to previous buffer
 
 ---
 
@@ -294,12 +298,12 @@ require('nvim-treesitter.configs').setup {
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.make = {
   install_info = {
-    url = "~/workspace/tree-sitter-make/",      -- local path or git repo
-    files = { "src/parser.c" },                 -- note that some parsers also require src/scanner.c or src/scanner.cc
+    url = "~/workspace/tree-sitter-make/",  -- local path or git repo
+    files = { "src/parser.c" },             -- note that some parsers also require src/scanner.c or src/scanner.cc
     -- optional entries:
-    branch = "main",                            -- default branch in case of git repo if different from master
-    generate_requires_npm = false,              -- if stand-alone parser without npm dependencies
-    requires_generate_from_grammar = false,     -- if folder contains pre-generated src/parser.c
+    branch = "main",                        -- default branch in case of git repo if different from master
+    generate_requires_npm = false,          -- if stand-alone parser without npm dependencies
+    requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
   }
 }
 
@@ -486,6 +490,7 @@ cmp.setup.cmdline({ '/', '?' }, {
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
+
 lspconfig.lua_ls.setup {
   capabilities = capabilities,
   on_attach = function(client, bufnr)
@@ -500,6 +505,9 @@ lspconfig.lua_ls.setup {
         -- Get the language server to recognize the `vim` global
         globals = { 'vim' },
       },
+      workspace = {
+        library = { [vim.fn.expand('$VIMRUNTIME/lua')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true },
+      }
     },
   },
 }
@@ -562,7 +570,7 @@ local function set_qf_diagnostics()
     if error.lnum == 0 then
       goto continue
     end
-    vim.diagnostic.set(ns_id, error.bufnr, vim.diagnostic.fromqflist({error}))
+    vim.diagnostic.set(ns_id, error.bufnr, vim.diagnostic.fromqflist({ error }))
     ::continue::
   end
 end
