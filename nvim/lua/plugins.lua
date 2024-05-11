@@ -4,9 +4,6 @@ require('lazy').setup({
   -- Git status of changed lines to the left.
   'airblade/vim-gitgutter',
 
-  -- Git plugin
-  'tpope/vim-fugitive',
-
   -- Syntax highlight for pbxproj (TODO switch to treesitter later)
   'cfdrake/vim-pbxproj',
 
@@ -22,8 +19,14 @@ require('lazy').setup({
   -- nvim Commenter/uncommenter (replaces vim-commentary)
   { 'numToStr/Comment.nvim',                    lazy = false },
 
+  -- Git plugin
+  'tpope/vim-fugitive',
+
   -- Change surrounding.
   'tpope/vim-surround',
+
+  -- [q and ]q to navigate quickfix list for example
+  'tpope/vim-unimpaired',
 
   -- Reapeat surround commands
   'tpope/vim-repeat',
@@ -64,6 +67,9 @@ require('lazy').setup({
       vim.cmd('colorscheme gruvbox')
     end
   },
+
+  -- Integrate quickfix list with diagnostics
+  { dir = '~/personal/qflist-diagnostics.nvim' },
 
   -- Yaml utility, helps distinguish indendation
   'Einenlum/yaml-revealer',
@@ -151,9 +157,6 @@ require('lazy').setup({
     -- install jsregexp (optional!).
     -- build = "make install_jsregexp"
   },
-
-  -- Linter spawner and parser
-  'mfussenegger/nvim-lint',
 })
 
 -- Set leader to <space>
@@ -232,18 +235,35 @@ vim.keymap.set('n', '}', '<nop>')
 vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
 
 vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste
-
-vim.keymap.set('n', ']c', ':cnext<CR>')            -- Go to next quickfix
-vim.keymap.set('n', '[c', ':cprev<CR>')            -- Go to previous quickfix
-
-vim.keymap.set('n', ']b', ':bnext<CR>')            -- Go to next buffer
-vim.keymap.set('n', '[b', ':bprev<CR>')            -- Go to previous buffer
-
 ---
 
 require('lint').linters_by_ft = {
   markdown = { 'vale', },
+  cpp = { 'make_lint' }
 }
+
+require('lint').linters.make_lint = {
+  cmd = 'make lint',
+  stdin = false,
+  append_fname = true,
+  args = {},
+  stream = { 'stout', 'stderr' },
+  ignore_exitcode = false,
+  env = nil,
+  parser = require('lint.parser').from_pattern(
+    [[(%d+):(%d+):(%d+):(%w+):(.*)]],
+    { 'row', 'col', 'end_col', 'severity', 'message' },
+    {
+      severities = {
+        error = 'error',
+        warning = 'warning',
+        info = 'info',
+        hint = 'hint',
+      },
+    }
+  ),
+}
+
 
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
   callback = function()
@@ -506,7 +526,7 @@ lspconfig.lua_ls.setup {
         globals = { 'vim' },
       },
       workspace = {
-        library = { [vim.fn.expand('$VIMRUNTIME/lua')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true },
+        library = {[vim.fn.expand('$VIMRUNTIME/lua')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true},
       }
     },
   },
@@ -556,51 +576,3 @@ lspconfig.pylsp.setup {
 --   capabilities = capabilities
 -- }
 
-local ns_id = vim.api.nvim_create_namespace('quickfix diagnostics')
-local function set_qf_diagnostics()
-  local errors = vim.fn.getqflist()
-  for _, error in ipairs(errors) do
-    if error.bufnr < 0 then
-      goto continue
-    end
-    local bufname = vim.fn.bufname(error.bufnr)
-    if bufname == "" then
-      goto continue
-    end
-    if error.lnum == 0 then
-      goto continue
-    end
-    vim.diagnostic.set(ns_id, error.bufnr, vim.diagnostic.fromqflist({ error }))
-    ::continue::
-  end
-end
-
-local function clear_qf_diagnostics()
-  local errors = vim.fn.getqflist()
-  for _, error in ipairs(errors) do
-    if error.bufnr < 0 then
-      goto continue
-    end
-    local bufname = vim.fn.bufname(error.bufnr)
-    if bufname == "" then
-      goto continue
-    end
-    if error.lnum == 0 then
-      goto continue
-    end
-    vim.diagnostic.set(ns_id, error.bufnr, {})
-    ::continue::
-  end
-end
-
-vim.api.nvim_create_autocmd('QuickFixCmdPost', {
-  callback = function()
-    set_qf_diagnostics()
-  end,
-})
-
-vim.api.nvim_create_autocmd('QuickFixCmdPre', {
-  callback = function()
-    clear_qf_diagnostics()
-  end,
-})
