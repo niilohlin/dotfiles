@@ -81,7 +81,7 @@ require('lazy').setup({
   'hrsh7th/cmp-cmdline',
 
   -- Make anything into an lsp, like linter output etc.
-  'mfussenegger/nvim-lint',
+  'nvimtools/none-ls.nvim',
 
   -- LSP setup
   'neovim/nvim-lspconfig',
@@ -181,7 +181,7 @@ vim.keymap.set('n', 'Q', '<nop>')
 vim.keymap.set('n', '<C-U>', '<C-U>zz')                       -- Move cursor to middle of screen
 vim.keymap.set('n', '<C-D>', '<C-D>zz')                       -- Move cursor to middle of screen
 
-vim.keymap.set('n', '<leader>j', ':lua MiniFiles.open()<CR>') -- Show current file in mini.files
+vim.keymap.set('n', '<leader>j', ":lua MiniFiles.open(vim.fn.expand('%:p') )<CR>") -- Show current file in mini.files
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 
@@ -235,40 +235,15 @@ vim.keymap.set('n', '}', '<nop>')
 vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
 
 vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste
+
 ---
 
-require('lint').linters_by_ft = {
-  markdown = { 'vale', },
-  cpp = { 'make_lint' }
-}
+local null_ls = require('null-ls')
 
-require('lint').linters.make_lint = {
-  cmd = 'make lint',
-  stdin = false,
-  append_fname = true,
-  args = {},
-  stream = { 'stout', 'stderr' },
-  ignore_exitcode = false,
-  env = nil,
-  parser = require('lint.parser').from_pattern(
-    [[(%d+):(%d+):(%d+):(%w+):(.*)]],
-    { 'row', 'col', 'end_col', 'severity', 'message' },
-    {
-      severities = {
-        error = 'error',
-        warning = 'warning',
-        info = 'info',
-        hint = 'hint',
-      },
-    }
-  ),
-}
-
-
-vim.api.nvim_create_autocmd({ "BufWritePost" }, {
-  callback = function()
-    require('lint').try_lint()
-  end,
+null_ls.setup({
+  sources = {
+    null_ls.builtins.diagnostics.checkmake,
+  },
 })
 
 ---
@@ -348,9 +323,9 @@ require('telescope').load_extension('fzf')
 
 local my_prefix = function(fs_entry)
   if fs_entry.fs_type == 'directory' then
-    return 'D ', 'MiniFilesDirectory'
+    return '/ ', 'MiniFilesDirectory'
   elseif fs_entry.fs_type == 'file' then
-    return 'F ', 'MiniFilesFile'
+    return '- ', 'MiniFilesFile'
   end
   return MiniFiles.default_prefix(fs_entry)
 end

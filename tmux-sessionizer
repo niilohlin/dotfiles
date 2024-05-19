@@ -10,7 +10,7 @@ else
         sessions=$(tmux list-sessions)
         # session names with a dollar appended at the end of it so that we can filter them out from the directories
         session_names=$(echo $sessions | sed -n 's/^\([^:]*\):.*/\1$/p')
-        directories=$(find ~/workspace/quickbit ~/dotfiles ~/work ~/personal ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names")
+        directories=$(find ~/work/quickbit ~/dotfiles ~/work ~/personal ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names")
 
         selected=$({ echo $sessions; echo $directories } | fzf-tmux -p --preview 'tmux list-windows -t $(echo {} | cut -d ":" -f 1) 2> /dev/null || ls -l {}')
         if [[ ! -d $selected ]]; then
