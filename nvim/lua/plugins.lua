@@ -16,9 +16,6 @@ require('lazy').setup({
   -- Markdown utility, go to link and so on.
   'plasticboy/vim-markdown',
 
-  -- nvim Commenter/uncommenter (replaces vim-commentary)
-  { 'numToStr/Comment.nvim',                    lazy = false },
-
   -- Git plugin
   'tpope/vim-fugitive',
 
@@ -385,10 +382,6 @@ require('nvim-treesitter.configs').setup {
   },
 }
 
-
-require('Comment').setup()
-
----
 
 -- Setup language servers.
 local lspconfig = require('lspconfig')
