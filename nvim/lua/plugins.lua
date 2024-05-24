@@ -35,13 +35,56 @@ require('lazy').setup({
   'junegunn/fzf.vim',
 
   -- project wide search, requires ripgrep
-  { 'nvim-telescope/telescope.nvim',            dependencies = { 'nvim-lua/plenary.nvim' } },
+  {
+    'nvim-telescope/telescope.nvim',
+    event = 'VimEnter',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      -- fzf native plugin, make it possible to fuzzy search in telescope
+      { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+    },
+    config = function()
+      require('telescope').setup()
+      local builtin = require('telescope.builtin')
+      vim.keymap.set('n', '<leader>sf', builtin.find_files, {}) -- find files
+      vim.keymap.set('n', '<leader>sr', builtin.resume, {})     -- Resume last telescope search
+      vim.keymap.set('n', '<leader>sg', builtin.live_grep, {})  -- live grep
+      vim.keymap.set('n', '<Leader>sF', function()
+        builtin.find_files({ hidden = true })
+      end, {})                                                        -- live find files (including hidden files)
+      vim.keymap.set('n', '<leader>so', builtin.oldfiles)             -- Open old files
+      vim.keymap.set('n', '<leader>ss', builtin.lsp_document_symbols) -- live find symbols
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, {})          -- Open buffers
 
-  -- fzf native plugin, make it possible to fuzzy search in telescope
-  { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
+      local function has_workspace_symbols()
+        if not vim.lsp.buf_get_clients() then
+          return false
+        end
+
+        for _, client in ipairs(vim.lsp.get_active_clients()) do
+          if client.server_capabilities.workspaceSymbolProvider then
+            return true
+          end
+        end
+
+        return false
+      end
+
+      vim.keymap.set('n', '<leader>o', function()
+        if has_workspace_symbols() then
+          builtin.lsp_dynamic_workspace_symbols()
+        elseif vim.fn.filereadable('tags') then
+          builtin.tags()
+        else
+          builtin.live_grep()
+        end
+      end, {}) -- Search for tags or lsp workspace symbols
+    end
+
+  },
 
   -- Silversearcher plugin (search project)
-  { 'kelly-lin/telescope-ag',                   dependencies = { 'nvim-telescope/telescope.nvim' } },
+  { 'kelly-lin/telescope-ag',                  dependencies = { 'nvim-telescope/telescope.nvim' } },
 
   -- Disable search highlight after searching.
   'romainl/vim-cool',
@@ -139,7 +182,7 @@ require('lazy').setup({
   -- 'wellle/targets.vim',
 
   -- File explorer
-  { 'echasnovski/mini.files',                  version = '*' },
+  { 'echasnovski/mini.files', version = '*' },
 
   -- Indent object, adds objects like ai "delete around indent"
   'michaeljsmith/vim-indent-object',
@@ -190,9 +233,6 @@ require('lazy').setup({
 
 })
 
--- Set leader to <space>
-vim.g.mapleader = ' '
-
 -- Insert remaps.
 -- Makes so that indendation does not disappear when entering a new line.
 vim.keymap.set('i', '<CR>', '<CR>a<BS>')
@@ -222,42 +262,7 @@ vim.keymap.set('v', '<leader>p', '"_dP')                    -- Paste without cop
 
 vim.api.nvim_command('command W w')                         -- Remap :W to :w
 
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>ff', builtin.find_files, {}) -- find files
-vim.keymap.set('n', '<leader>fr', builtin.resume, {})     -- Resume last telescope search
-vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})  -- live grep
-vim.keymap.set('n', '<Leader>fF', function()
-  builtin.find_files({ hidden = true })
-end, {})                                                        -- live find files (including hidden files)
-vim.keymap.set('n', '<Leader>fo', builtin.oldfiles)             -- Open old files
-vim.keymap.set('n', '<leader>fs', builtin.lsp_document_symbols) -- live find symbols
-vim.keymap.set('n', '<leader>fb', builtin.buffers, {})          -- Open buffers
-vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>')        -- Replace Returns:  Replace all \n with new lines
-
-local function has_workspace_symbols()
-  if not vim.lsp.buf_get_clients() then
-    return false
-  end
-
-  for _, client in ipairs(vim.lsp.get_active_clients()) do
-    if client.server_capabilities.workspaceSymbolProvider then
-      return true
-    end
-  end
-
-  return false
-end
-
-vim.keymap.set('n', '<leader>o', function()
-  if has_workspace_symbols() then
-    builtin.lsp_dynamic_workspace_symbols()
-  elseif vim.fn.filereadable('tags') then
-    builtin.tags()
-  else
-    builtin.live_grep()
-  end
-end, {}) -- Search for tags or lsp workspace symbols
-
+vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>')    -- Replace Returns:  Replace all \n with new lines
 
 -- disable { and } to untrain myself from using them
 vim.keymap.set('n', '{', '<nop>')
