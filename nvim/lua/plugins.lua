@@ -72,7 +72,13 @@ require('lazy').setup({
   'Einenlum/yaml-revealer',
 
   -- Github Copilot, AI completions
-  'github/copilot.vim',
+  {
+    'github/copilot.vim',
+    config = function()
+      vim.g.copilot_no_tab_map = true
+      vim.api.nvim_set_keymap('i', '<Right>', 'copilot#Accept("<CR>")', { expr = true, silent = true })
+    end
+  },
 
   -- Better wild menu, while typing
   'hrsh7th/cmp-cmdline',
@@ -99,6 +105,8 @@ require('lazy').setup({
       "MunifTanjim/nui.nvim",
     },
     config = function()
+      -- if we are using noice and nui, we don't need the statusline
+      vim.opt.cmdheight = 1
       require("noice").setup({
         lsp = {
           -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
@@ -127,14 +135,11 @@ require('lazy').setup({
     end
   },
 
-  -- Vim trainer
-  'ThePrimeagen/vim-be-good',
-
-  -- -- Targets, text objects, adds objects like ci,
+  -- Targets, text objects, adds objects like ci,
   -- 'wellle/targets.vim',
 
   -- File explorer
-  { 'echasnovski/mini.files', version = '*' },
+  { 'echasnovski/mini.files',                  version = '*' },
 
   -- Indent object, adds objects like ai "delete around indent"
   'michaeljsmith/vim-indent-object',
@@ -154,6 +159,35 @@ require('lazy').setup({
     -- install jsregexp (optional!).
     -- build = "make install_jsregexp"
   },
+
+  -- Improved completions, completions for argument signature
+  'hrsh7th/cmp-nvim-lsp-signature-help',
+
+  -- Complete from buffer
+  'hrsh7th/cmp-buffer',
+
+  -- Formatting manager. Makes sure that we can autoformat on save without leaving the buffer changed
+  -- when exiting
+  {
+    'stevearc/conform.nvim',
+    config = function()
+      require('conform').setup {
+        format_on_save = {
+          -- These options will be passed to conform.format()
+          timeout_ms = 500,
+          lsp_fallback = true,
+        },
+        formatters_by_ft = {
+          lua = { "stylua" },
+          -- Conform will run multiple formatters sequentially
+          python = { "isort", "black" },
+          -- Use a sub-list to run only the first available formatter
+          javascript = { { "prettierd", "prettier" } },
+        },
+      }
+    end
+  },
+
 })
 
 -- Set leader to <space>
@@ -175,8 +209,8 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Normal remaps
-vim.keymap.set('n', '<C-U>', '<C-U>zz')                       -- Move cursor to middle of screen
-vim.keymap.set('n', '<C-D>', '<C-D>zz')                       -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-U>', '<C-U>zz')                                            -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-D>', '<C-D>zz')                                            -- Move cursor to middle of screen
 
 vim.keymap.set('n', '<leader>j', ":lua MiniFiles.open(vim.fn.expand('%:p') )<CR>") -- Show current file in mini.files
 
@@ -303,7 +337,7 @@ vim.treesitter.language.register('make', 'make')
 
 parser_config.pbxproj = {
   install_info = {
-    url = '/Users/niilohlin/workspace/tree-sitter-pbxproj',
+    url = '/Users/niilohlin/personal/tree-sitter-pbxproj',
     files = { 'src/parser.c' },
     branch = 'main',
     generate_requires_npm = false,
@@ -320,9 +354,9 @@ require('telescope').load_extension('fzf')
 
 local my_prefix = function(fs_entry)
   if fs_entry.fs_type == 'directory' then
-    return '/ ', 'MiniFilesDirectory'
+    return '', 'MiniFilesDirectory'
   elseif fs_entry.fs_type == 'file' then
-    return '- ', 'MiniFilesFile'
+    return '', 'MiniFilesFile'
   end
   return MiniFiles.default_prefix(fs_entry)
 end
@@ -392,8 +426,6 @@ lspconfig.lua_ls.setup {}
 -- Global mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
-vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
 -- Use LspAttach autocommand to only map the following keys
@@ -448,20 +480,12 @@ cmp.setup({
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+    ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
   }),
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
-  }, {
-    { name = 'buffer' },
-  })
-})
-
--- Set configuration for specific filetype.
-cmp.setup.filetype('gitcommit', {
-  sources = cmp.config.sources({
-    { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+    { name = 'nvim_lsp_signature_help' },
   }, {
     { name = 'buffer' },
   })
@@ -478,24 +502,25 @@ cmp.setup.cmdline({ '/', '?' }, {
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
-
 lspconfig.lua_ls.setup {
   capabilities = capabilities,
-  on_attach = function(client, bufnr)
-    -- vim.api.nvim_create_autocmd("BufWritePre", {
-    --   buffer = bufnr,
-    --   command = "lua vim.lsp.buf.format { async = false }",
-    -- })
-  end,
   settings = {
     Lua = {
+      runtime = { version = 'LuaJIT' },
       diagnostics = {
-        -- Get the language server to recognize the `vim` global
-        globals = { 'vim' },
       },
       workspace = {
-        library = {[vim.fn.expand('$VIMRUNTIME/lua')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true, [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true},
-      }
+        checkThirdParty = false,
+        library = {
+          [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+          [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+          [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true,
+          [unpack(vim.api.nvim_list_runtime_paths())] = true,
+        },
+      },
+      completion = {
+        callSnippet = 'Replace',
+      },
     },
   },
 }
@@ -534,13 +559,3 @@ lspconfig.pylsp.setup {
   },
   capabilities = capabilities
 }
-
--- lspconfig.ruff_lsp.setup {
---   init_options = {
---     settings = {
---       args = {},
---     }
---   },
---   capabilities = capabilities
--- }
-
