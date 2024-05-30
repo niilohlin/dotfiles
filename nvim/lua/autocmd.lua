@@ -98,10 +98,27 @@ vim.api.nvim_create_autocmd({ "BufNewFile" }, {
   command = "0r ~/.config/nvim/skeleton/skeleton.rb",
 })
 
+
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.log", "*.logs", "*.out", "output" },
   callback = function()
     vim.cmd([[ set ft=log ]])
+
+    local output_file = os.getenv("NVIM_OUTPUT_FILE")
+    if output_file then
+      vim.keymap.set('v', '<leader>v', function()
+        vim.cmd("normal! \"vy")
+        local selected_text = vim.fn.getreg("v")
+        local file = io.open(output_file, "a")
+        if file == nil then
+          print("Could not open file: " .. output_file)
+          return
+        end
+        file:write(selected_text)
+        file:close()
+        vim.cmd("q")
+      end)
+    end
   end,
 })
 
