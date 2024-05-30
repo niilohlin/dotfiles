@@ -19,14 +19,28 @@ require('lazy').setup({
   -- Git plugin
   'tpope/vim-fugitive',
 
-  -- Change surrounding.
-  'tpope/vim-surround',
+  { -- Surround plugin, adds text objects like ci" and so on.
+    'echasnovski/mini.surround',
+    config = function()
+      require('mini.surround').setup {
+        mappings = {
+          add = '',            -- Add surrounding in Normal and Visual modes
+          delete = 'ds',       -- Delete surrounding
+          replace = 'cs',      -- Replace surrounding
+
+          find = '',           -- Find surrounding (to the right)
+          find_left = '',      -- Find surrounding (to the left)
+          highlight = '',      -- Highlight surrounding
+          update_n_lines = '', -- Update `n_lines`
+          suffix_last = '',    -- Suffix to search with "prev" method
+          suffix_next = '',    -- Suffix to search with "next" method
+        },
+      }
+    end
+  },
 
   -- [q and ]q to navigate quickfix list for example
   'tpope/vim-unimpaired',
-
-  -- Reapeat surround commands
-  'tpope/vim-repeat',
 
   -- -- fuzzy file finder
   'junegunn/fzf',
@@ -123,11 +137,17 @@ require('lazy').setup({
     end
   },
 
-  -- Better wild menu, while typing
-  'hrsh7th/cmp-cmdline',
-
-  -- Make anything into an lsp, like linter output etc.
-  'nvimtools/none-ls.nvim',
+  { -- Make anything into an lsp, like linter output etc.
+    'nvimtools/none-ls.nvim',
+    config = function()
+      local null_ls = require('null-ls')
+      null_ls.setup({
+        sources = {
+          null_ls.builtins.diagnostics.checkmake,
+        },
+      })
+    end
+  },
 
   -- LSP setup
   'neovim/nvim-lspconfig',
@@ -182,32 +202,92 @@ require('lazy').setup({
   -- 'wellle/targets.vim',
 
   -- File explorer
-  { 'echasnovski/mini.files', version = '*' },
+  {
+    'stevearc/oil.nvim',
+    event = 'VimEnter',
+    config = function()
+      require('oil').setup()
+      vim.keymap.set('n', '<leader>j', ":Oil<CR>") -- Show current file in mini.files
+      -- Disable netrw. We don't need it if we use oil
+      vim.g.loaded_netrw = 1
+      vim.g.loaded_netrwPlugin = 1
+    end
+  },
 
   -- Indent object, adds objects like ai "delete around indent"
   'michaeljsmith/vim-indent-object',
 
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10
-  { 'hrsh7th/nvim-cmp' },
+  {
+    'hrsh7th/nvim-cmp',
+    dependencies = {
+      'hrsh7th/cmp-buffer',                  -- Complete from buffer
+      'hrsh7th/cmp-nvim-lsp-signature-help', -- Improved completions, completions for argument signature
+      'hrsh7th/cmp-cmdline',                 -- Better wild menu, while typing
+      'hrsh7th/cmp-nvim-lsp',                -- LSP completion
+      {                                      -- Nvim api completion
+        'hrsh7th/cmp-nvim-lua',
+        config = function()
+          require('cmp_nvim_lsp').setup {
+            sources = {
+              { name = 'nvim_lua' },
+            }
+          }
+        end
+      },
+    },
+    config = function()
+      -- Set up nvim-cmp.
+      local cmp = require('cmp')
+      cmp.setup({
+        snippet = {
+          -- REQUIRED - you must specify a snippet engine
+          expand = function(args)
+            require('luasnip').lsp_expand(args.body)
+          end,
+        },
+        window = {
+          -- completion = cmp.config.window.bordered(),
+          -- documentation = cmp.config.window.bordered(),
+        },
+        mapping = cmp.mapping.preset.insert({
+          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+          ['<C-f>'] = cmp.mapping.scroll_docs(4),
+          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-e>'] = cmp.mapping.abort(),
+          ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        }),
+        sources = cmp.config.sources({
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' },
+          { name = 'nvim_lsp_signature_help' },
+        }, {
+          { name = 'buffer' },
+        })
+      })
 
-  -- LSP completion
-  'hrsh7th/cmp-nvim-lsp',
+      -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+      cmp.setup.cmdline({ '/', '?' }, {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = {
+          { name = 'buffer' }
+        }
+      })
+    end
+  },
 
   -- snip manager required by nvim-cmp
   {
+    dependencies = {
+      'saadparwaiz1/cmp_luasnip'
+    },
     'L3MON4D3/LuaSnip',
     -- follow latest release.
     version = 'v2.3.0',
     -- install jsregexp (optional!).
     -- build = "make install_jsregexp"
   },
-
-  -- Improved completions, completions for argument signature
-  'hrsh7th/cmp-nvim-lsp-signature-help',
-
-  -- Complete from buffer
-  'hrsh7th/cmp-buffer',
 
   -- Formatting manager. Makes sure that we can autoformat on save without leaving the buffer changed
   -- when exiting
@@ -226,6 +306,7 @@ require('lazy').setup({
           python = { "isort", "black" },
           -- Use a sub-list to run only the first available formatter
           javascript = { { "prettierd", "prettier" } },
+          json = { "jq" },
         },
       }
     end
@@ -249,10 +330,8 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Normal remaps
-vim.keymap.set('n', '<C-U>', '<C-U>zz')                                            -- Move cursor to middle of screen
-vim.keymap.set('n', '<C-D>', '<C-D>zz')                                            -- Move cursor to middle of screen
-
-vim.keymap.set('n', '<leader>j', ":lua MiniFiles.open(vim.fn.expand('%:p') )<CR>") -- Show current file in mini.files
+vim.keymap.set('n', '<C-U>', '<C-U>zz') -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
 
 vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
 
@@ -268,19 +347,13 @@ vim.keymap.set('n', '<leader>rr', ':%s/\\\\n/\\r/g<CR>')    -- Replace Returns: 
 vim.keymap.set('n', '{', '<nop>')
 vim.keymap.set('n', '}', '<nop>')
 
-vim.keymap.set('n', 'g[', ':ijump <C-R><C-W><CR>') -- Jump to first occurrence of word under cursor
+vim.keymap.set('n', 'g[', function()
+  local word_under_cursor = vim.fn.expand('<cword>')
+  vim.cmd('execute "keepjumps normal! gg"')
+  vim.cmd('/' .. word_under_cursor)
+end)
 
-vim.keymap.set('n', 'gp', '`[v`]')                 -- Select last paste
-
----
-
-local null_ls = require('null-ls')
-
-null_ls.setup({
-  sources = {
-    null_ls.builtins.diagnostics.checkmake,
-  },
-})
+vim.keymap.set('n', 'gp', '`[v`]') -- Select last paste
 
 ---
 
@@ -326,10 +399,10 @@ require('nvim-treesitter.configs').setup {
   },
 }
 
-local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
 parser_config.make = {
   install_info = {
-    url = "~/workspace/tree-sitter-make/",  -- local path or git repo
+    url = "~/personal/tree-sitter-make/",   -- local path or git repo
     files = { "src/parser.c" },             -- note that some parsers also require src/scanner.c or src/scanner.cc
     -- optional entries:
     branch = "main",                        -- default branch in case of git repo if different from master
@@ -342,7 +415,7 @@ vim.treesitter.language.register('make', 'make')
 
 parser_config.pbxproj = {
   install_info = {
-    url = '/Users/niilohlin/personal/tree-sitter-pbxproj',
+    url = '~/personal/tree-sitter-pbxproj',
     files = { 'src/parser.c' },
     branch = 'main',
     generate_requires_npm = false,
@@ -356,23 +429,6 @@ vim.treesitter.language.register('pbxproj', 'pbxproj')
 ---
 
 require('telescope').load_extension('fzf')
-
-local my_prefix = function(fs_entry)
-  if fs_entry.fs_type == 'directory' then
-    return '', 'MiniFilesDirectory'
-  elseif fs_entry.fs_type == 'file' then
-    return '', 'MiniFilesFile'
-  end
-  return MiniFiles.default_prefix(fs_entry)
-end
-
-require('mini.files').setup({ content = { prefix = my_prefix } })
-
--- require('mini.files').setup({ content = { prefix = function() end } })
-
--- Disable netrw.
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
 
 require('nvim-treesitter.configs').setup {
   textobjects = {
@@ -394,6 +450,7 @@ require('nvim-treesitter.configs').setup {
         ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
         -- You can also use captures from other query groups like `locals.scm`
         ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
+        ['is'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
       },
       -- You can choose the select mode (default is charwise 'v')
       --
@@ -467,43 +524,6 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
--- Set up nvim-cmp.
-local cmp = require('cmp')
-cmp.setup({
-  snippet = {
-    -- REQUIRED - you must specify a snippet engine
-    expand = function(args)
-      require('luasnip').lsp_expand(args.body)
-    end,
-  },
-  window = {
-    -- completion = cmp.config.window.bordered(),
-    -- documentation = cmp.config.window.bordered(),
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-  }),
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-    { name = 'nvim_lsp_signature_help' },
-  }, {
-    { name = 'buffer' },
-  })
-})
-
--- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-cmp.setup.cmdline({ '/', '?' }, {
-  mapping = cmp.mapping.preset.cmdline(),
-  sources = {
-    { name = 'buffer' }
-  }
-})
-
 -- Set up lspconfig.
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
@@ -549,6 +569,7 @@ lspconfig.eslint.setup({
 })
 
 lspconfig.pylsp.setup {
+  root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
   settings = {
     pylsp = {
       plugins = {
@@ -564,3 +585,20 @@ lspconfig.pylsp.setup {
   },
   capabilities = capabilities
 }
+
+function ReviewerMode()
+  vim.o.statuscolumn = "%s %l %r"
+end
+
+local client = vim.lsp.start_client {
+  name = "ctags-lsp",
+  cmd = { "/Users/niilohlin/personal/ctags-lsp/main.py" },
+  on_attach = function(client, bufnr)
+    print("ctags-lsp attached")
+  end,
+  capabilities = capabilities,
+}
+
+if not client then
+  print("ctags-lsp failed to start")
+end
