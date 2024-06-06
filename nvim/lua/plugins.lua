@@ -1,4 +1,6 @@
--- lazy.nvim package manager
+function ReviewerMode()
+  vim.o.statuscolumn = "%s %l %r"
+end
 
 require('lazy').setup({
   -- Git status of changed lines to the left.
@@ -59,6 +61,7 @@ require('lazy').setup({
     },
     config = function()
       require('telescope').setup()
+      require('telescope').load_extension('fzf')
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>sf', builtin.find_files, {}) -- find files
       vim.keymap.set('n', '<leader>sr', builtin.resume, {})     -- Resume last telescope search
@@ -69,6 +72,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>so', builtin.oldfiles)             -- Open old files
       vim.keymap.set('n', '<leader>ss', builtin.lsp_document_symbols) -- live find symbols
       vim.keymap.set('n', '<leader>sb', builtin.buffers, {})          -- Open buffers
+      vim.keymap.set('n', '<leader>st', builtin.tags)                 -- live find symbols
 
       local function has_workspace_symbols()
         if not vim.lsp.buf_get_clients() then
@@ -103,8 +107,119 @@ require('lazy').setup({
   -- Disable search highlight after searching.
   'romainl/vim-cool',
 
-  -- Better syntax highlighting
-  'nvim-treesitter/nvim-treesitter',
+  { -- Semantic syntax highlighting
+    'nvim-treesitter/nvim-treesitter',
+    config = function()
+      local configs = require('nvim-treesitter.configs')
+      configs.setup {
+        ensure_installed = {
+          'bash',
+          'c',
+          'cpp',
+          'css',
+          'javascript',
+          'json',
+          'lua',
+          'python',
+          'regex',
+          'rust',
+          'toml',
+          'yaml',
+          'swift',
+          'haskell',
+        },
+
+        sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
+
+        ignore_install = {},  -- List of parsers to ignore installing
+
+        auto_install = false, -- Automatically install missing parsers when entering buffer
+
+        highlight = {
+          enable = true, -- `false` will disable the whole extension
+          disable = {},  -- list of language that will be disabled
+
+          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+          -- Using this option may slow down your editor, and you may see some duplicate highlights.
+          -- Instead of true it can also be a list of languages
+          additional_vim_regex_highlighting = false,
+        },
+        textobjects = {
+          select = {
+            enable = true,
+
+            -- Automatically jump forward to textobj, similar to targets.vim
+            lookahead = true,
+
+            keymaps = {
+              -- You can use the capture groups defined in textobjects.scm
+              ['af'] = '@function.outer',
+              ['if'] = '@function.inner',
+              ['ac'] = '@class.outer',
+              ['aa'] = '@parameter.outer',
+              ['ia'] = '@parameter.inner',
+              -- You can optionally set descriptions to the mappings (used in the desc parameter of
+              -- nvim_buf_set_keymap) which plugins like which-key display
+              ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
+              -- You can also use captures from other query groups like `locals.scm`
+              ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
+              ['is'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
+            },
+            -- You can choose the select mode (default is charwise 'v')
+            --
+            -- Can also be a function which gets passed a table with the keys
+            -- * query_string: eg '@function.inner'
+            -- * method: eg 'v' or 'o'
+            -- and should return the mode ('v', 'V', or '<c-v>') or a table
+            -- mapping query_strings to modes.
+            selection_modes = {
+              ['@parameter.outer'] = 'v', -- charwise
+              ['@function.outer'] = 'V',  -- linewise
+              ['@class.outer'] = '<c-v>', -- blockwise
+            },
+            -- If you set this to `true` (default is `false`) then any textobject is
+            -- extended to include preceding or succeeding whitespace. Succeeding
+            -- whitespace has priority in order to act similarly to eg the built-in
+            -- `ap`.
+            --
+            -- Can also be a function which gets passed a table with the keys
+            -- * query_string: eg '@function.inner'
+            -- * selection_mode: eg 'v'
+            -- and should return true or false
+            include_surrounding_whitespace = true,
+          },
+        },
+      }
+
+      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
+      parser_config.make = {
+        install_info = {
+          url = "~/personal/tree-sitter-make/",   -- local path or git repo
+          files = { "src/parser.c" },             -- note that some parsers also require src/scanner.c or src/scanner.cc
+          -- optional entries:
+          branch = "main",                        -- default branch in case of git repo if different from master
+          generate_requires_npm = false,          -- if stand-alone parser without npm dependencies
+          requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
+        }
+      }
+
+      vim.treesitter.language.register('make', 'make')
+
+      parser_config.pbxproj = {
+        install_info = {
+          url = '~/personal/tree-sitter-pbxproj',
+          files = { 'src/parser.c' },
+          branch = 'main',
+          generate_requires_npm = false,
+          requires_generate_from_grammar = false,
+        },
+        filetype = 'pbxproj',
+      }
+
+      vim.treesitter.language.register('pbxproj', 'pbxproj')
+    end
+  },
 
   -- Treesitter text objects
   'nvim-treesitter/nvim-treesitter-textobjects',
@@ -149,12 +264,145 @@ require('lazy').setup({
     end
   },
 
-  -- LSP setup
-  'neovim/nvim-lspconfig',
+
+  { -- LSP setup
+    'neovim/nvim-lspconfig',
+    config = function()
+      -- Setup language servers.
+      local lspconfig = require('lspconfig')
+      lspconfig.sourcekit.setup {}
+      lspconfig.marksman.setup {}
+      lspconfig.lua_ls.setup {}
+
+      -- Global mappings.
+      -- See `:help vim.diagnostic.*` for documentation on any of the below functions
+      vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
+      vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
+
+      -- Use LspAttach autocommand to only map the following keys
+      -- after the language server attaches to the current buffer
+      vim.api.nvim_create_autocmd('LspAttach', {
+        group = vim.api.nvim_create_augroup('UserLspConfig', {}),
+        callback = function(ev)
+          -- Enable completion triggered by <c-x><c-o>
+          vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
+
+          -- Buffer local mappings.
+          -- See `:help vim.lsp.*` for documentation on any of the below functions
+          local opts = { buffer = ev.buf }
+          local builtin = require('telescope.builtin')
+          vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+          vim.keymap.set('n', 'gd', builtin.lsp_definitions, opts)
+          vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+          vim.keymap.set('n', 'gi', builtin.lsp_implementations, opts)
+          vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+          vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
+          vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
+          -- Search workspace symbols
+          vim.keymap.set('n', '<leader>t', vim.lsp.buf.workspace_symbol, opts)
+          vim.keymap.set('n', '<leader>wl', function()
+            print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+          end, opts)
+          vim.keymap.set('n', '<leader>D', builtin.lsp_type_definitions, opts)
+          vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+          vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
+          vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
+          vim.keymap.set('n', '<leader>=', function()
+            vim.lsp.buf.format { async = true }
+          end, opts)
+        end,
+      })
+
+      -- Set up lspconfig.
+      local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+      lspconfig.lua_ls.setup {
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            runtime = { version = 'LuaJIT' },
+            diagnostics = {
+            },
+            workspace = {
+              checkThirdParty = false,
+              library = {
+                [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+                [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+                [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true,
+                [unpack(vim.api.nvim_list_runtime_paths())] = true,
+              },
+            },
+            completion = {
+              callSnippet = 'Replace',
+            },
+          },
+        },
+      }
+
+      lspconfig.sourcekit.setup {
+        capabilities = capabilities
+      }
+
+      lspconfig.tsserver.setup {
+        capabilities = capabilities
+      }
+
+      lspconfig.eslint.setup({
+        capabilities = capabilities,
+        on_attach = function(client, bufnr)
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            buffer = bufnr,
+            command = "EslintFixAll",
+          })
+        end,
+      })
+
+      lspconfig.pylsp.setup {
+        root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+        settings = {
+          pylsp = {
+            plugins = {
+              pylint = { enabled = true, executable = 'pylint' },
+              mypy = { enabled = true, executable = 'mypy' },
+              rope = { enabled = true, executable = 'rope' },
+              rope_autoimport = {
+                enabled = true,
+                completions = { enabled = true }
+              },
+            }
+          }
+        },
+        capabilities = capabilities
+      }
+
+      -- local client = vim.lsp.start_client {
+      --   -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+      --   name = "ctags-lsp",
+      --   cmd = { "/Users/niilohlin/personal/ctags-lsp/src/main.py" },
+      --   on_attach = function(client, bufnr)
+      --   end,
+      --   capabilities = capabilities,
+      -- }
+      --
+      -- if not client then
+      --   print("ctags-lsp failed to start")
+      -- end
+      --
+      -- vim.api.nvim_create_autocmd('BufEnter', {
+      --   pattern = '*.py',
+      --   callback = function()
+      --     vim.lsp.buf_attach_client(0, client)
+      --   end,
+      -- })
+    end
+  },
 
   -- Generic log highlighting
   'MTDL9/vim-log-highlighting',
 
+  -- Vim open file including line number, including gF
+  -- $ vim file.py:10
+  'wsdjeg/vim-fetch',
 
   -- cmd line in the middle of the screen
   {
@@ -221,10 +469,12 @@ require('lazy').setup({
   -- This version is compatible with nvim 0.9.x master requires 0.10
   {
     'hrsh7th/nvim-cmp',
+    event = 'InsertEnter',
     dependencies = {
       'hrsh7th/cmp-buffer',                  -- Complete from buffer
       'hrsh7th/cmp-nvim-lsp-signature-help', -- Improved completions, completions for argument signature
       'hrsh7th/cmp-cmdline',                 -- Better wild menu, while typing
+      'hrsh7th/cmp-path',                    -- Complete file paths
       'hrsh7th/cmp-nvim-lsp',                -- LSP completion
       {                                      -- Nvim api completion
         'hrsh7th/cmp-nvim-lua',
@@ -240,11 +490,12 @@ require('lazy').setup({
     config = function()
       -- Set up nvim-cmp.
       local cmp = require('cmp')
+      local luasnip = require('luasnip')
       cmp.setup({
         snippet = {
           -- REQUIRED - you must specify a snippet engine
           expand = function(args)
-            require('luasnip').lsp_expand(args.body)
+            luasnip.lsp_expand(args.body)
           end,
         },
         window = {
@@ -252,11 +503,20 @@ require('lazy').setup({
           -- documentation = cmp.config.window.bordered(),
         },
         mapping = cmp.mapping.preset.insert({
-          ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
+          ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-p>'] = cmp.mapping.select_prev_item(),
           ['<C-e>'] = cmp.mapping.abort(),
           ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+          ['<C-l>'] = cmp.mapping(function()
+            if luasnip.expand_or_locally_jumpable() then
+              luasnip.expand_or_jump()
+            end
+          end, { 'i', 's' }),
+          ['<C-h>'] = cmp.mapping(function()
+            if luasnip.locally_jumpable(-1) then
+              luasnip.jump(-1)
+            end
+          end, { 'i', 's' }),
         }),
         sources = cmp.config.sources({
           { name = 'nvim_lsp' },
@@ -280,7 +540,13 @@ require('lazy').setup({
   -- snip manager required by nvim-cmp
   {
     dependencies = {
-      'saadparwaiz1/cmp_luasnip'
+      'saadparwaiz1/cmp_luasnip',
+      { -- Pre made snippets
+        'rafamadriz/friendly-snippets',
+        config = function()
+          require('luasnip.loaders.from_vscode').lazy_load()
+        end,
+      },
     },
     'L3MON4D3/LuaSnip',
     -- follow latest release.
@@ -311,7 +577,6 @@ require('lazy').setup({
       }
     end
   },
-
 })
 
 -- Insert remaps.
@@ -330,10 +595,8 @@ vim.keymap.set('i', '<C-O>', '<C-X><C-O>')
 vim.keymap.set('n', 'Q', '<nop>')
 
 -- Normal remaps
-vim.keymap.set('n', '<C-U>', '<C-U>zz') -- Move cursor to middle of screen
-vim.keymap.set('n', '<C-D>', '<C-D>zz') -- Move cursor to middle of screen
-
-vim.keymap.set('n', '<leader>K', vim.diagnostic.open_float)
+vim.keymap.set('n', '<C-U>', '<C-U>zz')                     -- Move cursor to middle of screen
+vim.keymap.set('n', '<C-D>', '<C-D>zz')                     -- Move cursor to middle of screen
 
 vim.keymap.set('n', '<leader>gd', ':GitGutterUndoHunk<CR>') -- Discard git
 
@@ -354,251 +617,3 @@ vim.keymap.set('n', 'g[', function()
 end)
 
 vim.keymap.set('n', 'gp', '`[v`]') -- Select last paste
-
----
-
-require('nvim-treesitter.configs').setup {
-  ensure_installed = {
-    'bash',
-    'c',
-    'cpp',
-    'css',
-    'javascript',
-    'json',
-    'lua',
-    'python',
-    'regex',
-    'rust',
-    'toml',
-    'yaml',
-    'swift',
-    'haskell',
-  },
-
-  -- Install languages synchronously (only applied to `ensure_installed`)
-  sync_install = false,
-
-  -- List of parsers to ignore installing
-  ignore_install = {},
-
-  -- Automatically install missing parsers when entering buffer
-  auto_install = false,
-
-  highlight = {
-    -- `false` will disable the whole extension
-    enable = true,
-
-    -- list of language that will be disabled
-    disable = {},
-
-    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-    -- Using this option may slow down your editor, and you may see some duplicate highlights.
-    -- Instead of true it can also be a list of languages
-    additional_vim_regex_highlighting = false,
-  },
-}
-
-local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-parser_config.make = {
-  install_info = {
-    url = "~/personal/tree-sitter-make/",   -- local path or git repo
-    files = { "src/parser.c" },             -- note that some parsers also require src/scanner.c or src/scanner.cc
-    -- optional entries:
-    branch = "main",                        -- default branch in case of git repo if different from master
-    generate_requires_npm = false,          -- if stand-alone parser without npm dependencies
-    requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
-  }
-}
-
-vim.treesitter.language.register('make', 'make')
-
-parser_config.pbxproj = {
-  install_info = {
-    url = '~/personal/tree-sitter-pbxproj',
-    files = { 'src/parser.c' },
-    branch = 'main',
-    generate_requires_npm = false,
-    requires_generate_from_grammar = false,
-  },
-  filetype = 'pbxproj',
-}
-
-vim.treesitter.language.register('pbxproj', 'pbxproj')
-
----
-
-require('telescope').load_extension('fzf')
-
-require('nvim-treesitter.configs').setup {
-  textobjects = {
-    select = {
-      enable = true,
-
-      -- Automatically jump forward to textobj, similar to targets.vim
-      lookahead = true,
-
-      keymaps = {
-        -- You can use the capture groups defined in textobjects.scm
-        ['af'] = '@function.outer',
-        ['if'] = '@function.inner',
-        ['ac'] = '@class.outer',
-        ['aa'] = '@parameter.outer',
-        ['ia'] = '@parameter.inner',
-        -- You can optionally set descriptions to the mappings (used in the desc parameter of
-        -- nvim_buf_set_keymap) which plugins like which-key display
-        ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
-        -- You can also use captures from other query groups like `locals.scm`
-        ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
-        ['is'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
-      },
-      -- You can choose the select mode (default is charwise 'v')
-      --
-      -- Can also be a function which gets passed a table with the keys
-      -- * query_string: eg '@function.inner'
-      -- * method: eg 'v' or 'o'
-      -- and should return the mode ('v', 'V', or '<c-v>') or a table
-      -- mapping query_strings to modes.
-      selection_modes = {
-        ['@parameter.outer'] = 'v', -- charwise
-        ['@function.outer'] = 'V',  -- linewise
-        ['@class.outer'] = '<c-v>', -- blockwise
-      },
-      -- If you set this to `true` (default is `false`) then any textobject is
-      -- extended to include preceding or succeeding whitespace. Succeeding
-      -- whitespace has priority in order to act similarly to eg the built-in
-      -- `ap`.
-      --
-      -- Can also be a function which gets passed a table with the keys
-      -- * query_string: eg '@function.inner'
-      -- * selection_mode: eg 'v'
-      -- and should return true or false
-      include_surrounding_whitespace = true,
-    },
-  },
-}
-
-
--- Setup language servers.
-local lspconfig = require('lspconfig')
-lspconfig.sourcekit.setup {}
-lspconfig.marksman.setup {}
-lspconfig.lua_ls.setup {}
-
--- Global mappings.
--- See `:help vim.diagnostic.*` for documentation on any of the below functions
-vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
-
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
-vim.api.nvim_create_autocmd('LspAttach', {
-  group = vim.api.nvim_create_augroup('UserLspConfig', {}),
-  callback = function(ev)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.bo[ev.buf].omnifunc = 'v:lua.vim.lsp.omnifunc'
-
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
-    local builtin = require('telescope.builtin')
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gd', builtin.lsp_definitions, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    vim.keymap.set('n', 'gi', builtin.lsp_implementations, opts)
-    vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-    vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-    vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-    -- Search workspace symbols
-    vim.keymap.set('n', '<leader>t', vim.lsp.buf.workspace_symbol, opts)
-    vim.keymap.set('n', '<leader>wl', function()
-      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-    end, opts)
-    vim.keymap.set('n', '<leader>D', builtin.lsp_type_definitions, opts)
-    vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-    vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
-    vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
-    vim.keymap.set('n', '<leader>=', function()
-      vim.lsp.buf.format { async = true }
-    end, opts)
-  end,
-})
-
--- Set up lspconfig.
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-lspconfig.lua_ls.setup {
-  capabilities = capabilities,
-  settings = {
-    Lua = {
-      runtime = { version = 'LuaJIT' },
-      diagnostics = {
-      },
-      workspace = {
-        checkThirdParty = false,
-        library = {
-          [vim.fn.expand('$VIMRUNTIME/lua')] = true,
-          [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
-          [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true,
-          [unpack(vim.api.nvim_list_runtime_paths())] = true,
-        },
-      },
-      completion = {
-        callSnippet = 'Replace',
-      },
-    },
-  },
-}
-
-lspconfig.sourcekit.setup {
-  capabilities = capabilities
-}
-
-lspconfig.tsserver.setup {
-  capabilities = capabilities
-}
-
-lspconfig.eslint.setup({
-  capabilities = capabilities,
-  on_attach = function(client, bufnr)
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      command = "EslintFixAll",
-    })
-  end,
-})
-
-lspconfig.pylsp.setup {
-  root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-  settings = {
-    pylsp = {
-      plugins = {
-        pylint = { enabled = true, executable = 'pylint' },
-        mypy = { enabled = true, executable = 'mypy' },
-        rope = { enabled = true, executable = 'rope' },
-        rope_autoimport = {
-          enabled = true,
-          completions = { enabled = true }
-        },
-      }
-    }
-  },
-  capabilities = capabilities
-}
-
-function ReviewerMode()
-  vim.o.statuscolumn = "%s %l %r"
-end
-
-local client = vim.lsp.start_client {
-  name = "ctags-lsp",
-  cmd = { "/Users/niilohlin/personal/ctags-lsp/main.py" },
-  on_attach = function(client, bufnr)
-    print("ctags-lsp attached")
-  end,
-  capabilities = capabilities,
-}
-
-if not client then
-  print("ctags-lsp failed to start")
-end

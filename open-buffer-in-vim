@@ -30,5 +30,5 @@ tmux set-hook pane-died "run-shell '\
     tmux kill-window -t $WINDOW_ID;\
     tmux set-hook -u pane-died;\
     tmux set-window-option -t $CURRENT_WINDOW_ID remain-on-exit off;\
-    tmux send-keys -t $CURRENT_WINDOW_ID \$(<$NVIM_OUTPUT_FILE);\
+    tmux send-keys -t $CURRENT_WINDOW_ID \"\$(<$NVIM_OUTPUT_FILE)\";\
     '"
