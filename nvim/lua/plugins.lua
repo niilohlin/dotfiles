@@ -41,6 +41,15 @@ require('lazy').setup({
     end
   },
 
+  { -- Text objects plugin
+    dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
+    'echasnovski/mini.ai',
+    config = function()
+      require('mini.ai').setup {
+      }
+    end
+  },
+
   -- [q and ]q to navigate quickfix list for example
   'tpope/vim-unimpaired',
 
@@ -68,11 +77,12 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sg', builtin.live_grep, {})  -- live grep
       vim.keymap.set('n', '<Leader>sF', function()
         builtin.find_files({ hidden = true })
-      end, {})                                                        -- live find files (including hidden files)
-      vim.keymap.set('n', '<leader>so', builtin.oldfiles)             -- Open old files
-      vim.keymap.set('n', '<leader>ss', builtin.lsp_document_symbols) -- live find symbols
-      vim.keymap.set('n', '<leader>sb', builtin.buffers, {})          -- Open buffers
-      vim.keymap.set('n', '<leader>st', builtin.tags)                 -- live find symbols
+      end, {})                                                                 -- live find files (including hidden files)
+      vim.keymap.set('n', '<leader>so', builtin.oldfiles)                      -- Open old files
+      vim.keymap.set('n', '<leader>ss', builtin.lsp_document_symbols)          -- live find symbols
+      vim.keymap.set('n', '<leader>sb', builtin.buffers, {})                   -- Open buffers
+      vim.keymap.set('n', '<leader>st', builtin.tags)                          -- live find symbols
+      vim.keymap.set('n', '<leader>ws', builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       local function has_workspace_symbols()
         if not vim.lsp.buf_get_clients() then
@@ -156,12 +166,12 @@ require('lazy').setup({
               -- You can use the capture groups defined in textobjects.scm
               ['af'] = '@function.outer',
               ['if'] = '@function.inner',
-              ['ac'] = '@class.outer',
+              ['ak'] = '@class.outer',
               ['aa'] = '@parameter.outer',
               ['ia'] = '@parameter.inner',
               -- You can optionally set descriptions to the mappings (used in the desc parameter of
               -- nvim_buf_set_keymap) which plugins like which-key display
-              ['ic'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
+              ['ik'] = { query = '@class.inner', desc = 'Select inner part of a class region' },
               -- You can also use captures from other query groups like `locals.scm`
               ['as'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
               ['is'] = { query = '@scope', query_group = 'locals', desc = 'Select language scope' },
@@ -221,9 +231,6 @@ require('lazy').setup({
     end
   },
 
-  -- Treesitter text objects
-  'nvim-treesitter/nvim-treesitter-textobjects',
-
   -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
   'nvim-treesitter/playground',
 
@@ -266,14 +273,14 @@ require('lazy').setup({
 
 
   { -- LSP setup
+    dependencies = {
+      -- Mason makes sure that LSPs are installed
+      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+      'williamboman/mason-lspconfig.nvim',
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
+    },
     'neovim/nvim-lspconfig',
     config = function()
-      -- Setup language servers.
-      local lspconfig = require('lspconfig')
-      lspconfig.sourcekit.setup {}
-      lspconfig.marksman.setup {}
-      lspconfig.lua_ls.setup {}
-
       -- Global mappings.
       -- See `:help vim.diagnostic.*` for documentation on any of the below functions
       vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
@@ -315,64 +322,65 @@ require('lazy').setup({
 
       -- Set up lspconfig.
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
+      local lspconfig = require('lspconfig')
 
-      lspconfig.lua_ls.setup {
-        capabilities = capabilities,
-        settings = {
-          Lua = {
-            runtime = { version = 'LuaJIT' },
-            diagnostics = {
-            },
-            workspace = {
-              checkThirdParty = false,
-              library = {
-                [vim.fn.expand('$VIMRUNTIME/lua')] = true,
-                [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
-                [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true,
-                [unpack(vim.api.nvim_list_runtime_paths())] = true,
+      local servers = {
+        lua_ls = {
+          capabilities = capabilities,
+          settings = {
+            Lua = {
+              runtime = { version = 'LuaJIT' },
+              diagnostics = {
               },
-            },
-            completion = {
-              callSnippet = 'Replace',
+              workspace = {
+                checkThirdParty = false,
+                library = {
+                  [vim.fn.expand('$VIMRUNTIME/lua')] = true,
+                  [vim.fn.expand('$VIMRUNTIME/lua/vim/lsp')] = true,
+                  [vim.fn.expand('$VIMRUNTIME/lua/vim')] = true,
+                  [unpack(vim.api.nvim_list_runtime_paths())] = true,
+                },
+              },
+              completion = {
+                callSnippet = 'Replace',
+              },
             },
           },
         },
-      }
 
-      lspconfig.sourcekit.setup {
-        capabilities = capabilities
-      }
-
-      lspconfig.tsserver.setup {
-        capabilities = capabilities
-      }
-
-      lspconfig.eslint.setup({
-        capabilities = capabilities,
-        on_attach = function(client, bufnr)
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            buffer = bufnr,
-            command = "EslintFixAll",
-          })
-        end,
-      })
-
-      lspconfig.pylsp.setup {
-        root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-        settings = {
-          pylsp = {
-            plugins = {
-              pylint = { enabled = true, executable = 'pylint' },
-              mypy = { enabled = true, executable = 'mypy' },
-              rope = { enabled = true, executable = 'rope' },
-              rope_autoimport = {
-                enabled = true,
-                completions = { enabled = true }
-              },
-            }
-          }
+        tsserver = {
+          capabilities = capabilities
         },
-        capabilities = capabilities
+
+        eslint = {
+          capabilities = capabilities,
+          on_attach = function(client, bufnr)
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              buffer = bufnr,
+              command = "EslintFixAll",
+            })
+          end,
+        },
+
+        pylsp = {
+          root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+          settings = {
+            pylsp = {
+              plugins = {
+                jedi_completion = { enabled = true, include_params = true },
+                pylint = { enabled = true, executable = 'pylint' },
+                mypy = { enabled = true, executable = 'mypy' },
+                rope = { enabled = true, executable = 'rope' },
+                rope_completion = { enabled = true },
+                rope_autoimport = {
+                  enabled = true,
+                  completions = { enabled = true }
+                },
+              }
+            }
+          },
+          capabilities = capabilities
+        }
       }
 
       -- local client = vim.lsp.start_client {
@@ -394,8 +402,23 @@ require('lazy').setup({
       --     vim.lsp.buf_attach_client(0, client)
       --   end,
       -- })
+
+      require('mason').setup()
+      local ensure_installed = vim.tbl_keys(servers or {})
+      require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+
+      require('mason-lspconfig').setup {
+        handlers = {
+          function(server_name)
+            local server = servers[server_name] or {}
+            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+            require('lspconfig')[server_name].setup(server)
+          end,
+        },
+      }
     end
   },
+
 
   -- Generic log highlighting
   'MTDL9/vim-log-highlighting',
@@ -455,7 +478,7 @@ require('lazy').setup({
     event = 'VimEnter',
     config = function()
       require('oil').setup()
-      vim.keymap.set('n', '<leader>j', ":Oil<CR>") -- Show current file in mini.files
+      vim.keymap.set('n', '<leader>j', ":Oil<CR>") -- Show current file in Oil
       -- Disable netrw. We don't need it if we use oil
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
@@ -617,3 +640,8 @@ vim.keymap.set('n', 'g[', function()
 end)
 
 vim.keymap.set('n', 'gp', '`[v`]') -- Select last paste
+
+-- map textobject to select the continuous comment with vim._comment.textobject
+local comment = require('vim._comment')
+vim.keymap.set('x', 'ic', comment.textobject)
+vim.keymap.set('o', 'ic', comment.textobject)

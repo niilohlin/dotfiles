@@ -92,6 +92,10 @@ fpath=(~/.zsh/completions $fpath)
 # zstyle ':completion:*' menu no # force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
 zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # use fzf-tmux-popup instead of fzf
 
+# Hit cmd+r to fzf search history
+export FZF_TMUX=1
+source <(fzf --zsh)
+
 export LANG=C
 export LC_ALL=en_US.UTF-8
 
