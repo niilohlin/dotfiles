@@ -79,7 +79,7 @@ require('lazy').setup({
         builtin.find_files({ hidden = true })
       end, {})                                                                 -- live find files (including hidden files)
       vim.keymap.set('n', '<leader>so', builtin.oldfiles)                      -- Open old files
-      vim.keymap.set('n', '<leader>ss', builtin.lsp_document_symbols)          -- live find symbols
+      vim.keymap.set('n', '<leader>ds', builtin.lsp_document_symbols)          -- live find symbols
       vim.keymap.set('n', '<leader>sb', builtin.buffers, {})                   -- Open buffers
       vim.keymap.set('n', '<leader>st', builtin.tags)                          -- live find symbols
       vim.keymap.set('n', '<leader>ws', builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
@@ -266,6 +266,18 @@ require('lazy').setup({
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
+          null_ls.builtins.diagnostics.pylint.with({
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
+          null_ls.builtins.diagnostics.mypy.with({
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
         },
       })
     end
@@ -324,6 +336,8 @@ require('lazy').setup({
       local capabilities = require('cmp_nvim_lsp').default_capabilities()
       local lspconfig = require('lspconfig')
 
+      lspconfig['sourcekit'].setup { capabilities = capabilities }
+
       local servers = {
         lua_ls = {
           capabilities = capabilities,
@@ -362,25 +376,9 @@ require('lazy').setup({
           end,
         },
 
-        pylsp = {
-          root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-          settings = {
-            pylsp = {
-              plugins = {
-                jedi_completion = { enabled = true, include_params = true },
-                pylint = { enabled = true, executable = 'pylint' },
-                mypy = { enabled = true, executable = 'mypy' },
-                rope = { enabled = true, executable = 'rope' },
-                rope_completion = { enabled = true },
-                rope_autoimport = {
-                  enabled = true,
-                  completions = { enabled = true }
-                },
-              }
-            }
-          },
+        jedi_language_server = {
           capabilities = capabilities
-        }
+        },
       }
 
       -- local client = vim.lsp.start_client {
