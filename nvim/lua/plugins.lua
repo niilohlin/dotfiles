@@ -26,7 +26,7 @@ require('lazy').setup({
     config = function()
       require('mini.surround').setup {
         mappings = {
-          add = '',            -- Add surrounding in Normal and Visual modes
+          add = 'gs',          -- Add surrounding in Normal and Visual modes
           delete = 'ds',       -- Delete surrounding
           replace = 'cs',      -- Replace surrounding
 
@@ -41,12 +41,18 @@ require('lazy').setup({
     end
   },
 
+  { -- Text object context, sticky headers.
+    'nvim-treesitter/nvim-treesitter-context',
+    config = function()
+      require('treesitter-context').setup()
+    end
+  },
+
   { -- Text objects plugin
     dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects' },
     'echasnovski/mini.ai',
     config = function()
-      require('mini.ai').setup {
-      }
+      require('mini.ai').setup()
     end
   },
 
@@ -73,8 +79,18 @@ require('lazy').setup({
       require('telescope').load_extension('fzf')
       local builtin = require('telescope.builtin')
       vim.keymap.set('n', '<leader>sf', builtin.find_files, {}) -- find files
-      vim.keymap.set('n', '<leader>sr', builtin.resume, {})     -- Resume last telescope search
-      vim.keymap.set('n', '<leader>sg', builtin.live_grep, {})  -- live grep
+      vim.keymap.set('v', '<leader>sf', function()
+        vim.cmd("normal! \"vy")
+        local selected_text = vim.fn.getreg("v")
+        builtin.find_files({ default_text = selected_text })
+      end)
+      vim.keymap.set('n', '<leader>sr', builtin.resume, {})    -- Resume last telescope search
+      vim.keymap.set('n', '<leader>sg', builtin.live_grep, {}) -- live grep
+      vim.keymap.set('v', '<leader>sg', function()
+        vim.cmd("normal! \"vy")
+        local selected_text = vim.fn.getreg("v")
+        builtin.live_grep({ default_text = selected_text })
+      end)
       vim.keymap.set('n', '<Leader>sF', function()
         builtin.find_files({ hidden = true })
       end, {})                                                                 -- live find files (including hidden files)
@@ -107,6 +123,16 @@ require('lazy').setup({
           builtin.live_grep()
         end
       end, {}) -- Search for tags or lsp workspace symbols
+
+      vim.keymap.set('n', 'gf', function ()
+        local file = vim.fn.expand('<cfile>')
+        if vim.fn.filereadable(file) == 1 then
+          vim.cmd('edit ' .. file)
+        else
+          builtin.find_files({ default_text = file })
+        end
+      end)
+
     end
 
   },
@@ -231,9 +257,6 @@ require('lazy').setup({
     end
   },
 
-  -- Treesitter playground, for interactive evaluation of the current syntax tree in tree-sitter
-  'nvim-treesitter/playground',
-
   -- Gruvbox with treesitter support
   {
     'ellisonleao/gruvbox.nvim',
@@ -310,25 +333,38 @@ require('lazy').setup({
           -- See `:help vim.lsp.*` for documentation on any of the below functions
           local opts = { buffer = ev.buf }
           local builtin = require('telescope.builtin')
-          vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-          vim.keymap.set('n', 'gd', builtin.lsp_definitions, opts)
-          vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-          vim.keymap.set('n', 'gi', builtin.lsp_implementations, opts)
-          vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
-          vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, opts)
-          vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, opts)
-          -- Search workspace symbols
-          vim.keymap.set('n', '<leader>t', vim.lsp.buf.workspace_symbol, opts)
-          vim.keymap.set('n', '<leader>wl', function()
-            print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-          end, opts)
-          vim.keymap.set('n', '<leader>D', builtin.lsp_type_definitions, opts)
-          vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-          vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, opts)
-          vim.keymap.set('n', 'gr', builtin.lsp_references, opts)
-          vim.keymap.set('n', '<leader>=', function()
-            vim.lsp.buf.format { async = true }
-          end, opts)
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+          -- Do not override the keymap if the lsp server does not support the method.
+          local function declare_method_if_supported(method, command, fn)
+            if client == nil then
+              return
+            end
+            if client.supports_method(method) then
+              vim.keymap.set('n', command, fn, opts)
+            end
+          end
+
+          declare_method_if_supported('textDocument/declaration', 'gD', vim.lsp.buf.declaration)
+          declare_method_if_supported('textDocument/definition', 'gd', builtin.lsp_definitions)
+          declare_method_if_supported('textDocument/hover', 'K', vim.lsp.buf.hover)
+          declare_method_if_supported('textDocument/implementation', 'gi', builtin.lsp_implementations)
+          declare_method_if_supported('textDocument/signatureHelp', '<C-k>', vim.lsp.buf.signature_help)
+          declare_method_if_supported('textDocument/references', 'gr', builtin.lsp_references)
+          declare_method_if_supported('textDocument/rename', '<leader>rn', vim.lsp.buf.rename)
+          declare_method_if_supported('textDocument/documentSymbol', '<leader>ds', builtin.lsp_document_symbols)
+          declare_method_if_supported('textDocument/codeAction', '<leader>ca', vim.lsp.buf.code_action)
+          declare_method_if_supported('textDocument/typeDefinition', '<leader>D', builtin.lsp_type_definitions)
+          declare_method_if_supported('workspace/symbol', '<leader>ws', builtin.lsp_workspace_symbols)
+
+          if client and client.supports_method('textDocument/codeAction') then
+            vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+          end
+          if client and client.supports_method('textDocument/formatting') then
+            vim.keymap.set('n', '<leader>=', function()
+              vim.lsp.buf.format { async = true }
+            end, opts)
+          end
         end,
       })
 
@@ -377,6 +413,10 @@ require('lazy').setup({
         },
 
         jedi_language_server = {
+          capabilities = capabilities
+        },
+
+        htmx = {
           capabilities = capabilities
         },
       }
@@ -585,17 +625,31 @@ require('lazy').setup({
         format_on_save = {
           -- These options will be passed to conform.format()
           timeout_ms = 500,
-          lsp_fallback = true,
+          lsp_fallback = false,
         },
         formatters_by_ft = {
           lua = { "stylua" },
           -- Conform will run multiple formatters sequentially
           python = { "isort", "black" },
           -- Use a sub-list to run only the first available formatter
-          javascript = { { "prettierd", "prettier" } },
+          -- javascript = { { "prettierd", "prettier" } },
           json = { "jq" },
         },
       }
+    end
+  },
+
+  { -- python refactor tools
+    'python-rope/ropevim',
+    config = function()
+      vim.keymap.set('n', '<leader>ai', ':RopeAutoImport<CR>')
+    end
+  },
+
+  { -- xcode build plugin
+    'wojciech-kulik/xcodebuild.nvim',
+    config = function()
+      require('xcodebuild').setup()
     end
   },
 })
@@ -643,3 +697,4 @@ vim.keymap.set('n', 'gp', '`[v`]') -- Select last paste
 local comment = require('vim._comment')
 vim.keymap.set('x', 'ic', comment.textobject)
 vim.keymap.set('o', 'ic', comment.textobject)
+

@@ -1,13 +1,8 @@
 
-source ~/.xvimrc
-
-nnoremap gcc :xccmd commentAndUncommentCurrentLines<CR>
-vnoremap gc :xccmd commentAndUncommentCurrentLines<CR>
-
-nmap L <Action>(Forward)
-nmap H <Action>(Back)
+nmap <C-i> <Action>(Forward)
+nmap <C-o> <Action>(Back)
 nmap gd <Action>(GotoDeclaration)
-nmap <space>k <Action>(ShowUsages)
+nmap gr <Action>(ShowUsages)
 
 nmap <space>o <Action>(SearchEverywhere)
 nmap <space>b <Action>(ToggleLineBreakpoint)
@@ -17,10 +12,7 @@ nmap <space>dr <Action>(Debug)
 nmap <space>n <Action>(GotoNextError)
 nmap <space>N <Action>(GotoPreviousError)
 
-"nnoremap <space>w /\u<cr>
-"nnoremap <space>e /\l\u<cr>
-
-nmap <space>f <Action>(ReformatCode)
+nmap <space>= <Action>(ReformatCode)
 
 "nnoremap <space>b ?\u<cr>
 nmap <space>b <Action>(ToggleLineBreakpoint)
@@ -30,9 +22,6 @@ nnoremap <space>a ma:s/, /,\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a
 
 inoremap <C-n> <ESC>:action HippieCompletion<CR>a
 inoremap <C-p> <ESC>:action HippieBackwardCompletion<CR>
-
-vnoremap H <ESC>H
-vnoremap V <ESC>V
 
 command W w
 

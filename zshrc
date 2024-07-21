@@ -94,7 +94,9 @@ zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup # use fzf-tmux-popup instead of f
 
 # Hit cmd+r to fzf search history
 export FZF_TMUX=1
-source <(fzf --zsh)
+# export FZF_TMUX_OPTS="-p "
+source ~/.zsh/fzf-history
+# source <(fzf --zsh)
 
 export LANG=C
 export LC_ALL=en_US.UTF-8

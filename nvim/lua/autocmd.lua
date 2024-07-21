@@ -22,7 +22,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx" },
+  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx" },
   callback = function()
     set_tab_length(2)
   end,
@@ -39,6 +39,13 @@ vim.api.nvim_create_autocmd(
   "FileType",
   { pattern = "markdown", command = "set spell nofoldenable" }
 )
+
+vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+  pattern = ".env.local",
+  callback = function()
+    vim.cmd([[ set filetype=sh ]])
+  end
+})
 
 -- Make Vim tmux runner compatible with python
 vim.api.nvim_create_autocmd(
@@ -76,12 +83,16 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 )
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = "yaml",
+  pattern = { "yaml", "yml" },
   callback = function()
     set_tab_length(2)
   end,
-}
-)
+})
+
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = { "*.html.j2" },
+  command = "set filetype=htmldjango",
+})
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "Fastfile", "Appfile", "Snapfile", "Scanfile", "Gymfile", "Matchfile", "Deliverfile", "Dangerfile", "*.gemspec" },

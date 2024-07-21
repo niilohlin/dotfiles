@@ -18,6 +18,7 @@ opt.cursorline = true     -- Show a horizontal line where the cursor is
 opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
 opt.wildmode = { "longest", "full" }
+-- opt.jumpoptions = "stack" -- Make jumps work as expected.
 
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 opt.updatetime = 500

@@ -22,3 +22,6 @@ zdharma-continuum/fast-syntax-highlighting
 
 # AWS plugin
 ohmyzsh/ohmyzsh path:plugins/aws
+
+# Yarn completions
+chrisands/zsh-yarn-completions
