@@ -333,12 +333,51 @@ require('lazy').setup({
         end
       end, {}) -- Search for tags or lsp workspace symbols
 
+
+      -- Open file under cursor, if it's unique, or it can be found in the current directory
+      -- otherwise open telescope
       vim.keymap.set('n', 'gf', function ()
         local file = vim.fn.expand('<cfile>')
         if vim.fn.filereadable(file) == 1 then
           vim.cmd('edit ' .. file)
         else
-          builtin.find_files({ default_text = file })
+          vim.fn.jobstart(
+          'rg --files --color never . | rg ' .. file,
+          {
+            on_stdout = function(_, data, _)
+              if table.concat(data) == table.concat({ "" }) then
+                return
+              end
+              local files = {}
+              for _, found in ipairs(data) do
+                if found ~= '' then
+                  table.insert(files, found)
+                end
+              end
+              if #files == 1 then
+                vim.cmd('edit ' .. files[1])
+              else
+                builtin.find_files({ default_text = file })
+              end
+            end,
+            on_stderr = function(_, data, _)
+              local data_without_empty_strings = {}
+              for _, line in ipairs(data) do
+                if line ~= '' then
+                  table.insert(data_without_empty_strings, line)
+                end
+              end
+              if #data_without_empty_strings > 0 then
+                print(table.concat(data_without_empty_strings, '\n'))
+              end
+            end,
+            on_exit = function(_, code, _)
+              if code ~= 0 then
+                builtin.find_files({ default_text = file })
+              end
+            end
+          }
+          )
         end
       end)
 
