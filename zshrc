@@ -70,6 +70,7 @@ set keymap vi-insert
 
 export PATH=$PATH:$HOME/dotfiles/
 export PATH=$PATH:/usr/local/bin/
+export PATH=$PATH:$HOME/.cargo/bin
 
 eval "$(/opt/homebrew/bin/mise activate zsh)"
 

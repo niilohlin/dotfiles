@@ -923,6 +923,7 @@ vim.keymap.set("n", "<leader>rr", ":%s/\\\\n/\\r/g<CR>")    -- Replace Returns: 
 vim.keymap.set("n", "{", "<nop>")
 vim.keymap.set("n", "}", "<nop>")
 
+-- Go to the first instance of the word under the cursor, including imports.
 vim.keymap.set("n", "g[", function()
   local word_under_cursor = vim.fn.expand("<cword>")
   vim.cmd('execute "keepjumps normal! gg"')
