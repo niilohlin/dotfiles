@@ -156,60 +156,54 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
   end,
 })
 
-local opt = vim.opt
 -- options
-opt.showcmd = true        -- Show the current command in the bottom right
-opt.incsearch = true      -- Incremental search
-opt.showmatch = true      -- Highlight search match
-opt.ignorecase = true     -- Ignore search casing
-opt.smartcase = true      -- But not when searching with uppercase letters
-opt.smartindent = true    -- Language-aware indent
-opt.autowrite = true      -- Automatically write on :n and :p
-opt.autoread = true       -- Automatically read file from disk on change
-opt.number = true         -- Set line numbers
-opt.relativenumber = true -- Set relative line numbers
-opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-opt.ruler = true          -- Show cursor col and row position
-opt.colorcolumn = "120"   -- Show max column highlight.
-opt.modifiable = true     -- Make buffers modifiable.
-opt.cursorline = true     -- Show a horizontal line where the cursor is
-opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
-opt.wildmode = { "longest", "full" }
+vim.opt.showcmd = true        -- Show the current command in the bottom right
+vim.opt.incsearch = true      -- Incremental search
+vim.opt.showmatch = true      -- Highlight search match
+vim.opt.ignorecase = true     -- Ignore search casing
+vim.opt.smartcase = true      -- But not when searching with uppercase letters
+vim.opt.smartindent = true    -- Language-aware indent
+vim.opt.autowrite = true      -- Automatically write on :n and :p
+vim.opt.autoread = true       -- Automatically read file from disk on change
+vim.opt.number = true         -- Set line numbers
+vim.opt.relativenumber = true -- Set relative line numbers
+vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true          -- Show cursor col and row position
+vim.opt.colorcolumn = "120"   -- Show max column highlight.
+vim.opt.modifiable = true     -- Make buffers modifiable.
+vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.wildmode = { "longest", "full" }
 -- opt.jumpoptions = "stack" -- Make jumps work as expected.
 
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
-opt.updatetime = 500
+vim.opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
-opt.cmdheight = 2
+vim.opt.cmdheight = 2
 -- opt.cmdheight = 0          -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
-local tabLength = 4
-opt.tabstop = tabLength
-opt.shiftwidth = tabLength
-opt.softtabstop = tabLength
-opt.expandtab = true
+set_tab_length(4)
 
-opt.list = true -- Show whitespace characters.
-opt.listchars = { tab = "› ", trail = "·", extends = "›", precedes = "‹", nbsp = "+" } -- Show these characters
-opt.whichwrap = opt.whichwrap + "<,>,[,],l,h" -- Move cursor to next line when typing these characters.
+vim.opt.list = true -- Show whitespace characters.
+vim.opt.listchars = { tab = "› ", trail = "·", extends = "›", precedes = "‹", nbsp = "+" } -- Show these characters
+vim.opt.whichwrap = vim.opt.whichwrap + "<,>,[,],l,h" -- Move cursor to next line when typing these characters.
 
-opt.undofile = true -- Use undo file
-opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir" -- Set undo dir
-opt.scrolloff = 1 -- Scroll 1 line before cursor hits bottom
-opt.mouse = "" -- Disable mouse
+vim.opt.undofile = true -- Use undo file
+vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir" -- Set undo dir
+vim.opt.scrolloff = 1 -- Scroll 1 line before cursor hits bottom
+vim.opt.mouse = "" -- Disable mouse
 
-local g = vim.g
-g.markdown_enable_spell_checking = 0
+vim.g.markdown_enable_spell_checking = 0
 
-g.python_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
-g.python2_host_prog = "/usr/local/bin/python2"
-g.python3_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
+vim.g.python_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
+vim.g.python2_host_prog = "/usr/local/bin/python2"
+vim.g.python3_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
 
 -- Set leader to <space>
-g.mapleader = " "
-g.maplocalleader = " "
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 require("lazy").setup({
   -- Git status of changed lines to the left.
@@ -515,15 +509,6 @@ require("lazy").setup({
   -- Yaml utility, helps distinguish indendation
   "Einenlum/yaml-revealer",
 
-  -- Github Copilot, AI completions
-  {
-    "github/copilot.vim",
-    config = function()
-      vim.g.copilot_no_tab_map = true
-      vim.api.nvim_set_keymap("i", "<Right>", 'copilot#Accept("<CR>")', { expr = true, silent = true })
-    end,
-  },
-
   { -- Make anything into an lsp, like linter output etc.
     "nvimtools/none-ls.nvim",
     config = function()
@@ -594,13 +579,13 @@ require("lazy").setup({
           declare_method_if_supported("textDocument/references", "gr", builtin.lsp_references)
           declare_method_if_supported("textDocument/rename", "<leader>rn", vim.lsp.buf.rename)
           declare_method_if_supported("textDocument/documentSymbol", "<leader>ds", builtin.lsp_document_symbols)
-          declare_method_if_supported("textDocument/codeAction", "<leader>ca", vim.lsp.buf.code_action)
           declare_method_if_supported("textDocument/typeDefinition", "<leader>D", builtin.lsp_type_definitions)
           declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
 
           if client and client.supports_method("textDocument/codeAction") then
             vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
           end
+
           if client and client.supports_method("textDocument/formatting") then
             vim.keymap.set("n", "<leader>=", function()
               vim.lsp.buf.format({ async = true })
@@ -680,6 +665,28 @@ require("lazy").setup({
       --     vim.lsp.buf_attach_client(0, client)
       --   end,
       -- })
+
+      local client = vim.lsp.start_client {
+        -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+        name = "jedi_autoimport_lsp",
+        cmd = { "jedi_autoimport_lsp" },
+        on_attach = function(_, _) end,
+        capabilities = capabilities,
+      }
+
+      if not client then
+        print("jedi_autoimport_lsp failed to start")
+      end
+
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = '*.py',
+        callback = function()
+          if not client then
+            return
+          end
+          vim.lsp.buf_attach_client(0, client)
+        end,
+      })
 
       require("mason").setup()
       local ensure_installed = vim.tbl_keys(servers or {})
@@ -864,7 +871,7 @@ require("lazy").setup({
         format_on_save = {
           -- These options will be passed to conform.format()
           timeout_ms = 500,
-          lsp_fallback = true,
+          lsp_fallback = false,
         },
         formatters_by_ft = {
           -- lua = { "stylua" },
@@ -889,6 +896,56 @@ require("lazy").setup({
     "wojciech-kulik/xcodebuild.nvim",
     config = function()
       require("xcodebuild").setup()
+    end,
+  },
+
+  { -- Hardtime plugin, trains you on vim
+    "m4xshen/hardtime.nvim",
+    config = function()
+      require("hardtime").setup({
+        disabled_keys = {
+          ["<Right>"] = {} -- Enable right to accept copilot suggestions
+        }
+      })
+    end,
+  },
+
+  { -- code action previewer
+    dependencies = {
+      "nvim-telescope/telescope.nvim",
+      {
+        "nvim-telescope/telescope-ui-select.nvim",
+        config = function()
+          require("telescope").load_extension("ui-select")
+        end,
+      }
+    },
+    "aznhe21/actions-preview.nvim",
+    config = function()
+      local actions_preview = require("actions-preview")
+      actions_preview.setup({
+        telescope = {
+          sorting_strategy = "ascending",
+          layout_strategy = "vertical",
+          layout_config = {
+            width = 0.8,
+            height = 0.9,
+            prompt_position = "top",
+            preview_cutoff = 20,
+            preview_height = function(_, _, max_lines)
+              return max_lines - 15
+            end,
+          },
+        },
+      })
+
+      vim.api.nvim_create_autocmd("LspAttach", {
+        group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
+        callback = function(ev)
+          local opts = { buffer = ev.buf }
+          vim.keymap.set({ "v", "n" }, "<leader>ca", actions_preview.code_actions, opts)
+        end,
+      })
     end,
   },
 })
@@ -930,9 +987,56 @@ vim.keymap.set("n", "g[", function()
   vim.cmd("/" .. word_under_cursor)
 end)
 
-vim.keymap.set("n", "gp", "`[v`]") -- Select last paste
+vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
+vim.keymap.set("n", "g>", "`[v`]>") -- indent last paste
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 local comment = require("vim._comment")
 vim.keymap.set("x", "ic", comment.textobject)
 vim.keymap.set("o", "ic", comment.textobject)
+
+
+function JumpToMatchingPythonScope()
+  local line = vim.fn.getline(".")
+  local current_line_number = vim.fn.line(".")
+  local col = vim.fn.col(".")
+  local char = string.sub(line, col, col)
+  if char == ":" then
+    local current_indentation = vim.fn.indent(".")
+    local first_blank_line = -1
+    for i = vim.fn.line(".") + 1, vim.fn.line("$") do
+      local next_line = vim.fn.getline(i)
+      if next_line == "" then
+        if first_blank_line == -1 then
+          first_blank_line = i
+        end
+        goto continue
+      end
+      local next_indentation = vim.fn.indent(i)
+      if next_indentation <= current_indentation then
+        if first_blank_line ~= -1 and string.gmatch(next_line, "%s*else")() == nil then
+          vim.cmd("normal! " .. (first_blank_line - current_line_number) .. "j")
+          vim.cmd("normal! _")
+        else
+          vim.cmd("normal! " .. (i - current_line_number) .. "j")
+          vim.cmd("normal! _")
+        end
+        return
+      else
+        first_blank_line = -1
+      end
+      ::continue::
+    end
+    vim.cmd("normal! " .. (vim.fn.line("$")) .. "j")
+    vim.cmd("normal! _")
+  else
+    vim.cmd("normal! %")
+  end
+end
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  callback = function()
+    vim.keymap.set("n", "%", function() JumpToMatchingPythonScope() end, { expr = false, silent = true })
+  end,
+})
