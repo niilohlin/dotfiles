@@ -769,7 +769,7 @@ require("lazy").setup({
     end,
   },
 
-  -- Indent object, adds objects like ai "delete around indent"
+  -- Indentation textobject, adds objects like ai "delete around indentation", dii, vii etc.
   "michaeljsmith/vim-indent-object",
 
   -- LSP completion
@@ -987,8 +987,9 @@ vim.keymap.set("n", "g[", function()
   vim.cmd("/" .. word_under_cursor)
 end)
 
+vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
 vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
-vim.keymap.set("n", "g>", "`[v`]>") -- indent last paste
+vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 local comment = require("vim._comment")
@@ -996,7 +997,7 @@ vim.keymap.set("x", "ic", comment.textobject)
 vim.keymap.set("o", "ic", comment.textobject)
 
 
-function JumpToMatchingPythonScope()
+local function jumpToMatchingPythonScope()
   local line = vim.fn.getline(".")
   local current_line_number = vim.fn.line(".")
   local col = vim.fn.col(".")
@@ -1037,6 +1038,6 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
-    vim.keymap.set("n", "%", function() JumpToMatchingPythonScope() end, { expr = false, silent = true })
+    vim.keymap.set("n", "%", jumpToMatchingPythonScope, { expr = false, silent = true })
   end,
 })
