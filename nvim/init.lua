@@ -852,6 +852,7 @@ require("lazy").setup({
         "rafamadriz/friendly-snippets",
         config = function()
           require("luasnip.loaders.from_vscode").lazy_load()
+          require("luasnip.loaders.from_snipmate").lazy_load({ path = { "./snippets" } })
         end,
       },
     },
@@ -885,12 +886,12 @@ require("lazy").setup({
     end,
   },
 
-  { -- python refactor tools
-    "python-rope/ropevim",
-    config = function()
-      vim.keymap.set("n", "<leader>ai", ":RopeAutoImport<CR>")
-    end,
-  },
+  -- { -- python refactor tools
+  --   "python-rope/ropevim",
+  --   config = function()
+  --     vim.keymap.set("n", "<leader>ai", ":RopeAutoImport<CR>")
+  --   end,
+  -- },
 
   { -- xcode build plugin
     "wojciech-kulik/xcodebuild.nvim",
@@ -1030,6 +1031,8 @@ local function jumpToMatchingPythonScope()
     end
     vim.cmd("normal! " .. (vim.fn.line("$")) .. "j")
     vim.cmd("normal! _")
+  elseif string.gmatch(vim.fn.getline("."), "%s*else")() then
+    -- TODO. go back
   else
     vim.cmd("normal! %")
   end
