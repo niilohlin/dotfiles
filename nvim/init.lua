@@ -175,7 +175,6 @@ vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
--- opt.jumpoptions = "stack" -- Make jumps work as expected.
 
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 vim.opt.updatetime = 500
@@ -241,13 +240,6 @@ require("lazy").setup({
           suffix_next = "",    -- Suffix to search with "next" method
         },
       })
-    end,
-  },
-
-  { -- Text object context, sticky headers.
-    "nvim-treesitter/nvim-treesitter-context",
-    config = function()
-      require("treesitter-context").setup()
     end,
   },
 
@@ -513,9 +505,16 @@ require("lazy").setup({
     "nvimtools/none-ls.nvim",
     config = function()
       local null_ls = require("null-ls")
+      local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
+          null_ls.builtins.formatting.black.with({
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
           null_ls.builtins.diagnostics.pylint.with({
             prefer_local = "venv/bin",
             env = function(params)
@@ -529,6 +528,18 @@ require("lazy").setup({
             end,
           }),
         },
+        on_attach = function(client, bufnr)
+          if client.supports_method("textDocument/formatting") then
+            vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ async = false })
+              end,
+            })
+          end
+        end,
       })
     end,
   },
@@ -863,51 +874,10 @@ require("lazy").setup({
     -- build = "make install_jsregexp"
   },
 
-  -- Formatting manager. Makes sure that we can autoformat on save without leaving the buffer changed
-  -- when exiting
-  {
-    "stevearc/conform.nvim",
-    config = function()
-      require("conform").setup({
-        format_on_save = {
-          -- These options will be passed to conform.format()
-          timeout_ms = 500,
-          lsp_fallback = false,
-        },
-        formatters_by_ft = {
-          -- lua = { "stylua" },
-          -- Conform will run multiple formatters sequentially
-          python = { "isort", "black" },
-          -- Use a sub-list to run only the first available formatter
-          -- javascript = { { "prettierd", "prettier" } },
-          json = { "jq" },
-        },
-      })
-    end,
-  },
-
-  -- { -- python refactor tools
-  --   "python-rope/ropevim",
-  --   config = function()
-  --     vim.keymap.set("n", "<leader>ai", ":RopeAutoImport<CR>")
-  --   end,
-  -- },
-
   { -- xcode build plugin
     "wojciech-kulik/xcodebuild.nvim",
     config = function()
       require("xcodebuild").setup()
-    end,
-  },
-
-  { -- Hardtime plugin, trains you on vim
-    "m4xshen/hardtime.nvim",
-    config = function()
-      require("hardtime").setup({
-        disabled_keys = {
-          ["<Right>"] = {} -- Enable right to accept copilot suggestions
-        }
-      })
     end,
   },
 
@@ -977,10 +947,6 @@ vim.api.nvim_command("command W w")                         -- Remap :W to :w
 
 vim.keymap.set("n", "<leader>rr", ":%s/\\\\n/\\r/g<CR>")    -- Replace Returns:  Replace all \n with new lines
 
--- disable { and } to untrain myself from using them
-vim.keymap.set("n", "{", "<nop>")
-vim.keymap.set("n", "}", "<nop>")
-
 -- Go to the first instance of the word under the cursor, including imports.
 vim.keymap.set("n", "g[", function()
   local word_under_cursor = vim.fn.expand("<cword>")
@@ -997,8 +963,7 @@ local comment = require("vim._comment")
 vim.keymap.set("x", "ic", comment.textobject)
 vim.keymap.set("o", "ic", comment.textobject)
 
-
-local function jumpToMatchingPythonScope()
+local function jump_to_matching_python_scope()
   local line = vim.fn.getline(".")
   local current_line_number = vim.fn.line(".")
   local col = vim.fn.col(".")
@@ -1038,9 +1003,39 @@ local function jumpToMatchingPythonScope()
   end
 end
 
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
-    vim.keymap.set("n", "%", jumpToMatchingPythonScope, { expr = false, silent = true })
+    vim.keymap.set("n", "%", jump_to_matching_python_scope, { expr = false, silent = true })
   end,
 })
+
+local statements = vim.treesitter.query.parse(
+"python",
+[[
+(if_statement consequence: (_) ) @scope.if
+(if_statement alternative: (_) @scope.else)
+]]
+)
+
+local bufnr = vim.api.nvim_get_current_buf()
+local parser = vim.treesitter.get_parser(bufnr, 'python')
+local tree = parser:parse()[1]
+
+local root = tree:root()
+
+function Highlight_python()
+  local captures = {}
+
+  for id, node, _ in statements:iter_captures(root, bufnr, 0, -1) do
+    local capture_name = statements.captures[id]
+    table.insert(captures, {capture_name, vim.treesitter.get_node_text(node, bufnr)})
+  end
+
+  for _, capture in ipairs(captures) do
+    print(capture[1] .. ": " .. capture[2])
+  end
+
+end
+
