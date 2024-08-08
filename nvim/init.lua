@@ -722,6 +722,24 @@ require("lazy").setup({
   -- $ vim file.py:10
   "wsdjeg/vim-fetch",
 
+  { -- Pure lua replacement for github/copilot. Has more features and is more efficient.
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggesion = {
+          keymap = {
+            accept = "<Right>",
+            next = "<C-X><C-E>",
+          }
+        }
+      })
+      vim.keymap.set("i", "<C-X><C-e>", function() require("copilot.suggestion").next() end)
+      vim.keymap.set("i", "<Right>", function() require("copilot.suggestion").accept() end)
+    end,
+  },
+
   -- cmd line in the middle of the screen
   {
     "folke/noice.nvim",
