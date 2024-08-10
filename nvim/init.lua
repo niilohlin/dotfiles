@@ -833,6 +833,7 @@ require("lazy").setup({
           expand = function(args)
             luasnip.lsp_expand(args.body)
           end,
+          completion = { completeopt = 'menu,menuone,noinsert' },
         },
         window = {
           -- completion = cmp.config.window.bordered(),
@@ -939,17 +940,6 @@ require("lazy").setup({
   },
 })
 
--- Makes so that indendation does not disappear when entering a new line.
-vim.keymap.set("i", "<CR>", "<CR>a<BS>")
--- Complete file name
-vim.keymap.set("i", "<C-F>", "<C-X><C-F>")
--- Complete line
-vim.keymap.set("i", "<C-L>", "<C-X><C-L>")
--- Complete from definition
-vim.keymap.set("i", "<C-D>", "<C-X><C-D>")
--- Omni complete
-vim.keymap.set("i", "<C-O>", "<C-X><C-O>")
-
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
 
@@ -977,9 +967,7 @@ vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
 vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
 
 -- map textobject to select the continuous comment with vim._comment.textobject
-local comment = require("vim._comment")
-vim.keymap.set("x", "ic", comment.textobject)
-vim.keymap.set("o", "ic", comment.textobject)
+vim.keymap.set({ "o", "x", "v" } , "ic", require("vim._comment").textobject)
 
 local function jump_to_matching_python_scope()
   local line = vim.fn.getline(".")
@@ -1054,6 +1042,5 @@ function Highlight_python()
   for _, capture in ipairs(captures) do
     print(capture[1] .. ": " .. capture[2])
   end
-
 end
 
