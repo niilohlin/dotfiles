@@ -680,6 +680,7 @@ require("lazy").setup({
       local client = vim.lsp.start_client {
         -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
         name = "jedi_autoimport_lsp",
+        -- cmd = { os.getenv("HOME") .. "/personal/jedi_autoimport_lsp/jedi_autoimport_lsp/main.py" },
         cmd = { "jedi_autoimport_lsp" },
         on_attach = function(_, _) end,
         capabilities = capabilities,
@@ -800,6 +801,12 @@ require("lazy").setup({
 
   -- Indentation textobject, adds objects like ai "delete around indentation", dii, vii etc.
   "michaeljsmith/vim-indent-object",
+  -- convert to nvim
+  -- { "jessekelighine/vindent.vim",
+  --   config = function()
+  --
+  --   end
+  -- },
 
   -- LSP completion
   -- This version is compatible with nvim 0.9.x master requires 0.10
@@ -1010,37 +1017,183 @@ local function jump_to_matching_python_scope()
 end
 
 
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "python",
-  callback = function()
-    vim.keymap.set("n", "%", jump_to_matching_python_scope, { expr = false, silent = true })
-  end,
-})
+-- neoindent
 
-local statements = vim.treesitter.query.parse(
-"python",
-[[
-(if_statement consequence: (_) ) @scope.if
-(if_statement alternative: (_) @scope.else)
-]]
-)
+---@param lnum integer
+---@return boolean
+local function line_empty(lnum)
+  return vim.fn.getline(lnum) == ""
+end
 
-local bufnr = vim.api.nvim_get_current_buf()
-local parser = vim.treesitter.get_parser(bufnr, 'python')
-local tree = parser:parse()[1]
+---@param lnum integer
+---@return boolean
+local function line_valid(lnum)
+  return lnum >= 1 and lnum <= vim.fn.line("$")
+end
 
-local root = tree:root()
+local compare = {
+  Same = function(indent, base_indent) return indent == base_indent end,
+  NoLe = function(indent, base_indent) return indent >= base_indent end,
+  Less = function(indent, base_indent) return indent < base_indent end,
+  More = function(indent, base_indent) return indent > base_indent end,
+  Diff = function(indent, base_indent) return indent ~= base_indent end,
+}
 
-function Highlight_python()
-  local captures = {}
 
-  for id, node, _ in statements:iter_captures(root, bufnr, 0, -1) do
-    local capture_name = statements.captures[id]
-    table.insert(captures, {capture_name, vim.treesitter.get_node_text(node, bufnr)})
+local Nohang = {
+  prev = function(lnum) return vim.fn.nextnonblank(lnum) end,
+  next = function(lnum) return vim.fn.prevnonblank(lnum) end,
+}
+
+---@param lnum integer
+---@return integer
+local function indent(lnum)
+  return line_empty(lnum) and -1 or vim.fn.indent(lnum)
+end
+
+---@param lnum integer
+local function get_indent(lnum)
+  if not line_empty(lnum) then
+    return indent(lnum)
   end
 
-  for _, capture in ipairs(captures) do
-    print(capture[1] .. ": " .. capture[2])
+  -- fallback if we're standing on a blank line, we still want to find the indentation of the block.
+  local indent_prev = vim.fn.prevnonblank(lnum)
+  local indent_next = vim.fn.nextnonblank(lnum)
+  local max_indent = math.max(indent_prev, indent_next)
+  if max_indent == 0 then
+    return -1
+  end
+  return max_indent
+end
+
+---@param direction string -- "prev" | "next"
+---@param func any
+---@param skip any
+---@param lnum integer
+---@param base integer | nil
+---@return integer
+local function find_until(direction, func, skip, lnum, base)
+  if base == nil then
+    base = vim.fn.line(".")
+  end
+
+  local current_indent = get_indent(base)
+  local increment = (direction == "prev") and -1 or 1
+
+  while true do
+    lnum = lnum + increment
+    if not line_valid(lnum) then
+      return lnum
+    elseif skip and line_empty(lnum) then
+      goto continue
+    elseif compare[func](indent(lnum), current_indent) then
+      return lnum
+    end
+    ::continue::
   end
 end
+---
+---@param direction string -- "prev" | "next"
+---@param func any
+---@param skip any
+---@param lnum integer
+---@param base integer | nil
+---@return integer
+local function find_until_not(direction, func, skip, lnum, base)
+  if base == nil then
+    base = vim.fn.line(".")
+  end
+
+  local current_indent = get_indent(base)
+  local increment = (direction == "prev") and -1 or 1
+
+  while true do
+    lnum = lnum + increment
+    if not line_valid(lnum) then
+      return lnum - increment
+    elseif skip and line_empty(lnum) then
+      goto continue
+    elseif compare[func](indent(lnum), current_indent) then
+      return lnum - increment
+    end
+    ::continue::
+  end
+end
+
+---@param direction string
+---@param mode string
+---@param diff integer
+local function do_motion(direction, mode, diff)
+
+  local move = diff .. (direction == "prev" and "k" or "j")
+  local marker = "m'"
+
+  if mode == "N" then
+    vim.cmd((diff == 0 and "norm! lh_" or "norm! " .. marker .. move .. "_"))
+  elseif mode == "X" then
+    vim.cmd((diff == 0 and "norm! gv" or "norm! \\<Esc>" .. marker .. "gv" .. move .. "_"))
+  elseif mode == "O" then
+    vim.cmd((diff == 0 and "norm! V" or "norm! " .. marker .. "V" .. move .. "_"))
+  end
+end
+
+-- Actually move the cursor according to inputs. (text object)
+local function do_object(range)
+  vim.fn.cursor(range[1], 0)
+  vim.cmd("norm! V" .. (range[2] - range[1] ~= 0 and (range[2] - range[1]) .. "j" or ""))
+end
+
+
+function BlockEdgeMotion(direct, skip, func, mode)
+  local line = vim.fn.line(".")
+  local edge = Nohang[direct](find_until_not(direct, func, skip, line))
+  do_motion(direct, mode, math.abs(line - edge))
+end
+
+function Object(skip, func, code, count)
+  local get_range = {
+    full = function(line1, line2)
+      return {
+        find_until_not("prev", func, skip, line1),
+        find_until_not("next", func, skip, line2),
+      }
+    end,
+  }
+
+  local line = vim.fn.line(".")
+  local full_range = get_range.full(line, line)
+  local range = { Nohang.prev(full_range[1]), Nohang.next(full_range[2]) }
+
+  for _ = 1, count - (vim.g.vindent_count and 1 or 0) do
+    local test = {
+      math.max(full_range[1] - 1, range[1]),
+      math.max(full_range[2] + 1, range[2]),
+    }
+
+    if compare.Less(indent(test[1]), indent(test[2])) and line_valid(test[1]) and not line_empty(test[1]) then
+      test[1] = range[1]
+    end
+
+    if compare.Less(indent(test[1]), indent(test[2])) and line_valid(test[2]) and not line_empty(test[2]) then
+      test[2] = range[2]
+    end
+
+    full_range = get_range.full(test[1], test[2])
+    range = { Nohang.prev(full_range[1]), Nohang.next(full_range[2]) }
+  end
+
+  if code:sub(1, 1) == "a" then
+    range[1] = find_until("prev", "Less", true, range[1])
+  end
+
+  if code:sub(2, 2) == "I" then
+    range[2] = find_until("next", "Less", true, range[2])
+  end
+
+  do_object(range)
+end
+
+vim.keymap.set("n", "[i", function() BlockEdgeMotion("prev", true, "Less", "N") end)
+vim.keymap.set("n", "]i", function() BlockEdgeMotion("next", true, "Less", "N") end)
 
