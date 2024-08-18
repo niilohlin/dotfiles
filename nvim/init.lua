@@ -58,19 +58,50 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
--- Make Vim tmux runner compatible with python
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
+    -- Make Vim tmux runner compatible with python
     vim.cmd([[ let g:VtrStripLeadingWhitespace = 0 ]])
     vim.cmd([[ let g:VtrClearEmptyLines = 0 ]])
     vim.cmd([[ let g:VtrAppendNewline = 1 ]])
-  end,
-})
 
-vim.api.nvim_create_autocmd({ "BufNewFile" }, {
-  pattern = "*.py",
-  command = "0r ~/.config/nvim/skeleton/skeleton.py",
+    -- Python method textobject, better than tree-sitter textobject
+    vim.keymap.set('o', 'im', function ()
+      vim.cmd('keepjumps normal [m')
+      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
+      vim.cmd("keepjumps normal ]M")
+      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
+      vim.cmd("normal! gv")
+    end)
+
+    vim.keymap.set('x', 'im', function ()
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+      vim.cmd('keepjumps normal [m')
+      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
+      vim.cmd("keepjumps normal ]M")
+      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
+      vim.cmd("normal! gv")
+    end)
+
+    vim.keymap.set('o', 'am', function ()
+      vim.cmd('keepjumps normal [Ml')
+      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
+      vim.cmd("keepjumps normal ]M")
+      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
+      vim.cmd("normal! gv")
+    end)
+
+    vim.keymap.set('x', 'am', function ()
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+      vim.cmd('keepjumps normal [Ml')
+      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
+      vim.cmd("keepjumps normal ]M")
+      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
+      vim.cmd("normal! gv")
+    end)
+
+  end,
 })
 
 vim.api.nvim_create_autocmd({ "FileType" }, {
@@ -402,55 +433,21 @@ require("lazy").setup({
         highlight = {
           enable = true, -- `false` will disable the whole extension
           disable = {},  -- list of language that will be disabled
-
-          -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-          -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-          -- Using this option may slow down your editor, and you may see some duplicate highlights.
-          -- Instead of true it can also be a list of languages
           additional_vim_regex_highlighting = false,
         },
         textobjects = {
           select = {
             enable = true,
 
-            -- Automatically jump forward to textobj, similar to targets.vim
             lookahead = true,
 
             keymaps = {
-              -- You can use the capture groups defined in textobjects.scm
               ["af"] = "@function.outer",
               ["if"] = "@function.inner",
               ["ak"] = "@class.outer",
               ["aa"] = "@parameter.outer",
               ["ia"] = "@parameter.inner",
-              -- You can optionally set descriptions to the mappings (used in the desc parameter of
-              -- nvim_buf_set_keymap) which plugins like which-key display
-              ["ik"] = { query = "@class.inner", desc = "Select inner part of a class region" },
-              -- You can also use captures from other query groups like `locals.scm`
-              ["as"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
-              ["is"] = { query = "@scope", query_group = "locals", desc = "Select language scope" },
             },
-            -- You can choose the select mode (default is charwise 'v')
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * method: eg 'v' or 'o'
-            -- and should return the mode ('v', 'V', or '<c-v>') or a table
-            -- mapping query_strings to modes.
-            selection_modes = {
-              ["@parameter.outer"] = "v", -- charwise
-              ["@function.outer"] = "V",  -- linewise
-              ["@class.outer"] = "<c-v>", -- blockwise
-            },
-            -- If you set this to `true` (default is `false`) then any textobject is
-            -- extended to include preceding or succeeding whitespace. Succeeding
-            -- whitespace has priority in order to act similarly to eg the built-in
-            -- `ap`.
-            --
-            -- Can also be a function which gets passed a table with the keys
-            -- * query_string: eg '@function.inner'
-            -- * selection_mode: eg 'v'
-            -- and should return true or false
             include_surrounding_whitespace = true,
           },
         },
@@ -973,3 +970,4 @@ vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 vim.keymap.set({ "o", "x", "v" } , "ic", require("vim._comment").textobject)
+
