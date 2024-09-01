@@ -664,23 +664,27 @@ require("lazy").setup({
         },
       }
 
+      -- DEMO, Insert client here --
+
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.zsh',
         callback = function()
           local client_id, err_message = vim.lsp.start_client {
-            name = "demo_lsp_client",
-            cmd = { "/Users/niilohlin/personal/demo_lsp_server/init.lua" },
+            name = "magic_zsh_lsp",
+            cmd = { "/tmp/lsp_server.lua" },
             capabilities = capabilities,
           }
 
           if client_id then
             vim.lsp.buf_attach_client(0, client_id)
-            print("demo_lsp_client attached")
+            print("magic_zsh_lsp attached")
           else
-            print("demo_lsp_client failed to start: " .. (err_message or "?"))
+            print("magic_zsh_lsp failed to start: " .. (err_message or "?"))
           end
         end,
       })
+
+      ------------------------------
 
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
