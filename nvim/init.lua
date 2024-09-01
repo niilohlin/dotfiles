@@ -101,6 +101,14 @@ vim.api.nvim_create_autocmd("FileType", {
       vim.cmd("normal! gv")
     end)
 
+    -- search for the current line
+    local builtin = require("telescope.builtin")
+    vim.keymap.set('n', 'gi', function()
+      vim.cmd('normal! "vyiw')
+      local selected_text = "def " .. vim.fn.getreg("v") .. "\\("
+      builtin.live_grep({ default_text = selected_text })
+    end)
+
   end,
 })
 
@@ -503,6 +511,7 @@ require("lazy").setup({
     config = function()
       local null_ls = require("null-ls")
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
@@ -520,6 +529,7 @@ require("lazy").setup({
           }),
           null_ls.builtins.diagnostics.mypy.with({
             prefer_local = "venv/bin",
+            extra_args = { "--cache-dir=/dev/null" },
             env = function(params)
               return { PYTHONPATH = params.root }
             end,
@@ -654,46 +664,40 @@ require("lazy").setup({
         },
       }
 
-      -- local client = vim.lsp.start_client {
-      --   -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-      --   name = "ctags-lsp",
-      --   cmd = { "/Users/niilohlin/personal/ctags-lsp/src/main.py" },
-      --   on_attach = function(client, bufnr)
-      --   end,
-      --   capabilities = capabilities,
-      -- }
-      --
-      -- if not client then
-      --   print("ctags-lsp failed to start")
-      -- end
-      --
-      -- vim.api.nvim_create_autocmd('BufEnter', {
-      --   pattern = '*.py',
-      --   callback = function()
-      --     vim.lsp.buf_attach_client(0, client)
-      --   end,
-      -- })
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = '*.zsh',
+        callback = function()
+          local client_id, err_message = vim.lsp.start_client {
+            name = "demo_lsp_client",
+            cmd = { "/Users/niilohlin/personal/demo_lsp_server/init.lua" },
+            capabilities = capabilities,
+          }
 
-      local client = vim.lsp.start_client {
-        -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-        name = "jedi_autoimport_lsp",
-        -- cmd = { os.getenv("HOME") .. "/personal/jedi_autoimport_lsp/jedi_autoimport_lsp/main.py" },
-        cmd = { "jedi_autoimport_lsp" },
-        on_attach = function(_, _) end,
-        capabilities = capabilities,
-      }
-
-      if not client then
-        print("jedi_autoimport_lsp failed to start")
-      end
+          if client_id then
+            vim.lsp.buf_attach_client(0, client_id)
+            print("demo_lsp_client attached")
+          else
+            print("demo_lsp_client failed to start: " .. (err_message or "?"))
+          end
+        end,
+      })
 
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
-          if not client then
-            return
+          local client_id, err_message = vim.lsp.start_client {
+            -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+            name = "jedi_autoimport_lsp",
+            -- cmd = { os.getenv("HOME") .. "/personal/jedi_autoimport_lsp/jedi_autoimport_lsp/main.py" },
+            cmd = { "jedi_autoimport_lsp" },
+            capabilities = capabilities,
+          }
+
+          if client_id then
+            vim.lsp.buf_attach_client(0, client_id)
+          else
+            print("jedi_autoimport_lsp failed to start" .. (err_message or "?"))
           end
-          vim.lsp.buf_attach_client(0, client)
         end,
       })
 
@@ -735,48 +739,6 @@ require("lazy").setup({
       })
       vim.keymap.set("i", "<C-X><C-e>", function() require("copilot.suggestion").next() end)
       vim.keymap.set("i", "<Right>", function() require("copilot.suggestion").accept() end)
-    end,
-  },
-
-  -- cmd line in the middle of the screen
-  {
-    "folke/noice.nvim",
-    event = "VeryLazy",
-    opts = {
-      -- add any options here
-    },
-    dependencies = {
-      -- used for proper rendering and multiple views
-      "MunifTanjim/nui.nvim",
-    },
-    config = function()
-      -- if we are using noice and nui, we don't need the statusline
-      vim.opt.cmdheight = 1
-      require("noice").setup({
-        lsp = {
-          -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
-          override = {
-            ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
-            ["vim.lsp.util.stylize_markdown"] = true,
-            ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
-          },
-        },
-        presets = {
-          command_palette = true,       -- position the cmdline and popupmenu together
-          long_message_to_split = true, -- long messages will be sent to a split
-          inc_rename = false,           -- enables an input dialog for inc-rename.nvim
-          lsp_doc_border = false,       -- add a border to hover docs and signature help
-        },
-        cmdline = {
-          format = {
-            cmdline = { icon = ":" },
-            search_down = { icon = "/" },
-            search_up = { icon = "?" },
-            lua = { icon = "lua" },
-            help = { icon = "help" },
-          },
-        },
-      })
     end,
   },
 
@@ -895,13 +857,6 @@ require("lazy").setup({
     -- build = "make install_jsregexp"
   },
 
-  { -- xcode build plugin
-    "wojciech-kulik/xcodebuild.nvim",
-    config = function()
-      require("xcodebuild").setup()
-    end,
-  },
-
   { -- code action previewer
     dependencies = {
       "nvim-telescope/telescope.nvim",
@@ -940,6 +895,10 @@ require("lazy").setup({
       })
     end,
   },
+
+  { -- built in lua repl
+    'ii14/neorepl.nvim'
+  }
 })
 
 -- Never use Q for ex mode.
@@ -969,5 +928,9 @@ vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
 vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
 
 -- map textobject to select the continuous comment with vim._comment.textobject
-vim.keymap.set({ "o", "x", "v" } , "ic", require("vim._comment").textobject)
+vim.keymap.set({ "o" } , "ic", require("vim._comment").textobject)
+vim.keymap.set('x', 'ic', function ()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+  require("vim._comment").textobject()
+end)
 

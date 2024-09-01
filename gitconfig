@@ -55,3 +55,5 @@
 	sort = -committerdate
 [maintenance]
 	repo = /Users/niilohlin/workspace/quickbit
+[gpg]
+	format = ssh
