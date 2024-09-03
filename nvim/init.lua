@@ -670,16 +670,16 @@ require("lazy").setup({
         pattern = '*.zsh',
         callback = function()
           local client_id, err_message = vim.lsp.start_client {
-            name = "magic_zsh_lsp",
-            cmd = { "/tmp/lsp_server.lua" },
+            name = "zsh_lsp",
+            cmd = { "/tmp/zsh_lsp/init.lua" },
             capabilities = capabilities,
           }
 
           if client_id then
             vim.lsp.buf_attach_client(0, client_id)
-            print("magic_zsh_lsp attached")
+            print("zsh_lsp attached")
           else
-            print("magic_zsh_lsp failed to start: " .. (err_message or "?"))
+            print("zsh_lsp failed to start: " .. (err_message or "?"))
           end
         end,
       })
@@ -720,6 +720,9 @@ require("lazy").setup({
       })
     end,
   },
+
+  -- database viewer
+  'tpope/vim-dadbod',
 
   -- Generic log highlighting
   "MTDL9/vim-log-highlighting",
