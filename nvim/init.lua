@@ -244,11 +244,20 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
 require("lazy").setup({
-  -- Git status of changed lines to the left.
-  "airblade/vim-gitgutter",
-
-  -- Syntax highlight for pbxproj (TODO switch to treesitter later)
-  "cfdrake/vim-pbxproj",
+  { -- Git status of changed lines to the left.
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      local gitsigns = require("gitsigns")
+      gitsigns.setup({
+        signs = {
+          add          = { text = '+' },
+          change       = { text = '~' },
+        }
+      })
+      vim.keymap.set('n', '<leader>hr', gitsigns.reset_hunk)
+      vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk)
+    end
+  },
 
   -- Send text to tmux pane
   "christoomey/vim-tmux-navigator",
@@ -664,28 +673,6 @@ require("lazy").setup({
         },
       }
 
-      -- DEMO, Insert client here --
-
-      vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = '*.zsh',
-        callback = function()
-          local client_id, err_message = vim.lsp.start_client {
-            name = "zsh_lsp",
-            cmd = { "/tmp/zsh_lsp/init.lua" },
-            capabilities = capabilities,
-          }
-
-          if client_id then
-            vim.lsp.buf_attach_client(0, client_id)
-            print("zsh_lsp attached")
-          else
-            print("zsh_lsp failed to start: " .. (err_message or "?"))
-          end
-        end,
-      })
-
-      ------------------------------
-
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
@@ -914,8 +901,6 @@ vim.keymap.set("n", "Q", "<nop>")
 -- Normal remaps
 vim.keymap.set("n", "<C-U>", "<C-U>zz")                     -- Move cursor to middle of screen
 vim.keymap.set("n", "<C-D>", "<C-D>zz")                     -- Move cursor to middle of screen
-
-vim.keymap.set("n", "<leader>gd", ":GitGutterUndoHunk<CR>") -- Discard git
 
 vim.keymap.set("v", "<leader>p", '"_dP')                    -- Paste without copying to clipboard
 
