@@ -44,6 +44,7 @@ alias vim='nvim'
 alias tree='broot'
 alias less='vim -R' # use vim in readonly mode as a pager
 alias psp='source ~/dotfiles/cd_to_pane_start_path'
+alias lg='lazygit'
 
 # Ignore ORIG_HEAD and anything that looks like a remote branch
 zstyle ':completion:*:*' ignored-patterns '*ORIG_HEAD' '*/*'
