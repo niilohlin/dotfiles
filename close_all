@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+for pane in $(tmux list-panes -a -f '#{==:#{pane_current_command},nvim}' -F '#S:#W.#P'); {
+  tmux send-keys -t "${pane}" escape ":wqa" enter
+}

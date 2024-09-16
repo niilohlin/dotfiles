@@ -571,7 +571,7 @@ require("lazy").setup({
     config = function()
       -- Global mappings.
       -- See `:help vim.diagnostic.*` for documentation on any of the below functions
-      vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float)
+      vim.keymap.set("n", "<leader>e", function() vim.diagnostic.open_float({source = true}) end)
       vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
 
       -- Use LspAttach autocommand to only map the following keys
@@ -672,6 +672,24 @@ require("lazy").setup({
           capabilities = capabilities,
         },
       }
+
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = '*.py',
+        callback = function()
+          local client_id, err_message = vim.lsp.start_client {
+            name = "pylint_ignore",
+            cmd = { os.getenv("HOME") .. "/personal/pylint_ignore_lsp/pylint_ignore_lsp/main.py" },
+            -- cmd = { "pylint_ignore_lsp" },
+            capabilities = capabilities,
+          }
+
+          if client_id then
+            vim.lsp.buf_attach_client(0, client_id)
+          else
+            print("pylint_ignore_lsp failed to start" .. (err_message or "?"))
+          end
+        end,
+      })
 
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
