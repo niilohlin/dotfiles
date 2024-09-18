@@ -254,7 +254,7 @@ require("lazy").setup({
           change       = { text = '~' },
         }
       })
-      vim.keymap.set('n', '<leader>hr', gitsigns.reset_hunk)
+      vim.keymap.set('n', '<leader>hd', gitsigns.reset_hunk)
       vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk)
     end
   },
@@ -944,3 +944,23 @@ vim.keymap.set('x', 'ic', function ()
   require("vim._comment").textobject()
 end)
 
+vim.keymap.set('o', 'io', function ()
+  vim.cmd('normal! viwl"vy')
+  local copied = vim.fn.getreg("v")
+  if string.find(copied, ".", 1, true) then
+    vim.cmd('normal! gv')
+  else
+    vim.cmd('normal! gvhoh')
+  end
+end)
+
+vim.keymap.set('x', 'io', function ()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+  vim.cmd('normal! viwl"vy')
+  local copied = vim.fn.getreg("v")
+  if string.find(copied, ".", 1, true) then
+    vim.cmd('normal! gv')
+  else
+    vim.cmd('normal! gvhoh')
+  end
+end)

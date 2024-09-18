@@ -27,6 +27,7 @@
     go = checkout -b
     branches = "!git for-each-ref --sort=-committerdate refs/heads/ | tail -r"
     fix = !git add . && git commit --amend --no-edit
+    fixup = !git commit --fixup $(git log -1 --pretty=format:%h)
     branch-name = "!git rev-parse --abbrev-ref HEAD"
     publish = "!git push -u origin $(git branch-name) && open $(git config --get remote.origin.url | sed \"s/git@github.com:\\(.*\\)\\.git/https:\\/\\/github.com\\/\\1/g\")/pull/new/$(git branch-name)"
     next = "!git log --reverse --pretty=%H main | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
