@@ -1,4 +1,0 @@
-command regex ppjs 's/(.+)/expr print(NSString(string: String(data: try! JSONSerialization.data(withJSONObject: %1, options: .prettyPrinted), encoding: .utf8)!))/'
-
-command regex curl 's/(.+)/expr let method = "-X \(%1.httpMethod ?? "GET") "; let url = "\"" + (%1.url?.absoluteString ?? "" + "\""); let header = (%1.allHTTPHeaderFields ?? [:]).reduce(into: "") { (acc, tuple) in acc += "-H \"\(tuple.0): \(tuple.1)\" " }; let data = (%1.httpBody.flatMap { String(data: $0, encoding: .utf8) }).map { "-d \"\($0)\" " } ?? ""; print("curl -i " + method + header + data + url)/'
-'

@@ -921,6 +921,11 @@ vim.keymap.set("n", "<C-U>", "<C-U>zz")                     -- Move cursor to mi
 vim.keymap.set("n", "<C-D>", "<C-D>zz")                     -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>p", '"_dP')                    -- Paste without copying to clipboard
+vim.keymap.set("v", "<leader>cq", function()
+  vim.cmd('normal "vy')
+  vim.cmd([[ cexpr split(@v, "\n") ]])
+  vim.cmd('copen')
+end)
 
 vim.api.nvim_command("command W w")                         -- Remap :W to :w
 
@@ -964,3 +969,5 @@ vim.keymap.set('x', 'io', function ()
     vim.cmd('normal! gvhoh')
   end
 end)
+
+

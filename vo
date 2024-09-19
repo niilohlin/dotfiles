@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+
+TMPFILE=$(mktemp).out
+
+# -J: join lines, removes soft wraps
+# -p: output to stdout
+# -S: start at the beginning of the history
+tmux capture-pane -J -pS - > $TMPFILE
+
+# -c: command to run
+nvim -c 'norm G' $TMPFILE
