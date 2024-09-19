@@ -18,7 +18,6 @@ nmap <space>= <Action>(ReformatCode)
 nmap <space>b <Action>(ToggleLineBreakpoint)
 "nnoremap <space>ge ?\u\l<cr>
 nnoremap <space>p i§<esc>
-nnoremap <space>a ma:s/, /,\r/g<cr>'af(=%f(a<cr><esc>'af(%i<cr><esc>'a
 
 inoremap <C-n> <ESC>:action HippieCompletion<CR>a
 inoremap <C-p> <ESC>:action HippieBackwardCompletion<CR>
