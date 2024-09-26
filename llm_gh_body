@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+DIFF=$(git diff origin/main...$BRANCH_NAME)
+
+echo $DIFF | cgip "Write a suggested github pull request body for the diff, I am using the branch name $BRANCH_NAME"

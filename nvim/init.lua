@@ -678,8 +678,8 @@ require("lazy").setup({
         callback = function()
           local client_id, err_message = vim.lsp.start_client {
             name = "pylint_ignore",
-            cmd = { os.getenv("HOME") .. "/personal/pylint_ignore_lsp/pylint_ignore_lsp/main.py" },
-            -- cmd = { "pylint_ignore_lsp" },
+            -- cmd = { os.getenv("HOME") .. "/personal/pylint_ignore_lsp/pylint_ignore_lsp/main.py" },
+            cmd = { "pylint_ignore_lsp" },
             capabilities = capabilities,
           }
 
@@ -921,7 +921,7 @@ vim.keymap.set("n", "<C-U>", "<C-U>zz")                     -- Move cursor to mi
 vim.keymap.set("n", "<C-D>", "<C-D>zz")                     -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>p", '"_dP')                    -- Paste without copying to clipboard
-vim.keymap.set("v", "<leader>cq", function()
+vim.keymap.set("v", "<leader>cq", function()                -- open selected in quickfix list
   vim.cmd('normal "vy')
   vim.cmd([[ cexpr split(@v, "\n") ]])
   vim.cmd('copen')
