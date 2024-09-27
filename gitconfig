@@ -31,7 +31,7 @@
     branch-name = "!git rev-parse --abbrev-ref HEAD"
     # publish = "!git push -u origin $(git branch-name)
     publish = "!gh pr create --title $(llm_gh_title) --body $(llm_gh_body)"
-    autocommit = !git commit -m $(llm_commit)
+    autocommit = !llm_commit > /tmp/COMMIT_EDITMSG && git commit -e -t /tmp/COMMIT_EDITMSG
     prdiff = !git diff origin/main...$(git rev-parse --abbrev-ref HEAD)
     next = "!git log --reverse --pretty=%H main | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
     prev = "!git checkout HEAD^1"

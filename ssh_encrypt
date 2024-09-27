@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <file>"
+    exit 1
+fi
+
+ssh-keygen -f ~/.ssh/personal_rsa.pub -e -m PKCS8 > /tmp/id_rsa.pem.pub
+
+openssl pkeyutl -encrypt -pubin -inkey /tmp/id_rsa.pem.pub -in "$1" | base64 > /tmp/encrypted.txt
+
+cat /tmp/encrypted.txt

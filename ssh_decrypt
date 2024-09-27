@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <file>"
+    exit 1
+fi
+
+base64 -d <"$1" > /tmp/encrypted.bin
+
+openssl pkeyutl -decrypt -in /tmp/encrypted.bin -inkey ~/.ssh/personal_rsa > /tmp/decrypted.txt
+
+cat /tmp/decrypted.txt

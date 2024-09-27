@@ -136,8 +136,4 @@ for m in visual viopp; do
     done
 done
 
-# Start tmux if not already running
-# export TERM=xterm-256color
-# if [ -z $TMUX ]; then
-#     exec tmux
-# fi
+source ~/dotfiles/.env

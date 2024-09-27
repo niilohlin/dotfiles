@@ -1,3 +1,4 @@
 nvim/undodir/*
 nvim/plugged/*
 nvim/.netrwhist
+.env
