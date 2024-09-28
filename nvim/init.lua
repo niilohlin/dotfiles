@@ -256,6 +256,51 @@ require("lazy").setup({
       })
       vim.keymap.set('n', '<leader>hd', gitsigns.reset_hunk)
       vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk)
+
+      vim.keymap.set('n', ']c', function()
+        if vim.wo.diff then
+          vim.cmd.normal({']c', bang = true})
+        else
+          gitsigns.nav_hunk('next')
+        end
+      end)
+
+      vim.keymap.set('n', '[c', function()
+        if vim.wo.diff then
+          vim.cmd.normal({'[c', bang = true})
+        else
+          gitsigns.nav_hunk('prev')
+        end
+      end)
+
+      function Review()
+        gitsigns.change_base("main", true)
+
+        local ok, diff_output = pcall(vim.fn.system, "git diff --name-status main")
+        if not ok then
+          print("Error during system call")
+          return
+        end
+
+        local diff_lines = vim.split(diff_output, '\n')
+
+        local qflist = {}
+
+        for _, line in ipairs(diff_lines) do
+          if line ~= "" then
+            local status, filename = line:match("^(%w)%s(.+)$")
+            local qf_entry = {
+              filename = filename,
+              lnum = 1,
+              col = 1,
+              text = status,
+            }
+            table.insert(qflist, qf_entry)
+          end
+        end
+        vim.fn.setqflist(qflist)
+        vim.cmd('copen')
+      end
     end
   },
 
