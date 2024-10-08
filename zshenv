@@ -1,5 +1,5 @@
 
-export PATH=$PATH:$HOME/dotfiles/
+export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:$HOME/.cargo/bin
 
