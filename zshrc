@@ -63,7 +63,6 @@ zle -N down-line-or-beginning-search
 bindkey -M viins "^[[A" up-line-or-beginning-search
 bindkey -M viins "^[[B" down-line-or-beginning-search
 
-export VISUAL=nvim
 autoload edit-command-line; zle -N edit-command-line
 bindkey -M vicmd "^[[E" edit-command-line
 
@@ -72,15 +71,6 @@ chpwd_functions+=(ls)
 
 set -o vi
 set keymap vi-insert
-
-export PATH=$PATH:$HOME/dotfiles/
-export PATH=$PATH:/usr/local/bin/
-export PATH=$PATH:$HOME/.cargo/bin
-
-# postgresql 16 config
-export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
-export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
-export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
 
 eval "$(/opt/homebrew/bin/mise activate zsh)"
 
@@ -109,10 +99,6 @@ export FZF_TMUX=1
 source ~/.zsh/fzf-history
 # source <(fzf --zsh)
 
-export LANG=C
-export LC_ALL=en_US.UTF-8
-export INPUTRC=~/.inputrc
-
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Dynamic tree navigation
@@ -136,4 +122,3 @@ for m in visual viopp; do
     done
 done
 
-source ~/dotfiles/.env
