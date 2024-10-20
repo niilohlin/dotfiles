@@ -12,4 +12,9 @@ export LANG=C
 export LC_ALL=en_US.UTF-8
 export INPUTRC=~/.inputrc
 
+# if [ "$SSH_AUTH_SOCK" = "" -a -x /usr/bin/ssh-agent ]; then
+#     eval `/usr/bin/ssh-agent`
+# fi
+export SSH_AUTH_SOCK=$(tmux show-environment | grep SSH_AUTH_SOCK | cut -d= -f2)
+
 source ~/dotfiles/.env

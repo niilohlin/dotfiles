@@ -109,6 +109,24 @@ vim.api.nvim_create_autocmd("FileType", {
       builtin.live_grep({ default_text = selected_text })
     end)
 
+    -- Go to the associated implementation file
+    vim.keymap.set('n', '<leader>i', function()
+      local current_file_name = vim.fn.expand("%:t")
+
+      local file_to_edit = current_file_name
+      if string.sub(current_file_name, 1, 2) == "i_" then
+        file_to_edit = string.sub(current_file_name, 3)
+      else
+        file_to_edit = "i_" .. current_file_name
+      end
+
+      if vim.fn.filereadable(file_to_edit) == 1 then
+        vim.cmd("edit " .. file_to_edit)
+      else
+        builtin.find_files({ default_text = file_to_edit })
+      end
+    end)
+
   end,
 })
 
@@ -274,7 +292,10 @@ require("lazy").setup({
       end)
 
       function Review()
-        gitsigns.change_base("main", true)
+        -- local base = vim.fn.system("git merge-base HEAD main")
+        local count = vim.fn.system("git rev-list --count $(git merge-base HEAD main)..HEAD")
+        gitsigns.change_base("HEAD~" .. count, true)
+        -- gitsigns.change_base("main", true)
         gitsigns.setqflist("all")
       end
     end
@@ -291,6 +312,9 @@ require("lazy").setup({
 
   -- Git plugin
   "tpope/vim-fugitive",
+
+  -- CamelCase to snake case (crc, crm, crs, cru)
+  "tpope/vim-abolish",
 
   { -- Surround plugin, adds text objects like ci" and so on.
     "echasnovski/mini.surround",
@@ -317,6 +341,19 @@ require("lazy").setup({
     "echasnovski/mini.ai",
     config = function()
       require("mini.ai").setup()
+      require'nvim-treesitter.configs'.setup {
+        textobjects = {
+          swap = {
+            enable = true,
+            swap_next = {
+              ["<leader>a"] = "@parameter.inner",
+            },
+            swap_previous = {
+              ["<leader>A"] = "@parameter.inner",
+            },
+          },
+        },
+      }
     end,
   },
 
@@ -431,6 +468,8 @@ require("lazy").setup({
           })
         end
       end)
+
+      vim.keymap.set("n", "z=", builtin.spell_suggest)
     end,
   },
 
@@ -716,6 +755,23 @@ require("lazy").setup({
         pattern = '*.py',
         callback = function()
           local client_id, err_message = vim.lsp.start_client {
+            name = "generic_type_lsp",
+            cmd = { "generic_type_lsp" },
+            capabilities = capabilities,
+          }
+
+          if client_id then
+            vim.lsp.buf_attach_client(0, client_id)
+          else
+            print("generic_type_lsp failed to start" .. (err_message or "?"))
+          end
+        end,
+      })
+
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = '*.py',
+        callback = function()
+          local client_id, err_message = vim.lsp.start_client {
             -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
             name = "jedi_autoimport_lsp",
             -- cmd = { os.getenv("HOME") .. "/personal/jedi_autoimport_lsp/jedi_autoimport_lsp/main.py" },
@@ -990,5 +1046,19 @@ vim.keymap.set('x', 'io', function ()
     vim.cmd('normal! gvhoh')
   end
 end)
+
+-- check if running via ssh
+if os.getenv("SSH_CLIENT") then
+  vim.keymap.set('v', '"*y', function ()
+    -- copy to system clipboard
+    vim.cmd('normal! "+y')
+    -- run sync-clipboard terminal program
+    vim.fn.jobstart("sync-clipboard", {
+      on_exit = function(_, _, _)
+        print("Synced to client clipboard")
+      end,
+    })
+  end)
+end
 
 

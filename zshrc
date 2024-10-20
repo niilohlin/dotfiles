@@ -122,3 +122,8 @@ for m in visual viopp; do
     done
 done
 
+eval $(keychain --eval --agents ssh id_rsa)
+
+if [[ $- =~ i ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_TTY" ]]; then
+  tmux attach-session || tmux new-session
+fi
