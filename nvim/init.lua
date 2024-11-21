@@ -292,13 +292,37 @@ require("lazy").setup({
       end)
 
       function Review()
-        -- local base = vim.fn.system("git merge-base HEAD main")
-        local count = vim.fn.system("git rev-list --count $(git merge-base HEAD main)..HEAD")
-        gitsigns.change_base("HEAD~" .. count, true)
-        -- gitsigns.change_base("main", true)
+        gitsigns.change_base("main", true)
         gitsigns.setqflist("all")
       end
     end
+  },
+
+  { -- ChatGPT plugin
+    "robitx/gp.nvim",
+    config = function()
+      require("gp").setup({})
+      vim.api.nvim_create_autocmd({ "User" }, {
+        pattern = {"GpDone"},
+        callback = function(event)
+          -- All this is just to hard wrap the output.
+          local bufnr = event.buf
+          local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+          local input_text = table.concat(lines, "\n")
+
+          local cmd = "echo " .. vim.fn.shellescape(input_text) .. " | hard_wrap"
+          local formatted_text = vim.fn.system(cmd)
+
+          if vim.v.shell_error ~= 0 then
+            print("Error occurred while running the formatter:", formatted_text)
+            return
+          end
+
+          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(formatted_text, "\n"))
+        end,
+      })
+    end,
   },
 
   -- Send text to tmux pane
@@ -1047,6 +1071,25 @@ vim.keymap.set('x', 'io', function ()
   end
 end)
 
+vim.keymap.set('o', 'ie', function ()
+  vim.cmd('normal! ggVG')
+end)
+
+vim.keymap.set('x', 'ie', function ()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+  vim.cmd('normal! ggVG')
+end)
+
+vim.keymap.set('o', 'ae', function ()
+  vim.cmd('normal! ggVG')
+end)
+
+vim.keymap.set('x', 'ae', function ()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+  vim.cmd('normal! ggVG')
+end)
+
+
 -- check if running via ssh
 if os.getenv("SSH_CLIENT") then
   vim.keymap.set('v', '"*y', function ()
@@ -1060,5 +1103,3 @@ if os.getenv("SSH_CLIENT") then
     })
   end)
 end
-
-

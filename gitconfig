@@ -29,8 +29,8 @@
     fix = !git add . && git commit --amend --no-edit
     fixup = !git commit --fixup $(git log -1 --pretty=format:%h)
     branch-name = "!git rev-parse --abbrev-ref HEAD"
-    # publish = "!git push -u origin $(git branch-name)
-    publish = !llm_gh_body > /tmp/gh_body && gh pr create --title \"$(llm_gh_title)\" --body-file /tmp/gh_body
+    publish = "!git push -u origin $(git branch-name)"
+    # publish = !llm_gh_body > /tmp/gh_body && gh pr create --title \"$(llm_gh_title)\" --body-file /tmp/gh_body
     autocommit = !llm_commit > /tmp/COMMIT_EDITMSG && git commit -e -t /tmp/COMMIT_EDITMSG
     prdiff = !git diff origin/main...$(git rev-parse --abbrev-ref HEAD)
     next = "!git log --reverse --pretty=%H main | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
