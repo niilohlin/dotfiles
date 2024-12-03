@@ -127,3 +127,6 @@ eval $(keychain --eval --agents ssh id_rsa)
 if [[ $- =~ i ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_TTY" ]]; then
   tmux attach-session || tmux new-session
 fi
+
+# increase the limit of open files
+ulimit -n 8192

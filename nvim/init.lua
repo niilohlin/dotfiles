@@ -400,7 +400,11 @@ require("lazy").setup({
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
     config = function()
-      require("telescope").setup()
+      require("telescope").setup({
+        defaults = {
+          prompt_prefix = ""
+        }
+      })
       require("telescope").load_extension("fzf")
       local builtin = require("telescope.builtin")
       vim.keymap.set("n", "<leader>sf", builtin.find_files, {}) -- find files
@@ -1011,6 +1015,10 @@ require("lazy").setup({
 
   { -- built in lua repl
     'ii14/neorepl.nvim'
+  },
+
+  { -- async Make, Dispatch (run), and more, integrates with tmux
+    "tpope/vim-dispatch",
   }
 })
 
@@ -1034,9 +1042,10 @@ vim.keymap.set("n", "<leader>rr", ":%s/\\\\n/\\r/g<CR>")    -- Replace Returns: 
 
 -- Go to the first instance of the word under the cursor, including imports.
 vim.keymap.set("n", "g[", function()
+  vim.cmd("normal! m'") -- Add the current position to the jumplist
   local word_under_cursor = vim.fn.expand("<cword>")
   vim.cmd('execute "keepjumps normal! gg"')
-  vim.cmd("/" .. word_under_cursor)
+  vim.cmd("/" .. word_under_cursor .. "/")
 end)
 
 vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste

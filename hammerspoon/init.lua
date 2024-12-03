@@ -1,7 +1,11 @@
 ---@diagnostic disable: undefined-global
 
-local search_slack = hs.hotkey.new({'cmd', 'shift'}, 'o', function()
+local go_to_in_slack = hs.hotkey.new({'cmd', 'shift'}, 'o', function()
   hs.eventtap.keyStroke({'cmd'}, 'k')
+end)
+
+local search_all_slack = hs.hotkey.new({'cmd', 'shift'}, 'f', function()
+  hs.eventtap.keyStroke({'cmd'}, 'g')
 end)
 
 local go_back = hs.hotkey.new({'ctrl'}, 'o', function()
@@ -13,15 +17,17 @@ local go_forward = hs.hotkey.new({'ctrl'}, 'i', function()
 end)
 
 local function enable_slack_enhancements()
-  search_slack:enable()
+  go_to_in_slack:enable()
   go_back:enable()
   go_forward:enable()
+  search_all_slack:enable()
 end
 
 local function disable_slack_enhancements()
-  search_slack:disable()
+  go_to_in_slack:disable()
   go_back:disable()
   go_forward:disable()
+  search_all_slack:disable()
 end
 
 hs.window.filter.new('Slack')
@@ -102,14 +108,21 @@ local function moveWindowBottom()
   win:setFrame(hs.geometry.rect(max.x, max.y + (max.h / 2), max.w, max.h / 2))
 end
 
-local function reloadConfig()
-  hs.reload()
-  hs.alert.show("Hammerspoon config reloaded")
+-- local function reloadConfig()
+--   hs.reload()
+--   hs.alert.show("Hammerspoon config reloaded")
+-- end
+
+-- hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "R", reloadConfig)
+
+
+local function openFirefox()
+  hs.application.launchOrFocus("Firefox")
 end
 
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "R", reloadConfig)
 hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "K", moveWindowTop)
 hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "J", moveWindowBottom)
 hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "L", moveWindowRight)
 hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "H", moveWindowLeft)
 hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "return", maximizeWindow)
+hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "Q", openFirefox)
