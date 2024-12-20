@@ -136,6 +136,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     vim.cmd([[ call clearmatches() ]])
     vim.cmd([[ call matchadd('ColorColumn', '\%121v', 100) ]])
     vim.cmd([[ setlocal textwidth=120 ]])
+    vim.opt.commentstring = "// %s"
   end,
 })
 
@@ -738,9 +739,9 @@ require("lazy").setup({
           },
         },
 
-        tsserver = {
-          capabilities = capabilities,
-        },
+        -- tsserver = {
+        --   capabilities = capabilities,
+        -- },
 
         eslint = {
           capabilities = capabilities,
@@ -1019,7 +1020,7 @@ require("lazy").setup({
 
   { -- async Make, Dispatch (run), and more, integrates with tmux
     "tpope/vim-dispatch",
-  }
+  },
 })
 
 -- Never use Q for ex mode.
@@ -1029,7 +1030,6 @@ vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "<C-U>", "<C-U>zz")                     -- Move cursor to middle of screen
 vim.keymap.set("n", "<C-D>", "<C-D>zz")                     -- Move cursor to middle of screen
 
-vim.keymap.set("v", "<leader>p", '"_dP')                    -- Paste without copying to clipboard
 vim.keymap.set("v", "<leader>cq", function()                -- open selected in quickfix list
   vim.cmd('normal "vy')
   vim.cmd([[ cexpr split(@v, "\n") ]])

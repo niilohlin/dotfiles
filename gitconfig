@@ -26,6 +26,7 @@
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
     go = checkout -b
     branches = "!git for-each-ref --sort=-committerdate refs/heads/ | tail -r"
+    stashpull = "!git stash && git pull && git stash pop"
     fix = !git add . && git commit --amend --no-edit
     fixup = !git commit --fixup $(git log -1 --pretty=format:%h)
     branch-name = "!git rev-parse --abbrev-ref HEAD"
