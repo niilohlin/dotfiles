@@ -1,0 +1,7 @@
+font-family = "JetBrains Mono"
+font-family-bold = "JetBrains Mono Bold"
+font-family-italic = "JetBrains Mono Italic"
+font-family-bold-italic = "JetBrains Mono Bold Italic"
+font-size = 20
+
+theme = GruvboxDark

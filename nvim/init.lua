@@ -262,6 +262,12 @@ vim.g.python3_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+vim.diagnostic.config({
+  float = {
+    source = true,
+  }
+})
+
 require("lazy").setup({
   { -- Git status of changed lines to the left.
     "lewis6991/gitsigns.nvim",
@@ -659,8 +665,6 @@ require("lazy").setup({
     "neovim/nvim-lspconfig",
     config = function()
       -- Global mappings.
-      -- See `:help vim.diagnostic.*` for documentation on any of the below functions
-      vim.keymap.set("n", "<leader>e", function() vim.diagnostic.open_float({source = true}) end)
       vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
 
       -- Use LspAttach autocommand to only map the following keys
@@ -711,7 +715,7 @@ require("lazy").setup({
       })
 
       -- Set up lspconfig.
-      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
       local lspconfig = require("lspconfig")
 
       lspconfig["sourcekit"].setup({ capabilities = capabilities })
@@ -883,96 +887,71 @@ require("lazy").setup({
     end
   },
 
-  -- LSP completion
-  -- This version is compatible with nvim 0.9.x master requires 0.10
-  {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      "hrsh7th/cmp-buffer",                  -- Complete from buffer
-      "hrsh7th/cmp-nvim-lsp-signature-help", -- Improved completions, completions for argument signature
-      "hrsh7th/cmp-cmdline",                 -- Better wild menu, while typing
-      "hrsh7th/cmp-path",                    -- Complete file paths
-      "hrsh7th/cmp-nvim-lsp",                -- LSP completion
-      {                                      -- Nvim api completion
-        "hrsh7th/cmp-nvim-lua",
-        config = function()
-          require("cmp_nvim_lsp").setup({
-            sources = {
-              { name = "nvim_lua" },
-            },
-          })
-        end,
+  { -- Completion engine.
+    'saghen/blink.cmp',
+    dependencies = 'rafamadriz/friendly-snippets',
+
+    -- use a release tag to download pre-built binaries
+    version = 'v0.*',
+
+    opts = {
+      keymap = {
+        preset = 'default',
+        ['<C-l>'] = { 'snippet_forward', 'fallback' },
+        ['<C-h>'] = { 'snippet_backward', 'fallback' },
+        ['<C-k>'] = { 'show_documentation', 'fallback' },
+        ['<C-c>'] = { 'cancel', 'fallback' },
+      },
+      appearance = {
+        use_nvim_cmp_as_default = true,
+        kind_icons = {
+          Text = 'Text',
+          Method = 'Method',
+          Function = 'Function',
+          Constructor = 'Constructor',
+
+          Field = 'Field',
+          Variable = 'Variable',
+          Property = 'Property',
+
+          Class = 'Class',
+          Interface = 'Interface',
+          Struct = 'Struct',
+          Module = 'Module',
+
+          Unit = 'Unit',
+          Value = 'Value',
+          Enum = 'Enum',
+          EnumMember = 'EnumMember',
+
+          Keyword = 'Keyword',
+          Constant = 'Constant',
+
+          Snippet = 'Snippet',
+          Color = 'Color',
+          File = 'File',
+          Reference = 'Reference',
+          Folder = 'Folder',
+          Event = 'Event',
+          Operator = 'Operator',
+          TypeParameter = 'TypeParameter',
+        },
+      },
+
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
+      completion = {
+        -- Some LSPs might add brackets themselves anyways
+        accept = { auto_brackets = { enabled = false } },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 0,
+        },
+        -- signature = { enabled = true }
       },
     },
-    config = function()
-      -- Set up nvim-cmp.
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
-      cmp.setup({
-        snippet = {
-          -- REQUIRED - you must specify a snippet engine
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-          completion = { completeopt = 'menu,menuone,noinsert' },
-        },
-        window = {
-          -- completion = cmp.config.window.bordered(),
-          -- documentation = cmp.config.window.bordered(),
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-e>"] = cmp.mapping.abort(),
-          ["<C-y>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-          ["<C-l>"] = cmp.mapping(function()
-            if luasnip.expand_or_locally_jumpable() then
-              luasnip.expand_or_jump()
-            end
-          end, { "i", "s" }),
-          ["<C-h>"] = cmp.mapping(function()
-            if luasnip.locally_jumpable(-1) then
-              luasnip.jump(-1)
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "nvim_lsp_signature_help" },
-        }, {
-          { name = "buffer" },
-        }),
-      })
-
-      -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-      cmp.setup.cmdline({ "/", "?" }, {
-        mapping = cmp.mapping.preset.cmdline(),
-        sources = {
-          { name = "buffer" },
-        },
-      })
-    end,
-  },
-
-  -- snip manager required by nvim-cmp
-  {
-    dependencies = {
-      "saadparwaiz1/cmp_luasnip",
-      { -- Pre made snippets
-        "rafamadriz/friendly-snippets",
-        config = function()
-          require("luasnip.loaders.from_vscode").lazy_load()
-          require("luasnip.loaders.from_snipmate").lazy_load({ path = { "./snippets" } })
-        end,
-      },
-    },
-    "L3MON4D3/LuaSnip",
-    -- follow latest release.
-    version = "v2.3.0",
-    -- install jsregexp (optional!).
-    -- build = "make install_jsregexp"
+    opts_extend = { "sources.default" }
   },
 
   { -- code action previewer
