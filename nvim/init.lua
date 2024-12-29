@@ -594,9 +594,9 @@ require("lazy").setup({
     end,
   },
 
-  -- Gruvbox with treesitter support
-  {
-    "ellisonleao/gruvbox.nvim",
+  { -- Gruvbox with treesitter support (fixed gitsigns)
+    "niilohlin/gruvbox.nvim",
+    branch = "fix-gitsigns",
     config = function()
       local gruvbox = require("gruvbox")
       gruvbox.setup()

@@ -69,7 +69,9 @@ bindkey -M vicmd "^[[E" edit-command-line
 # Automatically ls after cd and add it to a hook
 chpwd_functions+=(ls)
 
+# Set vi keybindings
 set -o vi
+# Start in command mode.
 set keymap vi-insert
 
 eval "$(/opt/homebrew/bin/mise activate zsh)"
