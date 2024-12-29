@@ -349,22 +349,20 @@ require("lazy").setup({
 
   { -- Surround plugin, adds text objects like ci" and so on.
     "echasnovski/mini.surround",
-    config = function()
-      require("mini.surround").setup({
-        mappings = {
-          add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-          delete = "ds",       -- Delete surrounding
-          replace = "cs",      -- Replace surrounding
+    opts = {
+      mappings = {
+        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds",       -- Delete surrounding
+        replace = "cs",      -- Replace surrounding
 
-          find = "",           -- Find surrounding (to the right)
-          find_left = "",      -- Find surrounding (to the left)
-          highlight = "",      -- Highlight surrounding
-          update_n_lines = "", -- Update `n_lines`
-          suffix_last = "",    -- Suffix to search with "prev" method
-          suffix_next = "",    -- Suffix to search with "next" method
-        },
-      })
-    end,
+        find = "",           -- Find surrounding (to the right)
+        find_left = "",      -- Find surrounding (to the left)
+        highlight = "",      -- Highlight surrounding
+        update_n_lines = "", -- Update `n_lines`
+        suffix_last = "",    -- Suffix to search with "prev" method
+        suffix_next = "",    -- Suffix to search with "next" method
+      },
+    }
   },
 
   { -- Text objects plugin
@@ -598,8 +596,7 @@ require("lazy").setup({
     "niilohlin/gruvbox.nvim",
     branch = "fix-gitsigns",
     config = function()
-      local gruvbox = require("gruvbox")
-      gruvbox.setup()
+      require("gruvbox").setup()
       vim.cmd("colorscheme gruvbox")
     end,
   },
@@ -882,9 +879,6 @@ require("lazy").setup({
 
   { -- indentation text objects and jumps
     "niilohlin/neoindent",
-    config = function ()
-      require("neoindent").setup()
-    end
   },
 
   { -- Completion engine.
