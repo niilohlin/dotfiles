@@ -883,11 +883,7 @@ require("lazy").setup({
 
   { -- Completion engine.
     'saghen/blink.cmp',
-    dependencies = 'rafamadriz/friendly-snippets',
-
-    -- use a release tag to download pre-built binaries
-    version = 'v0.*',
-
+    dependencies = { 'rafamadriz/friendly-snippets' },
     opts = {
       keymap = {
         preset = 'default',
@@ -1018,7 +1014,9 @@ vim.keymap.set("n", "g[", function()
   vim.cmd("normal! m'") -- Add the current position to the jumplist
   local word_under_cursor = vim.fn.expand("<cword>")
   vim.cmd('execute "keepjumps normal! gg"')
-  vim.cmd("/" .. word_under_cursor .. "/")
+  vim.cmd("/\\C\\<" .. word_under_cursor .. "\\>/") -- \\C matches case exactly \< and \> matches word boundaries
+  vim.cmd("normal! n") -- Silly workaround
+  vim.cmd("normal! N")
 end)
 
 vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
