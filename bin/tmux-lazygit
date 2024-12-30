@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+
+# -E flag is for "exit on close"
+tmux popup -w 80% -h 80% -E lazygit
