@@ -435,11 +435,11 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       local function has_workspace_symbols()
-        if not vim.lsp.buf_get_clients() then
+        if not vim.lsp.get_clients() then
           return false
         end
 
-        for _, client in ipairs(vim.lsp.get_active_clients()) do
+        for _, client in ipairs(vim.lsp.get_clients()()) do
           if client.server_capabilities.workspaceSymbolProvider then
             return true
           end
@@ -1009,14 +1009,16 @@ vim.api.nvim_command("command W w")                         -- Remap :W to :w
 
 vim.keymap.set("n", "<leader>rr", ":%s/\\\\n/\\r/g<CR>")    -- Replace Returns:  Replace all \n with new lines
 
--- Go to the first instance of the word under the cursor, including imports.
+-- Go to the first instance of the word under the cursor in the current buffer, including imports.
 vim.keymap.set("n", "g[", function()
   vim.cmd("normal! m'") -- Add the current position to the jumplist
   local word_under_cursor = vim.fn.expand("<cword>")
   vim.cmd('execute "keepjumps normal! gg"')
-  vim.cmd("/\\C\\<" .. word_under_cursor .. "\\>/") -- \\C matches case exactly \< and \> matches word boundaries
-  vim.cmd("normal! n") -- Silly workaround
-  vim.cmd("normal! N")
+  -- \C matches case exactly \< and \> matches word boundaries
+  vim.cmd("/\\C\\<" .. word_under_cursor .. "\\>/")
+  -- Silly workaround to put the cursor at the start of the word exactly
+  -- because vim.cmd("/...") does not seem to do that correctly.
+  vim.cmd("keepjumps normal! nN")
 end)
 
 vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
