@@ -66,40 +66,8 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.cmd([[ let g:VtrClearEmptyLines = 0 ]])
     vim.cmd([[ let g:VtrAppendNewline = 1 ]])
 
-    -- Python method textobject, better than tree-sitter textobject
-    vim.keymap.set('o', 'im', function ()
-      vim.cmd('keepjumps normal [m')
-      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
-      vim.cmd("keepjumps normal ]M")
-      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
-      vim.cmd("normal! gv")
-    end)
-
-    vim.keymap.set('x', 'im', function ()
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
-      vim.cmd('keepjumps normal [m')
-      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
-      vim.cmd("keepjumps normal ]M")
-      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
-      vim.cmd("normal! gv")
-    end)
-
-    vim.keymap.set('o', 'am', function ()
-      vim.cmd('keepjumps normal [Ml')
-      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
-      vim.cmd("keepjumps normal ]M")
-      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
-      vim.cmd("normal! gv")
-    end)
-
-    vim.keymap.set('x', 'am', function ()
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
-      vim.cmd('keepjumps normal [Ml')
-      vim.fn.setpos("'<", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 0})
-      vim.cmd("keepjumps normal ]M")
-      vim.fn.setpos("'>", {vim.fn.bufnr(), vim.fn.line("."), vim.fn.col("."), 1})
-      vim.cmd("normal! gv")
-    end)
+    -- set 'include' to '' so that we can use [<c-I> to go to the import.
+    vim.opt.include = ""
 
     -- search for the current line
     local builtin = require("telescope.builtin")
@@ -762,6 +730,34 @@ require("lazy").setup({
           capabilities = capabilities,
         },
       }
+
+      -- Add all active lsps to the status line
+      local function lsp_status()
+        local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
+        if #attached_clients == 0 then
+          return ""
+        end
+        local names = vim.iter(attached_clients)
+        :map(function(client)
+          local name = client.name:gsub("language.server", "ls")
+          return name
+        end)
+        :totable()
+        return "[" .. table.concat(names, ", ") .. "]"
+      end
+
+      function _G.statusline()
+        return table.concat({
+          "%f",
+          "%h%w%m%r",
+          "%=",
+          lsp_status(),
+          " %-14(%l,%c%V%)",
+          "%P",
+        }, " ")
+      end
+
+      vim.o.statusline = "%{%v:lua._G.statusline()%}"
 
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',

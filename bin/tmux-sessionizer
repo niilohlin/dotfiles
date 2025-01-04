@@ -32,7 +32,14 @@ if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
 fi
 
 if ! tmux has-session -t=$selected_name 2> /dev/null; then
+    # -d flag is to detach the current session
+    # -s flag is to specify the session name
+    # -c flag is to specify the working directory
     tmux new-session -ds $selected_name -c $selected
+    if [[ -f "$selected/session.ini" ]]; then
+        tmux send-keys -t $selected_name ". tmux-setup-workspace '$selected/session.ini'" Enter
+        # . tmux-setup-workspace "$selected/session.ini"
+    fi
 fi
 
 tmux switch-client -t $selected_name

@@ -7,7 +7,7 @@
 	pager = diff-so-fancy | less --tabs=4 -RFX
 [user]
 	name = Niil Öhlin
-	email = niilohlin@gmail.com
+	email = niil.ohlin@quickbit.com
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -46,10 +46,10 @@
     path = ~/work/gitconfig
 [includeIf "gitdir:~/personal/"]
     path = ~/personal/gitconfig
-[url "ssh://git@github.com"]
-	insteadOf = https://github.com
-; [url "git://git@github.com"]
-; 	insteadOf = ssh://git@github.com
+# [url "ssh://git@github.com"]
+# 	insteadOf = https://github.com
+# ; [url "git://git@github.com"]
+# ; 	insteadOf = ssh://git@github.com
 [pull]
 	rebase = true
 [rerere]
