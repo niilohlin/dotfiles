@@ -301,9 +301,6 @@ require("lazy").setup({
   },
 
   -- Send text to tmux pane
-  "christoomey/vim-tmux-navigator",
-
-  -- Send text to tmux pane
   "christoomey/vim-tmux-runner",
 
   -- Markdown utility, go to link and so on.
@@ -343,10 +340,10 @@ require("lazy").setup({
           swap = {
             enable = true,
             swap_next = {
-              ["<leader>a"] = "@parameter.inner",
+              ["<leader>sa"] = "@parameter.inner",
             },
             swap_previous = {
-              ["<leader>A"] = "@parameter.inner",
+              ["<leader>sA"] = "@parameter.inner",
             },
           },
         },
@@ -530,33 +527,6 @@ require("lazy").setup({
           },
         },
       })
-
-      local parser_config = require("nvim-treesitter.parsers").get_parser_configs()
-      parser_config.make = {
-        install_info = {
-          url = "~/personal/tree-sitter-make/",   -- local path or git repo
-          files = { "src/parser.c" },             -- note that some parsers also require src/scanner.c or src/scanner.cc
-          -- optional entries:
-          branch = "main",                        -- default branch in case of git repo if different from master
-          generate_requires_npm = false,          -- if stand-alone parser without npm dependencies
-          requires_generate_from_grammar = false, -- if folder contains pre-generated src/parser.c
-        },
-      }
-
-      vim.treesitter.language.register("make", "make")
-
-      parser_config.pbxproj = {
-        install_info = {
-          url = "~/personal/tree-sitter-pbxproj",
-          files = { "src/parser.c" },
-          branch = "main",
-          generate_requires_npm = false,
-          requires_generate_from_grammar = false,
-        },
-        filetype = "pbxproj",
-      }
-
-      vim.treesitter.language.register("pbxproj", "pbxproj")
     end,
   },
 
@@ -567,6 +537,10 @@ require("lazy").setup({
       require("gruvbox").setup()
       vim.cmd("colorscheme gruvbox")
     end,
+  },
+
+  { -- best range-normal live-update plugin. Make sure to write `norma` to activate (todo: rewrite)
+    "bfredl/nvim-incnormal"
   },
 
   -- Integrate quickfix list with diagnostics
@@ -762,6 +736,13 @@ require("lazy").setup({
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
+          local clients = vim.lsp.get_clients()
+          for _, client in ipairs(clients) do
+            if client.name == "pylint_ignore" then
+              return
+            end
+          end
+
           local client_id, err_message = vim.lsp.start_client {
             name = "pylint_ignore",
             -- cmd = { os.getenv("HOME") .. "/personal/pylint_ignore_lsp/pylint_ignore_lsp/main.py" },
@@ -780,6 +761,13 @@ require("lazy").setup({
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
+          local clients = vim.lsp.get_clients()
+          for _, client in ipairs(clients) do
+            if client.name == "generic_type_lsp" then
+              return
+            end
+          end
+
           local client_id, err_message = vim.lsp.start_client {
             name = "generic_type_lsp",
             cmd = { "generic_type_lsp" },
@@ -797,6 +785,13 @@ require("lazy").setup({
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
+          local clients = vim.lsp.get_clients()
+          for _, client in ipairs(clients) do
+            if client.name == "jedi_autoimport_lsp" then
+              return
+            end
+          end
+
           local client_id, err_message = vim.lsp.start_client {
             -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
             name = "jedi_autoimport_lsp",
@@ -829,9 +824,6 @@ require("lazy").setup({
     end,
   },
 
-  -- database viewer
-  'tpope/vim-dadbod',
-
   -- Generic log highlighting
   "MTDL9/vim-log-highlighting",
 
@@ -857,11 +849,7 @@ require("lazy").setup({
     end,
   },
 
-  -- Targets, text objects, adds objects like ci,
-  -- 'wellle/targets.vim',
-
-  -- File explorer
-  {
+  { -- File explorer
     "stevearc/oil.nvim",
     event = "VimEnter",
     config = function()
@@ -875,6 +863,9 @@ require("lazy").setup({
 
   { -- indentation text objects and jumps
     "niilohlin/neoindent",
+    config = function ()
+      require("neoindent").setup()
+    end
   },
 
   { -- Completion engine.
@@ -937,7 +928,10 @@ require("lazy").setup({
         -- signature = { enabled = true }
       },
     },
-    opts_extend = { "sources.default" }
+    opts_extend = { "sources.default" },
+    build = function ()
+      vim.fn.system("cd /Users/niilohlin/.local/share/nvim/lazy/blink.cmp/ && cargo build --release")
+    end
   },
 
   { -- code action previewer
@@ -977,10 +971,6 @@ require("lazy").setup({
         end,
       })
     end,
-  },
-
-  { -- built in lua repl
-    'ii14/neorepl.nvim'
   },
 
   { -- async Make, Dispatch (run), and more, integrates with tmux
