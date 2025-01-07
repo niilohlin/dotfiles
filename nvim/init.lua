@@ -543,6 +543,13 @@ require("lazy").setup({
     "bfredl/nvim-incnormal"
   },
 
+  -- {
+  --   dir = "~/personal/incnormal.lua",
+  --   config = function ()
+  --     require("incnormal").setup()
+  --   end
+  -- },
+
   -- Integrate quickfix list with diagnostics
   { dir = "~/personal/qflist-diagnostics.nvim" },
 
@@ -720,12 +727,24 @@ require("lazy").setup({
         return "[" .. table.concat(names, ", ") .. "]"
       end
 
+      local function git_status()
+        local branch = vim.fn.system("git branch --show-current 2>/dev/null"):gsub("%s+", "")
+        if branch == "" then
+          return "" -- Not in a Git repo
+        end
+
+        local status = vim.fn.system("git status --porcelain 2>/dev/null")
+        local changes = status ~= "" and "*" or ""
+        return "[" .. branch .. changes .. "]"
+      end
+
       function _G.statusline()
         return table.concat({
           "%f",
           "%h%w%m%r",
           "%=",
           lsp_status(),
+          git_status(),
           " %-14(%l,%c%V%)",
           "%P",
         }, " ")
