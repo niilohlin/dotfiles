@@ -12,7 +12,7 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-local function set_tab_length(tab_length)
+function set_tab_length(tab_length)
   vim.opt.tabstop = tab_length
   vim.opt.shiftwidth = tab_length
   vim.opt.softtabstop = tab_length
@@ -58,6 +58,50 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
+local function find_file_using_rg(file, find_files)
+  local file_in_same_path = vim.fn.expand("%:p:h") .. "/" .. file
+  if vim.fn.filereadable(file_in_same_path) == 1 then
+    vim.cmd("edit " .. file_in_same_path)
+    return
+  end
+
+  vim.fn.jobstart("rg --files --color never . | rg " .. file, {
+    on_stdout = function(_, data, _)
+      if table.concat(data) == table.concat({ "" }) then
+        return
+      end
+      local files = {}
+      for _, found in ipairs(data) do
+        if found ~= "" then
+          table.insert(files, found)
+        end
+      end
+      if #files == 1 then
+        vim.cmd("edit " .. files[1])
+      else
+        find_files({ default_text = file })
+      end
+    end,
+    on_stderr = function(_, data, _)
+      local data_without_empty_strings = {}
+      for _, line in ipairs(data) do
+        if line ~= "" then
+          table.insert(data_without_empty_strings, line)
+        end
+      end
+      if #data_without_empty_strings > 0 then
+        print(table.concat(data_without_empty_strings, "\n"))
+      end
+    end,
+    on_exit = function(_, code, _)
+      if code ~= 0 then
+        find_files({ default_text = file })
+      end
+    end,
+  })
+end
+
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
@@ -88,13 +132,8 @@ vim.api.nvim_create_autocmd("FileType", {
         file_to_edit = "i_" .. current_file_name
       end
 
-      if vim.fn.filereadable(file_to_edit) == 1 then
-        vim.cmd("edit " .. file_to_edit)
-      else
-        builtin.find_files({ default_text = file_to_edit })
-      end
+      find_file_using_rg(file_to_edit, builtin.find_files)
     end)
-
   end,
 })
 
@@ -270,6 +309,10 @@ require("lazy").setup({
         gitsigns.change_base("main", true)
         gitsigns.setqflist("all")
       end
+
+      function Unreview()
+        gitsigns.change_base(nil, true)
+      end
     end
   },
 
@@ -360,6 +403,12 @@ require("lazy").setup({
   -- fzf binding
   "junegunn/fzf.vim",
 
+  { -- quickfix improvement
+    'stevearc/quicker.nvim',
+    event = "FileType qf",
+    opts = {},
+  },
+
   -- project wide search, requires ripgrep
   {
     "nvim-telescope/telescope.nvim",
@@ -404,7 +453,7 @@ require("lazy").setup({
           return false
         end
 
-        for _, client in ipairs(vim.lsp.get_clients()()) do
+        for _, client in ipairs(vim.lsp.get_clients()) do
           if client.server_capabilities.workspaceSymbolProvider then
             return true
           end
@@ -430,40 +479,7 @@ require("lazy").setup({
         if vim.fn.filereadable(file) == 1 then
           vim.cmd("edit " .. file)
         else
-          vim.fn.jobstart("rg --files --color never . | rg " .. file, {
-            on_stdout = function(_, data, _)
-              if table.concat(data) == table.concat({ "" }) then
-                return
-              end
-              local files = {}
-              for _, found in ipairs(data) do
-                if found ~= "" then
-                  table.insert(files, found)
-                end
-              end
-              if #files == 1 then
-                vim.cmd("edit " .. files[1])
-              else
-                builtin.find_files({ default_text = file })
-              end
-            end,
-            on_stderr = function(_, data, _)
-              local data_without_empty_strings = {}
-              for _, line in ipairs(data) do
-                if line ~= "" then
-                  table.insert(data_without_empty_strings, line)
-                end
-              end
-              if #data_without_empty_strings > 0 then
-                print(table.concat(data_without_empty_strings, "\n"))
-              end
-            end,
-            on_exit = function(_, code, _)
-              if code ~= 0 then
-                builtin.find_files({ default_text = file })
-              end
-            end,
-          })
+          find_file_using_rg(file, builtin.find_files)
         end
       end)
 
@@ -566,20 +582,23 @@ require("lazy").setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
           null_ls.builtins.formatting.black.with({
+            timeout = 10 * 1000,
             prefer_local = "venv/bin",
             env = function(params)
               return { PYTHONPATH = params.root }
             end,
           }),
           null_ls.builtins.diagnostics.pylint.with({
+            timeout = 10 * 1000,
             prefer_local = "venv/bin",
             env = function(params)
               return { PYTHONPATH = params.root }
             end,
           }),
           null_ls.builtins.diagnostics.mypy.with({
+            timeout = 10 * 1000,
             prefer_local = "venv/bin",
-            extra_args = { "--cache-dir=/dev/null" },
+            extra_args = { },
             env = function(params)
               return { PYTHONPATH = params.root }
             end,
@@ -592,7 +611,7 @@ require("lazy").setup({
               group = augroup,
               buffer = bufnr,
               callback = function()
-                vim.lsp.buf.format({ async = false })
+                vim.lsp.buf.format({ async = false, timeout_ms = 5000  })
               end,
             })
           end
@@ -712,46 +731,6 @@ require("lazy").setup({
         },
       }
 
-      -- Add all active lsps to the status line
-      local function lsp_status()
-        local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
-        if #attached_clients == 0 then
-          return ""
-        end
-        local names = vim.iter(attached_clients)
-        :map(function(client)
-          local name = client.name:gsub("language.server", "ls")
-          return name
-        end)
-        :totable()
-        return "[" .. table.concat(names, ", ") .. "]"
-      end
-
-      local function git_status()
-        local branch = vim.fn.system("git branch --show-current 2>/dev/null"):gsub("%s+", "")
-        if branch == "" then
-          return "" -- Not in a Git repo
-        end
-
-        local status = vim.fn.system("git status --porcelain 2>/dev/null")
-        local changes = status ~= "" and "*" or ""
-        return "[" .. branch .. changes .. "]"
-      end
-
-      function _G.statusline()
-        return table.concat({
-          "%f",
-          "%h%w%m%r",
-          "%=",
-          lsp_status(),
-          git_status(),
-          " %-14(%l,%c%V%)",
-          "%P",
-        }, " ")
-      end
-
-      vim.o.statusline = "%{%v:lua._G.statusline()%}"
-
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
         callback = function()
@@ -841,6 +820,58 @@ require("lazy").setup({
         },
       })
     end,
+  },
+
+  {
+    'nvim-lualine/lualine.nvim',
+    config = function()
+      local custom_gruvbox = require("lualine.themes.gruvbox")
+      -- Remove the constant changing of colors while changing modes
+      custom_gruvbox.insert = custom_gruvbox.normal
+      custom_gruvbox.visual = custom_gruvbox.normal
+      custom_gruvbox.replace = custom_gruvbox.normal
+      custom_gruvbox.command = custom_gruvbox.normal
+      custom_gruvbox.inactive = custom_gruvbox.normal
+
+      require("lualine").setup({
+        options = {
+          theme = custom_gruvbox,
+          component_separators = { left = '', right = ''},
+          section_separators = { left = '', right = ''},
+        },
+        sections = {
+          lualine_a = { 'branch' },
+          lualine_b = {'diff', 'diagnostics'},
+          lualine_x = { function()
+            local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
+            if #attached_clients == 0 then
+              return ""
+            end
+            local names = vim.iter(attached_clients)
+            :map(function(client)
+              local name = client.name:gsub("language.server", "ls")
+              return name
+            end)
+            :totable()
+            return table.concat(names, " ")
+          end},
+          lualine_y = {'filetype', 'progress'},
+          lualine_z = {'location'}
+        },
+        inactive_sections = {
+          lualine_a = {'filename'},
+          lualine_b = {},
+          lualine_c = {},
+          lualine_x = {},
+          lualine_y = {},
+          lualine_z = {}
+        },
+        tabline = {},
+        winbar = {},
+        inactive_winbar = {},
+        extensions = {}
+      })
+    end
   },
 
   -- Generic log highlighting
@@ -994,6 +1025,27 @@ require("lazy").setup({
 
   { -- async Make, Dispatch (run), and more, integrates with tmux
     "tpope/vim-dispatch",
+    config = function ()
+      vim.keymap.set("n", "<leader>tr", function()
+        vim.cmd("Dispatch " .. vim.fn.expand("<cword>") .. "<CR>")
+      end) -- tr = Test Run
+
+      vim.keymap.set("n", "<leader>rr", function() -- rr ReRun last
+        local historynr = vim.fn.histnr("cmd")
+        for i = historynr, 1, -1 do
+          if vim.fn.histget("cmd", i):match("^" .. "Make.*") then
+            vim.cmd(vim.fn.histget("cmd", i))
+            return
+          end
+          if vim.fn.histget("cmd", i):match("^" .. "Dispatch.*") then
+            vim.cmd(vim.fn.histget("cmd", i))
+            return
+          end
+        end
+        print("No matching command found")
+      end)
+
+    end
   },
 })
 
@@ -1012,7 +1064,13 @@ end)
 
 vim.api.nvim_command("command W w")                         -- Remap :W to :w
 
-vim.keymap.set("n", "<leader>rr", ":%s/\\\\n/\\r/g<CR>")    -- Replace Returns:  Replace all \n with new lines
+vim.api.nvim_create_user_command(
+  'ReplaceReturns',
+  function(input)
+    vim.cmd("%s/\\\\n/\\r/g")
+  end,
+  { nargs = '*' }
+)
 
 -- Go to the first instance of the word under the cursor in the current buffer, including imports.
 vim.keymap.set("n", "g[", function()
@@ -1029,6 +1087,8 @@ end)
 vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
 vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
 vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
+
+vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 vim.keymap.set({ "o" } , "ic", require("vim._comment").textobject)

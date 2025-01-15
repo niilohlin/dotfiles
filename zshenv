@@ -2,6 +2,11 @@
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:$HOME/.cargo/bin
+export PATH=$PATH:/opt/homebrew/bin/
+
+export NVIM_BIN=/opt/homebrew/bin/nvim
+
+export PYTHONDONTWRITEBYTECODE=1
 
 # postgresql 16 config
 export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
