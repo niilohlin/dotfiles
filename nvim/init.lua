@@ -484,6 +484,20 @@ require("lazy").setup({
       end)
 
       vim.keymap.set("n", "z=", builtin.spell_suggest)
+
+      local pickers = require("telescope.pickers")
+      local finders = require("telescope.finders")
+      local conf = require("telescope.config").values
+      vim.keymap.set("n", "<leader>sc", function()
+        local git_command = "git diff --name-only"
+
+        pickers.new({}, {
+          prompt_title = "Git Diff Files",
+          finder = finders.new_oneshot_job(vim.split(git_command, " ")),
+          sorter = conf.file_sorter({}),
+          previewer = conf.file_previewer({}),
+        }):find()
+      end)
     end,
   },
 
@@ -533,13 +547,25 @@ require("lazy").setup({
             lookahead = true,
 
             keymaps = {
-              ["af"] = "@function.outer",
-              ["if"] = "@function.inner",
+              ["am"] = "@function.outer",
+              ["im"] = "@function.inner",
               ["ak"] = "@class.outer",
               ["aa"] = "@parameter.outer",
               ["ia"] = "@parameter.inner",
             },
             include_surrounding_whitespace = true,
+          },
+          move = {
+            enable = true,
+            set_jumps = true,
+            goto_next_start = {
+              ["]m"] = "@function.outer",
+              ["]k"] = "@class.outer",
+            },
+            goto_previous_start = {
+              ["[m"] = "@function.outer",
+              ["[k"] = "@class.outer",
+            },
           },
         },
       })
@@ -630,7 +656,7 @@ require("lazy").setup({
     "neovim/nvim-lspconfig",
     config = function()
       -- Global mappings.
-      vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist)
+      vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
 
       -- Use LspAttach autocommand to only map the following keys
       -- after the language server attaches to the current buffer
@@ -806,6 +832,31 @@ require("lazy").setup({
         end,
       })
 
+      vim.api.nvim_create_autocmd('BufEnter', {
+        pattern = '*.py',
+        callback = function()
+          local clients = vim.lsp.get_clients()
+          for _, client in ipairs(clients) do
+            if client.name == "rope-lsp" then
+              return
+            end
+          end
+
+          local client_id, err_message = vim.lsp.start_client {
+            -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+            name = "rope-lsp",
+            cmd = { os.getenv("HOME") .. "/personal/rope-lsp/rope_lsp/main.py" },
+            capabilities = capabilities,
+          }
+
+          if client_id then
+            vim.lsp.buf_attach_client(0, client_id)
+          else
+            print("rope lsp failed to start" .. (err_message or "?"))
+          end
+        end,
+      })
+
       require("mason").setup()
       local ensure_installed = vim.tbl_keys(servers or {})
       require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
@@ -841,7 +892,7 @@ require("lazy").setup({
         },
         sections = {
           lualine_a = { 'branch' },
-          lualine_b = {'diff', 'diagnostics'},
+          lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
             if #attached_clients == 0 then
