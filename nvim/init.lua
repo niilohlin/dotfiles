@@ -134,6 +134,9 @@ vim.api.nvim_create_autocmd("FileType", {
 
       find_file_using_rg(file_to_edit, builtin.find_files)
     end)
+
+    -- override treesitter keymap
+    vim.keymap.set({"x", "o"}, "am", "<Plug>(PythonsenseOuterFunctionTextObject)")
   end,
 })
 
@@ -276,6 +279,11 @@ vim.diagnostic.config({
 })
 
 require("lazy").setup({
+  { -- session management
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {}
+  },
   { -- Git status of changed lines to the left.
     "lewis6991/gitsigns.nvim",
     config = function()
@@ -547,8 +555,8 @@ require("lazy").setup({
             lookahead = true,
 
             keymaps = {
-              ["am"] = "@function.outer",
-              ["im"] = "@function.inner",
+              ["af"] = "@function.outer",
+              ["if"] = "@function.inner",
               ["ak"] = "@class.outer",
               ["aa"] = "@parameter.outer",
               ["ia"] = "@parameter.inner",
@@ -571,6 +579,15 @@ require("lazy").setup({
       })
     end,
   },
+
+  { -- better python movements and text objects
+    "jeetsukumaran/vim-pythonsense",
+    init = function ()
+      vim.g.is_pythonsense_suppress_object_keymaps = 1
+
+    end,
+  },
+
 
   { -- Gruvbox with treesitter support (fixed gitsigns)
     "niilohlin/gruvbox.nvim",
