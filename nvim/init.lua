@@ -891,6 +891,7 @@ require("lazy").setup({
   },
 
   {
+    dependencies = { "niilohlin/pure_branch.nvim" },
     'nvim-lualine/lualine.nvim',
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
@@ -901,6 +902,8 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
+      local pure_branch = require("pure_branch")
+
       require("lualine").setup({
         options = {
           theme = custom_gruvbox,
@@ -908,7 +911,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { 'branch' },
+          lualine_a = { pure_branch.pure_branch },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1218,3 +1221,4 @@ if os.getenv("SSH_CLIENT") then
     })
   end)
 end
+
