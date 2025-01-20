@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+
+branch_name=$(command git rev-parse --abbrev-ref HEAD)
+test -z "$(command git status --porcelain -u)"
+if [ $? -ne 0 ]; then
+    dirty="*"
+fi
+
+git_arrows=$(command git rev-list --left-right --count HEAD...@'{u}' 2>/dev/null)
+
+if [ $? -eq 0 ]; then
+    ahead=$(echo "$git_arrows" | cut -f1)
+    behind=$(echo "$git_arrows" | cut -f2)
+    if (( "$ahead" > 0 )); then
+        arrows="↑"
+    fi
+    if (( "$behind" > 0 )); then
+        arrows=$arrows"↓"
+    fi
+    echo "$branch_name$dirty" "$arrows"
+else
+    echo "$branch_name$dirty"
+fi
+
+

@@ -598,16 +598,18 @@ require("lazy").setup({
     end,
   },
 
-  { -- best range-normal live-update plugin. Make sure to write `norma` to activate (todo: rewrite)
-    "bfredl/nvim-incnormal"
+  { -- Add Preview command for live-previewing commands
+    "smjonas/live-command.nvim",
+    config = function ()
+      require("live-command").setup({
+        commands = {
+          Norm = { cmd = "norm" },
+          G = { cmd = "g" },
+        }
+      })
+    end
   },
 
-  -- {
-  --   dir = "~/personal/incnormal.lua",
-  --   config = function ()
-  --     require("incnormal").setup()
-  --   end
-  -- },
 
   -- Integrate quickfix list with diagnostics
   { dir = "~/personal/qflist-diagnostics.nvim" },
@@ -911,7 +913,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { pure_branch.pure_branch },
+          lualine_a = { 'branch' },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
