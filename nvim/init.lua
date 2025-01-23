@@ -851,31 +851,6 @@ require("lazy").setup({
         end,
       })
 
-      vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = '*.py',
-        callback = function()
-          local clients = vim.lsp.get_clients()
-          for _, client in ipairs(clients) do
-            if client.name == "rope-lsp" then
-              return
-            end
-          end
-
-          local client_id, err_message = vim.lsp.start_client {
-            -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-            name = "rope-lsp",
-            cmd = { os.getenv("HOME") .. "/personal/rope-lsp/rope_lsp/main.py" },
-            capabilities = capabilities,
-          }
-
-          if client_id then
-            vim.lsp.buf_attach_client(0, client_id)
-          else
-            print("rope lsp failed to start" .. (err_message or "?"))
-          end
-        end,
-      })
-
       require("mason").setup()
       local ensure_installed = vim.tbl_keys(servers or {})
       require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
@@ -893,7 +868,6 @@ require("lazy").setup({
   },
 
   {
-    dependencies = { "niilohlin/pure_branch.nvim" },
     'nvim-lualine/lualine.nvim',
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
@@ -904,7 +878,28 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
-      local pure_branch = require("pure_branch")
+
+      Last_checked_time = 0
+      Short_vcs_info = ""
+
+      function get_short_vcs_info()
+        if vim.loop.now() - Last_check_time < 1000 then
+          return Short_vcs_info
+        end
+        vim.fn.jobstart({ "~/dotfiles/bin/short_vcs_info" }, {
+          cwd = vim.fn.getcwd(),
+          stdout_buffered = true,
+          on_stdout = function(_, data, _)
+            if data and table.concat(data) ~= "" then
+              return
+            end
+            Short_vcs_info = data[0]
+            Last_checked_time = vim.loop.now()
+          end
+        })
+        return Short_vcs_info
+      end
+
 
       require("lualine").setup({
         options = {
