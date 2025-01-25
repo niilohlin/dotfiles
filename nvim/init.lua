@@ -623,6 +623,38 @@ require("lazy").setup({
       local null_ls = require("null-ls")
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
+      local pylint_disable = {
+        method = null_ls.methods.COMPLETION,
+        filetypes = { "python" },
+        generator = {
+          fn = function(params)
+            local comment = false
+            for i = 1, params.col do
+              if string.sub(params.content[params.row], i, i) == "#" then
+                comment = true
+              end
+            end
+
+            if not comment then
+              return
+            end
+
+            return {
+                {
+                    items = {
+                      { label = "pylint: disable", insertText = "pylint: disable", documentation = "Disable pylint" },
+                      { label = "type: ignore", insertText = "type: ignore", documentation = "Disable mypy" },
+                    },
+                    isIncomplete = true,
+                },
+            }
+          end,
+        },
+        async = true,
+      }
+
+      null_ls.register(pylint_disable)
+
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
@@ -768,6 +800,12 @@ require("lazy").setup({
         },
 
         jedi_language_server = {
+          init_options = {
+            completion = {
+              -- LSP snippets turned out to insisting on inserting parens everywhere
+              disableSnippets = true
+            },
+          },
           capabilities = capabilities,
         },
 
