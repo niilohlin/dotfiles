@@ -624,36 +624,64 @@ require("lazy").setup({
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
       local pylint_disable = {
-        method = null_ls.methods.COMPLETION,
+        method = null_ls.methods.CODE_ACTION,
         filetypes = { "python" },
         generator = {
           fn = function(params)
-            local comment = false
-            for i = 1, params.col do
-              if string.sub(params.content[params.row], i, i) == "#" then
-                comment = true
+            local actions = {}
+            for _, diag in ipairs(params.lsp_params.context.diagnostics) do
+              if diag.source == "pylint" then
+                table.insert(actions, {
+                  title = "Disable pylint (" .. diag.code .. ")",
+                  action = function()
+                    local line = diag.range.start.line
+                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
+                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                  end,
+                })
+              elseif diag.source == "mypy" then
+                table.insert(actions, {
+                  title = "Disable mypy [" .. diag.code .. "]",
+                  action = function()
+                    local line = diag.range.start.line
+                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
+                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                  end,
+                })
               end
             end
-
-            if not comment then
-              return
-            end
-
-            return {
-                {
-                    items = {
-                      { label = "pylint: disable", insertText = "pylint: disable", documentation = "Disable pylint" },
-                      { label = "type: ignore", insertText = "type: ignore", documentation = "Disable mypy" },
-                    },
-                    isIncomplete = true,
-                },
-            }
+            return actions
           end,
         },
-        async = true,
       }
 
       null_ls.register(pylint_disable)
+
+      local generic_assignment = {
+        method = null_ls.methods.COMPLETION,
+        filetypes = { "python", "lua" },
+        generator = {
+          fn = function(params)
+            local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
+            if not snake_case_word then return {} end
+            local words = {}
+            for word in snake_case_word:gmatch("[^_]+") do
+              table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
+            end
+            local camel_case_word = table.concat(words)
+            return {
+              {
+                items = { { label = camel_case_word, insertText = camel_case_word, documentation = "CamelCase" } },
+                isIncomplete = true,
+              },
+            }
+          end,
+        },
+      }
+
+      null_ls.register(generic_assignment)
 
       null_ls.setup({
         sources = {
@@ -816,75 +844,27 @@ require("lazy").setup({
 
       vim.api.nvim_create_autocmd('BufEnter', {
         pattern = '*.py',
-        callback = function()
+        callback = function(ev)
           local clients = vim.lsp.get_clients()
           for _, client in ipairs(clients) do
-            if client.name == "pylint_ignore" then
+            if client.name == "knot_lsp" then
               return
             end
           end
 
           local client_id, err_message = vim.lsp.start_client {
-            name = "pylint_ignore",
-            -- cmd = { os.getenv("HOME") .. "/personal/pylint_ignore_lsp/pylint_ignore_lsp/main.py" },
-            cmd = { "pylint_ignore_lsp" },
+            root_dir = vim.fs.root(ev.buf, 'pyproject.toml'),--lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
+            single_file_support = false,
+            name = "knot_lsp",
+            cmd = { os.getenv("HOME") .. "/personal/python-knot-lsp/knot_lsp/main.py" },
+            -- cmd = { "jedi_autoimport_lsp" },
             capabilities = capabilities,
           }
 
           if client_id then
             vim.lsp.buf_attach_client(0, client_id)
           else
-            print("pylint_ignore_lsp failed to start" .. (err_message or "?"))
-          end
-        end,
-      })
-
-      vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = '*.py',
-        callback = function()
-          local clients = vim.lsp.get_clients()
-          for _, client in ipairs(clients) do
-            if client.name == "generic_type_lsp" then
-              return
-            end
-          end
-
-          local client_id, err_message = vim.lsp.start_client {
-            name = "generic_type_lsp",
-            cmd = { "generic_type_lsp" },
-            capabilities = capabilities,
-          }
-
-          if client_id then
-            vim.lsp.buf_attach_client(0, client_id)
-          else
-            print("generic_type_lsp failed to start" .. (err_message or "?"))
-          end
-        end,
-      })
-
-      vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = '*.py',
-        callback = function()
-          local clients = vim.lsp.get_clients()
-          for _, client in ipairs(clients) do
-            if client.name == "jedi_autoimport_lsp" then
-              return
-            end
-          end
-
-          local client_id, err_message = vim.lsp.start_client {
-            -- root_dir = lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-            name = "jedi_autoimport_lsp",
-            -- cmd = { os.getenv("HOME") .. "/personal/jedi_autoimport_lsp/jedi_autoimport_lsp/main.py" },
-            cmd = { "jedi_autoimport_lsp" },
-            capabilities = capabilities,
-          }
-
-          if client_id then
-            vim.lsp.buf_attach_client(0, client_id)
-          else
-            print("jedi_autoimport_lsp failed to start" .. (err_message or "?"))
+            print("rope failed to start" .. (err_message or "?"))
           end
         end,
       })
