@@ -137,6 +137,33 @@ vim.api.nvim_create_autocmd("FileType", {
 
     -- override treesitter keymap
     vim.keymap.set({"x", "o"}, "am", "<Plug>(PythonsenseOuterFunctionTextObject)")
+
+    function GenerateRopeCache(params)
+      vim.fn.jobstart("python -m pip install rope", {
+        cwd = vim.fn.getcwd(),
+        on_exit = function(_, code, _)
+          if code ~= 0 then
+            print("Error occurred while installing rope")
+          end
+          local python_code = '__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).generate_cache()'
+          vim.fn.jobstart("python -c '" .. python_code .. "'", {
+            cwd = vim.fn.getcwd(),
+            on_stderr = function(_, data, _)
+              if #data > 0 then
+                print(table.concat(data, "\n"))
+              end
+            end,
+            on_exit = function(_, code, _)
+              if code ~= 0 then
+                print("Error occurred while generating rope cache")
+                return
+              end
+              print("successfully generated python cache")
+            end
+          })
+        end,
+      })
+    end
   end,
 })
 
@@ -623,6 +650,150 @@ require("lazy").setup({
       local null_ls = require("null-ls")
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
+      local rope_auto_import = {
+        method = null_ls.methods.CODE_ACTION,
+        filetypes = { "python" },
+        generator = {
+          fn = function(params, done)
+            local actions = {}
+            local missing_name = false
+            for _, diag in ipairs(params.lsp_params.context.diagnostics) do
+              if diag.code == "undefined-variable" or diag.code == "name-defined" then
+                is_undefined = true
+              end
+            end
+            if not is_undefined then
+              done({})
+              return
+            end
+
+            local word_under_cursor = vim.fn.expand("<cword>")
+
+            local python_code = '[print(*tuple) for tuple in sorted(__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).import_assist("' .. word_under_cursor .. '"))[0:10]]'
+            vim.fn.jobstart("python -c '" .. python_code .. "'", {
+              cwd = vim.fn.getcwd(),
+              stdout_buffered = true,
+              on_stdout = function(_, data, _)
+                if data and table.concat(data) == "" then
+                  return
+                end
+                for _, line in ipairs(data) do
+                  local name, module = line:match("(%S+) (%S+)")
+                  if name ~= nil and module ~= nil then
+                    table.insert(actions, {
+                      title = "import " .. name .. " from " .. module,
+                      action = function()
+                        local last_import_line = 0
+                        for i = 1, params.row do
+                          local line = vim.api.nvim_buf_get_lines(params.bufnr, i, i + 1, false)[1]
+                          if line:match("^from") or line:match("^import") then
+                            last_import_line = i
+                          end
+                        end
+
+                        local import_line = "from " .. module .. " import " .. name
+                        if last_import_line == 0 then
+                          vim.api.nvim_buf_set_lines(params.bufnr, last_import_line, last_import_line + 1, false, { import_line })
+                        else
+                          vim.api.nvim_buf_set_lines(params.bufnr, last_import_line + 1, last_import_line + 1, false, { import_line })
+                        end
+                      end,
+                    })
+                  end
+
+                end
+                done(actions)
+              end,
+              on_stderr = function(_, data, _)
+                if #data > 0 then
+                  print(table.concat(data, "\n"))
+                end
+              end,
+              on_exit = function(_, code, _)
+                if code ~= 0 then
+                  done({})
+                end
+              end
+            })
+          end,
+          async = true,
+        }
+      }
+
+      null_ls.register(rope_auto_import)
+
+      local rope_completion = {
+        method = null_ls.methods.COMPLETION,
+        filetypes = { "python" },
+        generator = {
+          fn = function(params, done)
+            local actions = {}
+            local missing_name = false
+            for _, diag in ipairs(params.lsp_params.context.diagnostics) do
+              if diag.code == "undefined-variable" or diag.code == "name-defined" then
+                is_undefined = true
+              end
+            end
+            if not is_undefined then
+              done({})
+              return
+            end
+
+            local word_under_cursor = vim.fn.expand("<cword>")
+
+            local python_code = '[print(*tuple) for tuple in sorted(__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).import_assist("' .. word_under_cursor .. '"))[0:10]]'
+            vim.fn.jobstart("python -c '" .. python_code .. "'", {
+              cwd = vim.fn.getcwd(),
+              stdout_buffered = true,
+              on_stdout = function(_, data, _)
+                if data and table.concat(data) == "" then
+                  return
+                end
+                for _, line in ipairs(data) do
+                  local name, module = line:match("(%S+) (%S+)")
+                  if name ~= nil and module ~= nil then
+                    table.insert(actions, {
+                      title = "import " .. name .. " from " .. module,
+                      action = function()
+                        local last_import_line = 0
+                        for i = 1, params.row do
+                          local line = vim.api.nvim_buf_get_lines(params.bufnr, i, i + 1, false)[1]
+                          if line:match("^from") or line:match("^import") then
+                            last_import_line = i
+                          end
+                        end
+
+                        local import_line = "from " .. module .. " import " .. name
+                        if last_import_line == 0 then
+                          vim.api.nvim_buf_set_lines(params.bufnr, last_import_line, last_import_line + 1, false, { import_line })
+                        else
+                          vim.api.nvim_buf_set_lines(params.bufnr, last_import_line + 1, last_import_line + 1, false, { import_line })
+                        end
+                      end,
+                    })
+                  end
+
+                end
+                done(actions)
+              end,
+              on_stderr = function(_, data, _)
+                if #data > 0 then
+                  print(table.concat(data, "\n"))
+                end
+              end,
+              on_exit = function(_, code, _)
+                if code ~= 0 then
+                  done({})
+                end
+              end
+            })
+          end,
+          async = true,
+        }
+      }
+
+      null_ls.register(rope_auto_import)
+
       local pylint_disable = {
         method = null_ls.methods.CODE_ACTION,
         filetypes = { "python" },
@@ -841,33 +1012,6 @@ require("lazy").setup({
           capabilities = capabilities,
         },
       }
-
-      vim.api.nvim_create_autocmd('BufEnter', {
-        pattern = '*.py',
-        callback = function(ev)
-          local clients = vim.lsp.get_clients()
-          for _, client in ipairs(clients) do
-            if client.name == "knot_lsp" then
-              return
-            end
-          end
-
-          local client_id, err_message = vim.lsp.start_client {
-            root_dir = vim.fs.root(ev.buf, 'pyproject.toml'),--lspconfig.util.root_pattern('setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt', '.git'),
-            single_file_support = false,
-            name = "knot_lsp",
-            cmd = { os.getenv("HOME") .. "/personal/python-knot-lsp/knot_lsp/main.py" },
-            -- cmd = { "jedi_autoimport_lsp" },
-            capabilities = capabilities,
-          }
-
-          if client_id then
-            vim.lsp.buf_attach_client(0, client_id)
-          else
-            print("rope failed to start" .. (err_message or "?"))
-          end
-        end,
-      })
 
       require("mason").setup()
       local ensure_installed = vim.tbl_keys(servers or {})
