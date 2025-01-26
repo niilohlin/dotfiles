@@ -74,7 +74,8 @@ set -o vi
 # Start in command mode.
 set keymap vi-insert
 
-eval "$(/opt/homebrew/bin/mise activate zsh)"
+eval "$(pyenv init - zsh)"
+eval "$(pyenv virtualenv-init -)"
 
 # Load /etc/paths.d/ into the PATH
 eval $(/usr/libexec/path_helper -s)

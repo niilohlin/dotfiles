@@ -2,6 +2,7 @@
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:$HOME/.cargo/bin
+export PATH=$PATH:$HOME/.pyenv/bin
 export PATH=$PATH:/opt/homebrew/bin/
 
 export NVIM_BIN=/opt/homebrew/bin/nvim
@@ -14,6 +15,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
 export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
 
 export LANG=C
+export CC=clang
 export LC_ALL=en_US.UTF-8
 export INPUTRC=~/.inputrc
 
@@ -21,5 +23,10 @@ export INPUTRC=~/.inputrc
 #     eval `/usr/bin/ssh-agent`
 # fi
 # export SSH_AUTH_SOCK=$(tmux show-environment | grep SSH_AUTH_SOCK | cut -d= -f2)
+#
+
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+
 
 source ~/dotfiles/.env
