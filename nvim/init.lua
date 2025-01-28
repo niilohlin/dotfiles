@@ -618,7 +618,7 @@ require("lazy").setup({
   "Einenlum/yaml-revealer",
 
   { -- Make anything into an lsp, like linter output etc.
-    dependencies = { "niilohlin/rope.nvim" },
+    dependencies = { {dir =  "~/personal/rope.nvim" } },
     "nvimtools/none-ls.nvim",
     config = function()
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -853,7 +853,7 @@ require("lazy").setup({
 
       require("mason-lspconfig").setup({
         handlers = {
-          function(server_name)
+         function(server_name)
             local server = servers[server_name] or {}
             server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
             require("lspconfig")[server_name].setup(server)
@@ -865,6 +865,7 @@ require("lazy").setup({
 
   {
     'nvim-lualine/lualine.nvim',
+    dependencies = { 'niilohlin/pure_branch.nvim' },
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
       -- Remove the constant changing of colors while changing modes
@@ -874,28 +875,7 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
-
-      Last_checked_time = 0
-      Short_vcs_info = ""
-
-      function get_short_vcs_info()
-        if vim.loop.now() - Last_check_time < 1000 then
-          return Short_vcs_info
-        end
-        vim.fn.jobstart({ "~/dotfiles/bin/short_vcs_info" }, {
-          cwd = vim.fn.getcwd(),
-          stdout_buffered = true,
-          on_stdout = function(_, data, _)
-            if data and table.concat(data) ~= "" then
-              return
-            end
-            Short_vcs_info = data[0]
-            Last_checked_time = vim.loop.now()
-          end
-        })
-        return Short_vcs_info
-      end
-
+      local pure_branch = require("pure_branch")
 
       require("lualine").setup({
         options = {
@@ -904,7 +884,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { 'branch' },
+          lualine_a = { pure_branch },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })

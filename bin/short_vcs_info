@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 branch_name=$(command git rev-parse --abbrev-ref HEAD)
 test -z "$(command git status --porcelain -u)"
 if [ $? -ne 0 ]; then
