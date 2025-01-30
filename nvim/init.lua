@@ -818,9 +818,9 @@ require("lazy").setup({
           },
         },
 
-        -- tsserver = {
-        --   capabilities = capabilities,
-        -- },
+        ts_ls = {
+          capabilities = capabilities,
+        },
 
         eslint = {
           capabilities = capabilities,
@@ -865,7 +865,6 @@ require("lazy").setup({
 
   {
     'nvim-lualine/lualine.nvim',
-    dependencies = { 'niilohlin/pure_branch.nvim' },
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
       -- Remove the constant changing of colors while changing modes
@@ -875,7 +874,6 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
-      local pure_branch = require("pure_branch")
 
       require("lualine").setup({
         options = {
@@ -884,7 +882,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { pure_branch },
+          lualine_a = { 'branch' },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1126,6 +1124,25 @@ vim.keymap.set("n", "g[", function()
   -- Silly workaround to put the cursor at the start of the word exactly
   -- because vim.cmd("/...") does not seem to do that correctly.
   vim.cmd("keepjumps normal! nN")
+end)
+
+vim.keymap.set("n", "<leader>ml", function()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local line = pos[1]
+  local col = pos[2]
+  local locname = vim.fn.input("entry name: ")
+
+  local entry = {
+    bufnr = bufnr,
+    lnum = line,
+    col = col + 1,
+    text = locname,
+  }
+
+  vim.fn.setloclist(0, {entry}, 'a')
+
+  vim.cmd('lopen')
 end)
 
 vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
