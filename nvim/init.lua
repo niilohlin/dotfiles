@@ -105,11 +105,7 @@ end
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
-    -- Make Vim tmux runner compatible with python
-    vim.cmd([[ let g:VtrStripLeadingWhitespace = 0 ]])
-    vim.cmd([[ let g:VtrClearEmptyLines = 0 ]])
-    vim.cmd([[ let g:VtrAppendNewline = 1 ]])
-
+    --
     -- set 'include' to '' so that we can use [<c-I> to go to the import.
     vim.opt.include = ""
 
@@ -151,11 +147,6 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = "*.stencil",
-  command = "set filetype=swift",
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "yaml", "yml" },
   callback = function()
     set_tab_length(2)
@@ -185,11 +176,6 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
     set_tab_length(2)
   end,
-})
-
-vim.api.nvim_create_autocmd({ "BufNewFile" }, {
-  pattern = "*.rb",
-  command = "0r ~/.config/nvim/skeleton/skeleton.rb",
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
@@ -264,14 +250,11 @@ vim.opt.mouse = "" -- Disable mouse
 
 vim.g.markdown_enable_spell_checking = 0
 
-vim.g.python_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
-vim.g.python2_host_prog = "/usr/local/bin/python2"
-vim.g.python3_host_prog = "~/.local/share/mise/installs/python/3/bin/python3"
-
 -- Set leader to <space>
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
+-- show diagnostic source.
 vim.diagnostic.config({
   float = {
     source = true,
@@ -279,11 +262,6 @@ vim.diagnostic.config({
 })
 
 require("lazy").setup({
-  { -- session management
-    "folke/persistence.nvim",
-    event = "BufReadPre",
-    opts = {}
-  },
   { -- Git status of changed lines to the left.
     "lewis6991/gitsigns.nvim",
     config = function()
@@ -350,9 +328,6 @@ require("lazy").setup({
       })
     end,
   },
-
-  -- Send text to tmux pane
-  "christoomey/vim-tmux-runner",
 
   -- Markdown utility, go to link and so on.
   "plasticboy/vim-markdown",
@@ -584,7 +559,6 @@ require("lazy").setup({
     "jeetsukumaran/vim-pythonsense",
     init = function ()
       vim.g.is_pythonsense_suppress_object_keymaps = 1
-
     end,
   },
 
@@ -610,15 +584,10 @@ require("lazy").setup({
     end
   },
 
-
-  -- -- Integrate quickfix list with diagnostics
-  -- { dir = "~/personal/qflist-diagnostics.nvim" },
-
   -- Yaml utility, helps distinguish indendation
   "Einenlum/yaml-revealer",
 
   { -- Make anything into an lsp, like linter output etc.
-    dependencies = { {dir =  "~/personal/rope.nvim" } },
     "nvimtools/none-ls.nvim",
     config = function()
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -1086,10 +1055,12 @@ require("lazy").setup({
         end
         print("No matching command found")
       end)
-
     end
   },
 })
+
+local bullseye = require("bullseye")
+vim.keymap.set("n", "<leader>ma", bullseye.add_current_loc_to_loclist)
 
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
@@ -1114,69 +1085,22 @@ vim.api.nvim_create_user_command(
   { nargs = '*' }
 )
 
--- Go to the first instance of the word under the cursor in the current buffer, including imports.
-vim.keymap.set("n", "g[", function()
-  vim.cmd("normal! m'") -- Add the current position to the jumplist
-  local word_under_cursor = vim.fn.expand("<cword>")
-  vim.cmd('execute "keepjumps normal! gg"')
-  -- \C matches case exactly \< and \> matches word boundaries
-  vim.cmd("/\\C\\<" .. word_under_cursor .. "\\>/")
-  -- Silly workaround to put the cursor at the start of the word exactly
-  -- because vim.cmd("/...") does not seem to do that correctly.
-  vim.cmd("keepjumps normal! nN")
+-- Last paste object
+vim.keymap.set({ "o" } , "iP", function()
+  vim.cmd("normal `[v`]`")
 end)
-
-vim.keymap.set("n", "<leader>ml", function()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local pos = vim.api.nvim_win_get_cursor(0)
-  local line = pos[1]
-  local col = pos[2]
-  local locname = vim.fn.input("entry name: ")
-
-  local entry = {
-    bufnr = bufnr,
-    lnum = line,
-    col = col + 1,
-    text = locname,
-  }
-
-  vim.fn.setloclist(0, {entry}, 'a')
-
-  vim.cmd('lopen')
+vim.keymap.set('x', 'iP', function ()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+  vim.cmd("normal `[v`]`")
 end)
-
-vim.keymap.set("n", "gp", "`[v`]")  -- Select last paste
-vim.keymap.set("n", "g=", "`[v`]=") -- Reindent last paste
-vim.keymap.set("n", "g>", "`[v`]>") -- Indent last paste
 
 vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
 
 -- map textobject to select the continuous comment with vim._comment.textobject
-vim.keymap.set({ "o" } , "ic", require("vim._comment").textobject)
+vim.keymap.set("o" , "ic", require("vim._comment").textobject)
 vim.keymap.set('x', 'ic', function ()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
   require("vim._comment").textobject()
-end)
-
-vim.keymap.set('o', 'io', function ()
-  vim.cmd('normal! viwl"vy')
-  local copied = vim.fn.getreg("v")
-  if string.find(copied, ".", 1, true) then
-    vim.cmd('normal! gv')
-  else
-    vim.cmd('normal! gvhoh')
-  end
-end)
-
-vim.keymap.set('x', 'io', function ()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
-  vim.cmd('normal! viwl"vy')
-  local copied = vim.fn.getreg("v")
-  if string.find(copied, ".", 1, true) then
-    vim.cmd('normal! gv')
-  else
-    vim.cmd('normal! gvhoh')
-  end
 end)
 
 vim.keymap.set('o', 'ie', function ()
