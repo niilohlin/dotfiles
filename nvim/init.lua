@@ -262,6 +262,19 @@ vim.diagnostic.config({
 })
 
 require("lazy").setup({
+  { -- session management
+    "folke/persistence.nvim",
+    event = "VimEnter",
+    config = function ()
+      local persistence = require("persistence")
+      persistence.setup()
+      vim.api.nvim_create_user_command(
+        'LoadSession',
+        persistence.load,
+        { nargs = '*' }
+      )
+    end
+  },
   { -- Git status of changed lines to the left.
     "lewis6991/gitsigns.nvim",
     config = function()
@@ -843,6 +856,7 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
+      local branch_name_with_symbols = require("lualine-branch")
 
       require("lualine").setup({
         options = {
@@ -851,7 +865,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { 'branch' },
+          lualine_a = { branch_name_with_symbols },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
