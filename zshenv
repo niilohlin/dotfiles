@@ -3,7 +3,9 @@ export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:$HOME/.cargo/bin
 export PATH=$PATH:$HOME/.pyenv/bin
-export PATH=$PATH:/opt/homebrew/bin/
+export PATH=$PATH:$HOME/.rbenv/shims/
+export PATH=/opt/homebrew/bin/:$PATH
+export PATH=$PATH:$HOME/.config/composer/vendor/bin
 
 export NVIM_BIN=/opt/homebrew/bin/nvim
 

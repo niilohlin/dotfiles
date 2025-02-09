@@ -247,6 +247,17 @@ vim.opt.undofile = true -- Use undo file
 vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir" -- Set undo dir
 vim.opt.scrolloff = 1 -- Scroll 1 line before cursor hits bottom
 vim.opt.mouse = "" -- Disable mouse
+vim.opt.path:append("**") -- make :find search recursively
+vim.opt.wildignore:append("*.o,*.obj,*.pyc,*.class") -- ignore build files when recursively searching
+-- ignore git and pycache
+vim.opt.wildignore:append("*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store,*/.vscode/*,*/.pytest_cache/*,*/__pycache__/*")
+-- ignore venv
+vim.opt.wildignore:append("*/venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist/*,*/.next/*,*/.cache/*")
+-- simple replacements for telescope/fzf inputs
+-- vim.keymap.set("n", "<leader>sf", ":find ")
+-- vim.keymap.set("n", "<leader>sg", ":vim //g `git ls-files`<left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>")
+
+
 
 vim.g.markdown_enable_spell_checking = 0
 
@@ -444,6 +455,12 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
+      vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
+      vim.api.nvim_command("command! BCommits lua require('telescope.builtin').git_bcommits()")
+      vim.api.nvim_command("command! Status lua require('telescope.builtin').git_status()")
+      vim.api.nvim_command("command! Stash lua require('telescope.builtin').git_stash()")
+      vim.api.nvim_command("command! Branches lua require('telescope.builtin').git_branches()")
+
       local function has_workspace_symbols()
         if not vim.lsp.get_clients() then
           return false
@@ -585,15 +602,55 @@ require("lazy").setup({
     end,
   },
 
-  { -- Add Preview command for live-previewing commands
-    "smjonas/live-command.nvim",
-    config = function ()
-      require("live-command").setup({
-        commands = {
-          Norm = { cmd = "norm" },
-          G = { cmd = "g" },
-        }
-      })
+  -- { -- Add Preview command for live-previewing commands
+  --   "smjonas/live-command.nvim",
+  --   config = function ()
+  --     require("live-command").setup({
+  --       commands = {
+  --         Norm = { cmd = "norm" },
+  --         G = { cmd = "g" },
+  --       }
+  --     })
+  --   end
+  -- },
+
+  { -- multi cursor support
+    'jake-stewart/multicursor.nvim',
+    config = function()
+      local mc = require("multicursor-nvim")
+      mc.setup()
+      vim.keymap.set("c", "<c-g>", function()
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), 'n', false)
+        vim.defer_fn(function ()
+          local start_pos = vim.api.nvim_win_get_cursor(0)
+          local start_line = start_pos[1]
+          local start_col = start_pos[2]
+
+          local current_line = nil
+          local current_col = nil
+
+          local max_matches = 100
+
+          while not (start_line == current_line and start_col == current_col) and max_matches do
+            mc.toggleCursor()
+            vim.cmd("normal n")
+            local current_pos = vim.api.nvim_win_get_cursor(0)
+            current_line = current_pos[1]
+            current_col = current_pos[2]
+            max_matches = max_matches - 1
+          end
+          mc.enableCursors()
+        end, 0)
+      end)
+
+      vim.keymap.set("n", "<leader>t", mc.toggleCursor)
+
+      vim.keymap.set("v", "I", mc.insertVisual)
+      vim.keymap.set("v", "A", mc.appendVisual)
+
+      vim.keymap.set("n", "]g", mc.nextCursor)
+      vim.keymap.set("n", "[g", mc.prevCursor)
+      vim.keymap.set("n", "<leader>g", mc.clearCursors)
     end
   },
 
@@ -804,6 +861,10 @@ require("lazy").setup({
           capabilities = capabilities,
         },
 
+        rust_analyzer = {
+          capabilities = capabilities,
+        },
+
         eslint = {
           capabilities = capabilities,
           on_attach = function(client, bufnr)
@@ -821,10 +882,6 @@ require("lazy").setup({
               disableSnippets = true
             },
           },
-          capabilities = capabilities,
-        },
-
-        htmx = {
           capabilities = capabilities,
         },
       }
@@ -856,7 +913,7 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
-      local branch_name_with_symbols = require("lualine-branch")
+      -- local branch_name_with_symbols = require("lualine-branch")
 
       require("lualine").setup({
         options = {
@@ -865,7 +922,7 @@ require("lazy").setup({
           section_separators = { left = '', right = ''},
         },
         sections = {
-          lualine_a = { branch_name_with_symbols },
+          lualine_a = { 'branch' },
           lualine_b = {'diff', function() return '|' end, 'diagnostics'},
           lualine_x = { function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1072,6 +1129,16 @@ require("lazy").setup({
     end
   },
 })
+
+
+
+-- stop snippet if active on
+vim.keymap.set({ 's' }, '<ESC>', function()
+  if vim.snippet then
+   vim.snippet.stop()
+  end
+  return '<ESC>'
+end)
 
 local bullseye = require("bullseye")
 vim.keymap.set("n", "<leader>ma", bullseye.add_current_loc_to_loclist)
