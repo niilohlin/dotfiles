@@ -11,3 +11,4 @@ font-feature=-dlig
 theme = GruvboxDark
 
 keybind = cmd+t=unbind
+keybind = cmd+enter=unbind

@@ -92,7 +92,7 @@ M.completion = {
   generator = {
     fn = function(params, done)
       local line_to_cursor = params.content[params.row]:sub(1, params.col)
-      local prefix = line_to_cursor:match("[a-zA-Z_][a-zA-Z0-9_]*$")
+      local prefix = line_to_cursor:match("[a-zA-Z_][a-zA-Z0-9_]*$") or ""
       local start_col = params.col - #prefix
 
       import_assist(prefix, 10, function(modules)

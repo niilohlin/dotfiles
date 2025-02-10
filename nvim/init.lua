@@ -602,24 +602,12 @@ require("lazy").setup({
     end,
   },
 
-  -- { -- Add Preview command for live-previewing commands
-  --   "smjonas/live-command.nvim",
-  --   config = function ()
-  --     require("live-command").setup({
-  --       commands = {
-  --         Norm = { cmd = "norm" },
-  --         G = { cmd = "g" },
-  --       }
-  --     })
-  --   end
-  -- },
-
   { -- multi cursor support
     'jake-stewart/multicursor.nvim',
     config = function()
       local mc = require("multicursor-nvim")
       mc.setup()
-      vim.keymap.set("c", "<c-g>", function()
+      vim.keymap.set("c", "<c-v>", function()
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), 'n', false)
         vim.defer_fn(function ()
           local start_pos = vim.api.nvim_win_get_cursor(0)
@@ -643,14 +631,12 @@ require("lazy").setup({
         end, 0)
       end)
 
-      vim.keymap.set("n", "<leader>t", mc.toggleCursor)
-
       vim.keymap.set("v", "I", mc.insertVisual)
       vim.keymap.set("v", "A", mc.appendVisual)
 
-      vim.keymap.set("n", "]g", mc.nextCursor)
-      vim.keymap.set("n", "[g", mc.prevCursor)
-      vim.keymap.set("n", "<leader>g", mc.clearCursors)
+      vim.keymap.set("n", "]<c-v>", mc.nextCursor)
+      vim.keymap.set("n", "[<c-v>", mc.prevCursor)
+      vim.keymap.set("n", "<leader><c-v>", mc.clearCursors)
     end
   },
 
@@ -1166,6 +1152,44 @@ vim.api.nvim_create_user_command(
   { nargs = '*' }
 )
 
+vim.api.nvim_create_user_command(
+  'PrettyPrint',
+  function(input)
+    local text_range = vim.fn.getline(input.line1, input.line2)
+
+    local text = ""
+    if type(text_range) == 'table' then
+      text = table.concat(text_range)
+    else
+      text = text_range
+    end
+
+    local indentation = 0
+    local result = {""}
+    for i = 1, #text do
+      local c = text:sub(i,i)
+      local openers = { ["{"]=true, ["["]=true, ["("]=true }
+      local closers = { ["}"]=true, ["]"]=true, [")"]=true }
+      if openers[c] then
+        indentation = indentation + 1
+        result[#result] = result[#result] .. c
+        result[#result + 1] = string.rep("    ", indentation)
+      elseif closers[c] then
+        indentation = indentation - 1
+        result[#result + 1] = string.rep("    ", indentation) .. c
+      elseif c == "," then
+        result[#result] = result[#result] .. c
+        result[#result + 1] = string.rep("    ", indentation)
+      else
+        result[#result] = result[#result] .. c
+      end
+    end
+    -- write result
+    vim.api.nvim_buf_set_lines(0, input.line1 - 1, input.line2, true, result)
+  end,
+  { nargs = '*', range = true }
+)
+
 -- Last paste object
 vim.keymap.set({ "o" } , "iP", function()
   vim.cmd("normal `[v`]`")
@@ -1217,3 +1241,7 @@ if os.getenv("SSH_CLIENT") then
   end)
 end
 
+
+if vim.fn.exists('g:GuiLoaded') == 1 or vim.fn.exists('g:neovide') == 1 or vim.fn.exists('g:nvy') == 1 then
+  require("gui")
+end
