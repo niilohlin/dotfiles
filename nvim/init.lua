@@ -604,6 +604,56 @@ require("lazy").setup({
     end,
   },
 
+  {
+    dependencies = {
+      "nvim-neotest/nvim-nio",
+      "nvim-lua/plenary.nvim",
+      "antoinemadec/FixCursorHold.nvim",
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-neotest/neotest-python",
+    },
+    "nvim-neotest/neotest",
+    config = function ()
+      local neotest = require("neotest")
+      neotest.setup({
+        adapters = {
+          require("neotest-python")({
+            dap = { justMyCode = false },
+          }),
+        },
+      })
+
+      vim.keymap.set("n", "<leader>trr", neotest.run.run)
+      vim.keymap.set("n", "<leader>trs", neotest.run.stop)
+      vim.keymap.set("n", "<c-w>t", neotest.output.open)
+      vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
+      vim.keymap.set("n", "]j", function() neotest.jump.next({ status = "failed" }) end )
+      vim.keymap.set("n", "[j", function() neotest.jump.prev({ status = "failed" }) end )
+
+      vim.api.nvim_create_user_command(
+        'NeotestPanelOpen',
+        function()
+          neotest.output_panel.open()
+        end,
+        { nargs = '*' }
+      )
+      vim.api.nvim_create_user_command(
+        'NeotestSummaryOpen',
+        function()
+          neotest.summary.open()
+        end,
+        { nargs = '*' }
+      )
+      vim.api.nvim_create_user_command(
+        'NeotestWatchCurrentFileToggle',
+        function()
+          neotest.watch.toggle(vim.fn.expand("%"))
+        end,
+        { nargs = '*' }
+      )
+
+    end
+  },
 
   { -- Gruvbox with treesitter support (fixed gitsigns)
     "niilohlin/gruvbox.nvim",
@@ -1106,10 +1156,6 @@ require("lazy").setup({
   { -- async Make, Dispatch (run), and more, integrates with tmux
     "tpope/vim-dispatch",
     config = function ()
-      vim.keymap.set("n", "<leader>tr", function()
-        vim.cmd("Dispatch " .. vim.fn.expand("<cword>") .. "<CR>")
-      end) -- tr = Test Run
-
       vim.keymap.set("n", "<leader>rr", function() -- rr ReRun last
         local historynr = vim.fn.histnr("cmd")
         for i = historynr, 1, -1 do
