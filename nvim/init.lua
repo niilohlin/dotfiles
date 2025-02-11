@@ -514,6 +514,18 @@ require("lazy").setup({
     end,
   },
 
+  -- -- frecency per project
+  -- { -- sort files by frecency (frequency + recency)
+  --   dependencies = { "nvim-telescope/telescope.nvim" },
+  --   "nvim-telescope/telescope-frecency.nvim",
+  --   version = "*",
+  --   config = function()
+  --     vim.keymap.set("n", "<leader>sf", function () -- override find files
+  --       vim.cmd("Telescope frecency")
+  --     end)
+  --   end,
+  -- },
+
   -- Silversearcher plugin (search project)
   { "kelly-lin/telescope-ag",                  dependencies = { "nvim-telescope/telescope.nvim" } },
 
