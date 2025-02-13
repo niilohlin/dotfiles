@@ -631,8 +631,9 @@ require("lazy").setup({
         },
       })
 
-      vim.keymap.set("n", "<leader>trr", neotest.run.run)
-      vim.keymap.set("n", "<leader>trs", neotest.run.stop)
+      vim.keymap.set("n", "<leader>tr", neotest.run.run)
+      vim.keymap.set("n", "<leader>td", function() neotest.run.run({ strategy = "dap" }) end)
+      vim.keymap.set("n", "<leader>ts", neotest.run.stop)
       vim.keymap.set("n", "<c-w>t", neotest.output.open)
       vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
       vim.keymap.set("n", "]j", function() neotest.jump.next({ status = "failed" }) end )
@@ -659,6 +660,24 @@ require("lazy").setup({
         end,
         { nargs = '*' }
       )
+    end
+  },
+
+  { -- Debug support
+    dependencies = {
+      "mfussenegger/nvim-dap-python",
+    },
+    "mfussenegger/nvim-dap",
+    config = function ()
+      local dap = require("dap")
+      vim.keymap.set("n", "<leader>dc", function() dap.continue() end)
+      vim.keymap.set("n", "<leader>db", function() dap.toggle_breakpoint() end)
+      vim.keymap.set("n", "<leader>dr", function() dap.repl.open() end)
+      vim.keymap.set("n", "<leader>dn", function() dap.step_over() end)
+      vim.keymap.set("n", "<leader>di", function() dap.step_into() end)
+      vim.keymap.set("n", "<leader>do", function() dap.step_out() end)
+      vim.keymap.set("n", "<leader>dc", function() dap.disconnect() end)
+      require("dap-python").setup("./venv/bin/python")
     end
   },
 
