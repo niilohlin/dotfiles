@@ -1,3 +1,4 @@
+---@diagnostic disable: missing-fields
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
@@ -12,7 +13,7 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-function set_tab_length(tab_length)
+function SetTabLength(tab_length)
   vim.opt.tabstop = tab_length
   vim.opt.shiftwidth = tab_length
   vim.opt.softtabstop = tab_length
@@ -38,14 +39,14 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx" },
   callback = function()
-    set_tab_length(2)
+    SetTabLength(2)
   end,
 })
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "lua",
   callback = function()
-    set_tab_length(2)
+    SetTabLength(2)
   end,
 })
 
@@ -149,7 +150,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "yaml", "yml" },
   callback = function()
-    set_tab_length(2)
+    SetTabLength(2)
   end,
 })
 
@@ -174,7 +175,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     vim.cmd([[ set ft=ruby ]])
     vim.cmd([[compiler ruby]])
 
-    set_tab_length(2)
+    SetTabLength(2)
   end,
 })
 
@@ -237,7 +238,7 @@ vim.opt.cmdheight = 2
 -- opt.cmdheight = 0          -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
-set_tab_length(4)
+SetTabLength(4)
 
 vim.opt.list = true -- Show whitespace characters.
 vim.opt.listchars = { tab = "› ", trail = "·", extends = "›", precedes = "‹", nbsp = "+" } -- Show these characters
@@ -614,8 +615,15 @@ require("lazy").setup({
     },
     "nvim-neotest/neotest",
     config = function ()
+      ---@module "neotest"
       local neotest = require("neotest")
-      neotest.setup({
+      neotest.setup(
+      {
+        summary = {
+          mappings = {
+            help = "g?" -- change "?" to "g?" so that you can search backwards.
+          }
+        },
         adapters = {
           require("neotest-python")({
             dap = { justMyCode = false },
@@ -651,7 +659,6 @@ require("lazy").setup({
         end,
         { nargs = '*' }
       )
-
     end
   },
 
@@ -882,6 +889,14 @@ require("lazy").setup({
 
       lspconfig["sourcekit"].setup({ capabilities = capabilities })
 
+      local vim_runtime_paths = {
+        vim.fn.expand("$VIMRUNTIME/lua"),
+        vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
+        vim.fn.expand("$VIMRUNTIME/lua/vim"),
+      }
+      local rest = vim.api.nvim_list_runtime_paths()
+      table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
+
       local servers = {
         lua_ls = {
           capabilities = capabilities,
@@ -891,12 +906,7 @@ require("lazy").setup({
               diagnostics = {},
               workspace = {
                 checkThirdParty = false,
-                library = {
-                  [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                  [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
-                  [vim.fn.expand("$VIMRUNTIME/lua/vim")] = true,
-                  [unpack(vim.api.nvim_list_runtime_paths())] = true,
-                },
+                library = vim_runtime_paths,
               },
               completion = {
                 callSnippet = "Replace",
@@ -1096,7 +1106,14 @@ require("lazy").setup({
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets', 'buffer' },
+        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
+        providers = {
+          lazydev = {
+            name = "LazyDev",
+            module = "lazydev.integrations.blink",
+            score_offset = 100,
+          },
+        },
       },
       completion = {
         -- Some LSPs might add brackets themselves anyways
@@ -1171,6 +1188,20 @@ require("lazy").setup({
         print("No matching command found")
       end)
     end
+  },
+
+  { -- nvim development utils
+    "folke/lazydev.nvim",
+    ft = "lua", -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        "$VIMRUNTIME",
+        { path = "${HOME}/.local/share/nvim/lazy" },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+      },
+    },
   },
 })
 
