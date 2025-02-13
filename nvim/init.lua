@@ -600,6 +600,9 @@ require("lazy").setup({
             node_decremental = "-",
           },
         },
+        indent = {
+          enable = true
+        }
       })
     end,
   },
@@ -1241,7 +1244,7 @@ vim.keymap.set({ 's' }, '<ESC>', function()
 end)
 
 local bullseye = require("bullseye")
-vim.keymap.set("n", "<leader>ma", bullseye.add_current_loc_to_loclist)
+vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")

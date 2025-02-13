@@ -1,15 +1,37 @@
 -- A more lightweight harpoon, based on the loclist
 local M = {}
 
-function M.add_current_loc_to_loclist()
+function M.toggle_current_loc_to_loclist()
+
+  -- local loclist_win = vim.fn.getloclist(0, {winid = true}).winid
+  -- if loclist_win == 0 then
+  --   vim.defer_fn(function ()
+  --     vim.cmd("lopen")
+  --   end, 0)
+  --   return
+  -- end
+
+  local loclist = vim.fn.getloclist(0)
+
   local bufnr = vim.api.nvim_get_current_buf()
 
   local pos = vim.api.nvim_win_get_cursor(0)
   local line = pos[1]
   local col = pos[2]
 
+  if vim.bo.filetype == "qf" then
+    local line_under_cursor = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
+    for i, entry in ipairs(loclist) do
+      if line_under_cursor:find(entry.text) then
+        table.remove(loclist, i)
+        vim.fn.setloclist(0, loclist, 'r')
+        return
+      end
+    end
+    return
+  end
+
   local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
-  local loclist = vim.fn.getloclist(0)
 
   vim.defer_fn(function ()
     local found = false
