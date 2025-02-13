@@ -386,19 +386,7 @@ require("lazy").setup({
     "echasnovski/mini.ai",
     config = function()
       require("mini.ai").setup()
-      require'nvim-treesitter.configs'.setup {
-        textobjects = {
-          swap = {
-            enable = true,
-            swap_next = {
-              ["<leader>sa"] = "@parameter.inner",
-            },
-            swap_previous = {
-              ["<leader>sA"] = "@parameter.inner",
-            },
-          },
-        },
-      }
+
     end,
   },
 
@@ -592,6 +580,24 @@ require("lazy").setup({
               ["[m"] = "@function.outer",
               ["[k"] = "@class.outer",
             },
+          },
+          swap = {
+            enable = true,
+            swap_next = {
+              ["<leader>sa"] = "@parameter.inner",
+            },
+            swap_previous = {
+              ["<leader>sA"] = "@parameter.inner",
+            },
+          },
+        },
+        incremental_selection = {
+          enable = true,
+          keymaps = {
+            init_selection = "gV",
+            node_incremental = "+",
+            scope_incremental = "g+",
+            node_decremental = "-",
           },
         },
       })
