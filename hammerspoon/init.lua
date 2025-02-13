@@ -1,19 +1,19 @@
 ---@diagnostic disable: undefined-global
 
-local go_to_in_slack = hs.hotkey.new({'cmd', 'shift'}, 'o', function()
-  hs.eventtap.keyStroke({'cmd'}, 'k')
+local go_to_in_slack = hs.hotkey.new({ "cmd", "shift" }, "o", function()
+  hs.eventtap.keyStroke({ "cmd" }, "k")
 end)
 
-local search_all_slack = hs.hotkey.new({'cmd', 'shift'}, 'f', function()
-  hs.eventtap.keyStroke({'cmd'}, 'g')
+local search_all_slack = hs.hotkey.new({ "cmd", "shift" }, "f", function()
+  hs.eventtap.keyStroke({ "cmd" }, "g")
 end)
 
-local go_back = hs.hotkey.new({'ctrl'}, 'o', function()
-  hs.eventtap.keyStroke({'cmd'}, '[')
+local go_back = hs.hotkey.new({ "ctrl" }, "o", function()
+  hs.eventtap.keyStroke({ "cmd" }, "[")
 end)
 
-local go_forward = hs.hotkey.new({'ctrl'}, 'i', function()
-  hs.eventtap.keyStroke({'cmd'}, ']')
+local go_forward = hs.hotkey.new({ "ctrl" }, "i", function()
+  hs.eventtap.keyStroke({ "cmd" }, "]")
 end)
 
 local function enable_slack_enhancements()
@@ -30,10 +30,10 @@ local function disable_slack_enhancements()
   search_all_slack:disable()
 end
 
-hs.window.filter.new('Slack')
-:subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
-:subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
-
+hs.window.filter
+    .new("Slack")
+    :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
+    :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
 
 hs.window.animationDuration = 0
 
@@ -51,10 +51,14 @@ local function moveWindowRight()
     local nextScreen = screen:toEast()
     if nextScreen then
       local nextScreenFrame = nextScreen:frame()
-      win:setFrame(hs.geometry.rect(nextScreenFrame.x, nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h))
+      win:setFrame(
+        hs.geometry.rect(nextScreenFrame.x, nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h)
+      )
     end
   else
-    win:setFrame(hs.geometry.rect(screenFrame.x + (screenFrame.w / 2), screenFrame.y, screenFrame.w / 2, screenFrame.h))
+    win:setFrame(
+      hs.geometry.rect(screenFrame.x + (screenFrame.w / 2), screenFrame.y, screenFrame.w / 2, screenFrame.h)
+    )
   end
 end
 
@@ -71,7 +75,14 @@ local function moveWindowLeft()
     local nextScreen = screen:toWest()
     if nextScreen then
       local nextScreenFrame = nextScreen:frame()
-      win:setFrame(hs.geometry.rect(nextScreenFrame.x + (nextScreenFrame.w / 2), nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h))
+      win:setFrame(
+        hs.geometry.rect(
+          nextScreenFrame.x + (nextScreenFrame.w / 2),
+          nextScreenFrame.y,
+          nextScreenFrame.w / 2,
+          nextScreenFrame.h
+        )
+      )
     end
   else
     win:setFrame(hs.geometry.rect(screenFrame.x, screenFrame.y, screenFrame.w / 2, screenFrame.h))
@@ -115,14 +126,23 @@ end
 
 -- hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "R", reloadConfig)
 
-
 local function openFirefox()
   hs.application.launchOrFocus("Firefox")
 end
 
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "K", moveWindowTop)
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "J", moveWindowBottom)
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "L", moveWindowRight)
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "H", moveWindowLeft)
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "return", maximizeWindow)
-hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "Q", openFirefox)
+local function openGhostty()
+  hs.application.launchOrFocus("Ghostty")
+end
+
+local function openSlack()
+  hs.application.launchOrFocus("Slack")
+end
+
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "K", moveWindowTop)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "J", moveWindowBottom)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "L", moveWindowRight)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", openFirefox)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", openGhostty)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", openSlack)
