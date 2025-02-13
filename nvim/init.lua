@@ -102,7 +102,6 @@ local function find_file_using_rg(file, find_files)
   })
 end
 
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
@@ -112,14 +111,14 @@ vim.api.nvim_create_autocmd("FileType", {
 
     -- search for the current line
     local builtin = require("telescope.builtin")
-    vim.keymap.set('n', 'gi', function()
+    vim.keymap.set("n", "gi", function()
       vim.cmd('normal! "vyiw')
       local selected_text = "def " .. vim.fn.getreg("v") .. "\\("
       builtin.live_grep({ default_text = selected_text })
     end)
 
     -- Go to the associated implementation file
-    vim.keymap.set('n', '<leader>i', function()
+    vim.keymap.set("n", "<leader>i", function()
       local current_file_name = vim.fn.expand("%:t")
 
       local file_to_edit = current_file_name
@@ -133,7 +132,7 @@ vim.api.nvim_create_autocmd("FileType", {
     end)
 
     -- override treesitter keymap
-    vim.keymap.set({"x", "o"}, "am", "<Plug>(PythonsenseOuterFunctionTextObject)")
+    vim.keymap.set({ "x", "o" }, "am", "<Plug>(PythonsenseOuterFunctionTextObject)")
   end,
 })
 
@@ -258,8 +257,6 @@ vim.opt.wildignore:append("*/venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist
 -- vim.keymap.set("n", "<leader>sf", ":find ")
 -- vim.keymap.set("n", "<leader>sg", ":vim //g `git ls-files`<left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>")
 
-
-
 vim.g.markdown_enable_spell_checking = 0
 
 -- Set leader to <space>
@@ -270,22 +267,18 @@ vim.g.maplocalleader = " "
 vim.diagnostic.config({
   float = {
     source = true,
-  }
+  },
 })
 
 require("lazy").setup({
   { -- session management
     "folke/persistence.nvim",
     event = "VimEnter",
-    config = function ()
+    config = function()
       local persistence = require("persistence")
       persistence.setup()
-      vim.api.nvim_create_user_command(
-        'LoadSession',
-        persistence.load,
-        { nargs = '*' }
-      )
-    end
+      vim.api.nvim_create_user_command("LoadSession", persistence.load, { nargs = "*" })
+    end,
   },
   { -- Git status of changed lines to the left.
     "lewis6991/gitsigns.nvim",
@@ -293,26 +286,26 @@ require("lazy").setup({
       local gitsigns = require("gitsigns")
       gitsigns.setup({
         signs = {
-          add          = { text = '+' },
-          change       = { text = '~' },
-        }
+          add = { text = "+" },
+          change = { text = "~" },
+        },
       })
-      vim.keymap.set('n', '<leader>hd', gitsigns.reset_hunk)
-      vim.keymap.set('n', '<leader>hp', gitsigns.preview_hunk)
+      vim.keymap.set("n", "<leader>hd", gitsigns.reset_hunk)
+      vim.keymap.set("n", "<leader>hp", gitsigns.preview_hunk)
 
-      vim.keymap.set('n', ']c', function()
+      vim.keymap.set("n", "]c", function()
         if vim.wo.diff then
-          vim.cmd.normal({']c', bang = true})
+          vim.cmd.normal({ "]c", bang = true })
         else
-          gitsigns.nav_hunk('next')
+          gitsigns.nav_hunk("next")
         end
       end)
 
-      vim.keymap.set('n', '[c', function()
+      vim.keymap.set("n", "[c", function()
         if vim.wo.diff then
-          vim.cmd.normal({'[c', bang = true})
+          vim.cmd.normal({ "[c", bang = true })
         else
-          gitsigns.nav_hunk('prev')
+          gitsigns.nav_hunk("prev")
         end
       end)
 
@@ -324,7 +317,7 @@ require("lazy").setup({
       function Unreview()
         gitsigns.change_base(nil, true)
       end
-    end
+    end,
   },
 
   { -- ChatGPT plugin
@@ -332,7 +325,7 @@ require("lazy").setup({
     config = function()
       require("gp").setup({})
       vim.api.nvim_create_autocmd({ "User" }, {
-        pattern = {"GpDone"},
+        pattern = { "GpDone" },
         callback = function(event)
           -- All this is just to hard wrap the output.
           local bufnr = event.buf
@@ -367,18 +360,18 @@ require("lazy").setup({
     "echasnovski/mini.surround",
     opts = {
       mappings = {
-        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-        delete = "ds",       -- Delete surrounding
-        replace = "cs",      -- Replace surrounding
+        add = "gs",      -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds",   -- Delete surrounding
+        replace = "cs",  -- Replace surrounding
 
-        find = "",           -- Find surrounding (to the right)
-        find_left = "",      -- Find surrounding (to the left)
-        highlight = "",      -- Highlight surrounding
+        find = "",       -- Find surrounding (to the right)
+        find_left = "",  -- Find surrounding (to the left)
+        highlight = "",  -- Highlight surrounding
         update_n_lines = "", -- Update `n_lines`
-        suffix_last = "",    -- Suffix to search with "prev" method
-        suffix_next = "",    -- Suffix to search with "next" method
+        suffix_last = "", -- Suffix to search with "prev" method
+        suffix_next = "", -- Suffix to search with "next" method
       },
-    }
+    },
   },
 
   { -- Text objects plugin
@@ -386,7 +379,6 @@ require("lazy").setup({
     "echasnovski/mini.ai",
     config = function()
       require("mini.ai").setup()
-
     end,
   },
 
@@ -400,7 +392,7 @@ require("lazy").setup({
   "junegunn/fzf.vim",
 
   { -- quickfix improvement
-    'stevearc/quicker.nvim',
+    "stevearc/quicker.nvim",
     event = "FileType qf",
     opts = {},
   },
@@ -417,8 +409,8 @@ require("lazy").setup({
     config = function()
       require("telescope").setup({
         defaults = {
-          prompt_prefix = ""
-        }
+          prompt_prefix = "",
+        },
       })
       require("telescope").load_extension("fzf")
       local builtin = require("telescope.builtin")
@@ -428,7 +420,7 @@ require("lazy").setup({
         local selected_text = vim.fn.getreg("v")
         builtin.find_files({ default_text = selected_text })
       end)
-      vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last telescope search
+      vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
       vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
       vim.keymap.set("v", "<leader>sg", function()
         vim.cmd('normal! "vy')
@@ -437,11 +429,11 @@ require("lazy").setup({
       end)
       vim.keymap.set("n", "<Leader>sF", function()
         builtin.find_files({ hidden = true })
-      end, {})                                                                 -- live find files (including hidden files)
-      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
-      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)          -- live find symbols
-      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
-      vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+      end, {})                                                              -- live find files (including hidden files)
+      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                   -- Open old files
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)       -- live find symbols
+      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                -- Open buffers
+      vim.keymap.set("n", "<leader>st", builtin.tags)                       -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -486,20 +478,6 @@ require("lazy").setup({
       end)
 
       vim.keymap.set("n", "z=", builtin.spell_suggest)
-
-      local pickers = require("telescope.pickers")
-      local finders = require("telescope.finders")
-      local conf = require("telescope.config").values
-      vim.keymap.set("n", "<leader>sc", function()
-        local git_command = "git diff --name-only"
-
-        pickers.new({}, {
-          prompt_title = "Git Diff Files",
-          finder = finders.new_oneshot_job(vim.split(git_command, " ")),
-          sorter = conf.file_sorter({}),
-          previewer = conf.file_previewer({}),
-        }):find()
-      end)
     end,
   },
 
@@ -516,7 +494,7 @@ require("lazy").setup({
   -- },
 
   -- Silversearcher plugin (search project)
-  { "kelly-lin/telescope-ag",                  dependencies = { "nvim-telescope/telescope.nvim" } },
+  { "kelly-lin/telescope-ag", dependencies = { "nvim-telescope/telescope.nvim" } },
 
   -- Disable search highlight after searching.
   "romainl/vim-cool",
@@ -545,13 +523,13 @@ require("lazy").setup({
 
         sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-        ignore_install = {},  -- List of parsers to ignore installing
+        ignore_install = {}, -- List of parsers to ignore installing
 
         auto_install = false, -- Automatically install missing parsers when entering buffer
 
         highlight = {
           enable = true, -- `false` will disable the whole extension
-          disable = {},  -- list of language that will be disabled
+          disable = {}, -- list of language that will be disabled
           additional_vim_regex_highlighting = false,
         },
         textobjects = {
@@ -601,15 +579,15 @@ require("lazy").setup({
           },
         },
         indent = {
-          enable = true
-        }
+          enable = true,
+        },
       })
     end,
   },
 
   { -- better python movements and text objects
     "jeetsukumaran/vim-pythonsense",
-    init = function ()
+    init = function()
       vim.g.is_pythonsense_suppress_object_keymaps = 1
     end,
   },
@@ -623,15 +601,14 @@ require("lazy").setup({
       "nvim-neotest/neotest-python",
     },
     "nvim-neotest/neotest",
-    config = function ()
+    config = function()
       ---@module "neotest"
       local neotest = require("neotest")
-      neotest.setup(
-      {
+      neotest.setup({
         summary = {
           mappings = {
-            help = "g?" -- change "?" to "g?" so that you can search backwards.
-          }
+            help = "g?", -- change "?" to "g?" so that you can search backwards.
+          },
         },
         adapters = {
           require("neotest-python")({
@@ -641,35 +618,29 @@ require("lazy").setup({
       })
 
       vim.keymap.set("n", "<leader>tr", neotest.run.run)
-      vim.keymap.set("n", "<leader>td", function() neotest.run.run({ strategy = "dap" }) end)
+      vim.keymap.set("n", "<leader>td", function()
+        neotest.run.run({ strategy = "dap" })
+      end)
       vim.keymap.set("n", "<leader>ts", neotest.run.stop)
       vim.keymap.set("n", "<c-w>t", neotest.output.open)
       vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
-      vim.keymap.set("n", "]j", function() neotest.jump.next({ status = "failed" }) end )
-      vim.keymap.set("n", "[j", function() neotest.jump.prev({ status = "failed" }) end )
+      vim.keymap.set("n", "]j", function()
+        neotest.jump.next({ status = "failed" })
+      end)
+      vim.keymap.set("n", "[j", function()
+        neotest.jump.prev({ status = "failed" })
+      end)
 
-      vim.api.nvim_create_user_command(
-        'NeotestPanelOpen',
-        function()
-          neotest.output_panel.open()
-        end,
-        { nargs = '*' }
-      )
-      vim.api.nvim_create_user_command(
-        'NeotestSummaryOpen',
-        function()
-          neotest.summary.open()
-        end,
-        { nargs = '*' }
-      )
-      vim.api.nvim_create_user_command(
-        'NeotestWatchCurrentFileToggle',
-        function()
-          neotest.watch.toggle(vim.fn.expand("%"))
-        end,
-        { nargs = '*' }
-      )
-    end
+      vim.api.nvim_create_user_command("NeotestPanelOpen", function()
+        neotest.output_panel.open()
+      end, { nargs = "*" })
+      vim.api.nvim_create_user_command("NeotestSummaryOpen", function()
+        neotest.summary.open()
+      end, { nargs = "*" })
+      vim.api.nvim_create_user_command("NeotestWatchCurrentFileToggle", function()
+        neotest.watch.toggle(vim.fn.expand("%"))
+      end, { nargs = "*" })
+    end,
   },
 
   { -- Debug support
@@ -677,17 +648,31 @@ require("lazy").setup({
       "mfussenegger/nvim-dap-python",
     },
     "mfussenegger/nvim-dap",
-    config = function ()
+    config = function()
       local dap = require("dap")
-      vim.keymap.set("n", "<leader>dc", function() dap.continue() end)
-      vim.keymap.set("n", "<leader>db", function() dap.toggle_breakpoint() end)
-      vim.keymap.set("n", "<leader>dr", function() dap.repl.open() end)
-      vim.keymap.set("n", "<leader>dn", function() dap.step_over() end)
-      vim.keymap.set("n", "<leader>di", function() dap.step_into() end)
-      vim.keymap.set("n", "<leader>do", function() dap.step_out() end)
-      vim.keymap.set("n", "<leader>dc", function() dap.disconnect() end)
+      vim.keymap.set("n", "<leader>dc", function()
+        dap.continue()
+      end)
+      vim.keymap.set("n", "<leader>db", function()
+        dap.toggle_breakpoint()
+      end)
+      vim.keymap.set("n", "<leader>dr", function()
+        dap.repl.open()
+      end)
+      vim.keymap.set("n", "<leader>dn", function()
+        dap.step_over()
+      end)
+      vim.keymap.set("n", "<leader>di", function()
+        dap.step_into()
+      end)
+      vim.keymap.set("n", "<leader>do", function()
+        dap.step_out()
+      end)
+      vim.keymap.set("n", "<leader>dc", function()
+        dap.disconnect()
+      end)
       require("dap-python").setup("./venv/bin/python")
-    end
+    end,
   },
 
   { -- Gruvbox with treesitter support (fixed gitsigns)
@@ -700,13 +685,13 @@ require("lazy").setup({
   },
 
   { -- multi cursor support
-    'jake-stewart/multicursor.nvim',
+    "jake-stewart/multicursor.nvim",
     config = function()
       local mc = require("multicursor-nvim")
       mc.setup()
       vim.keymap.set("c", "<c-v>", function()
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), 'n', false)
-        vim.defer_fn(function ()
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
+        vim.defer_fn(function()
           local start_pos = vim.api.nvim_win_get_cursor(0)
           local start_line = start_pos[1]
           local start_col = start_pos[2]
@@ -734,7 +719,7 @@ require("lazy").setup({
       vim.keymap.set("n", "]<c-v>", mc.nextCursor)
       vim.keymap.set("n", "[<c-v>", mc.prevCursor)
       vim.keymap.set("n", "<leader><c-v>", mc.clearCursors)
-    end
+    end,
   },
 
   -- Yaml utility, helps distinguish indendation
@@ -762,9 +747,16 @@ require("lazy").setup({
                   title = "Disable pylint (" .. diag.code .. ")",
                   action = function()
                     local line = diag.range.start.line
-                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text =
+                        vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
                     local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
-                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                    vim.api.nvim_buf_set_lines(
+                      params.bufnr,
+                      line,
+                      line + 1,
+                      false,
+                      { line_text_with_disable }
+                    )
                   end,
                 })
               elseif diag.source == "mypy" then
@@ -772,9 +764,19 @@ require("lazy").setup({
                   title = "Disable mypy [" .. diag.code .. "]",
                   action = function()
                     local line = diag.range.start.line
-                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                    local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
-                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                    local line_text =
+                        vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text_with_disable = line_text
+                        .. "  # type: ignore["
+                        .. diag.code
+                        .. "]"
+                    vim.api.nvim_buf_set_lines(
+                      params.bufnr,
+                      line,
+                      line + 1,
+                      false,
+                      { line_text_with_disable }
+                    )
                   end,
                 })
               end
@@ -792,7 +794,9 @@ require("lazy").setup({
         generator = {
           fn = function(params)
             local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
-            if not snake_case_word then return {} end
+            if not snake_case_word then
+              return {}
+            end
             local words = {}
             for word in snake_case_word:gmatch("[^_]+") do
               table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
@@ -800,7 +804,13 @@ require("lazy").setup({
             local camel_case_word = table.concat(words)
             return {
               {
-                items = { { label = camel_case_word, insertText = camel_case_word, documentation = "CamelCase" } },
+                items = {
+                  {
+                    label = camel_case_word,
+                    insertText = camel_case_word,
+                    documentation = "CamelCase",
+                  },
+                },
                 isIncomplete = true,
               },
             }
@@ -813,6 +823,7 @@ require("lazy").setup({
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
+          null_ls.builtins.formatting.stylua,
           null_ls.builtins.formatting.black.with({
             timeout = 10 * 1000,
             prefer_local = "venv/bin",
@@ -830,7 +841,7 @@ require("lazy").setup({
           null_ls.builtins.diagnostics.mypy.with({
             timeout = 10 * 1000,
             prefer_local = "venv/bin",
-            extra_args = { },
+            extra_args = {},
             env = function(params)
               return { PYTHONPATH = params.root }
             end,
@@ -843,7 +854,7 @@ require("lazy").setup({
               group = augroup,
               buffer = bufnr,
               callback = function()
-                vim.lsp.buf.format({ async = false, timeout_ms = 5000  })
+                vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
               end,
             })
           end
@@ -895,8 +906,16 @@ require("lazy").setup({
           declare_method_if_supported("textDocument/signatureHelp", "<C-k>", vim.lsp.buf.signature_help)
           declare_method_if_supported("textDocument/references", "gr", builtin.lsp_references)
           declare_method_if_supported("textDocument/rename", "<leader>rn", vim.lsp.buf.rename)
-          declare_method_if_supported("textDocument/documentSymbol", "<leader>ds", builtin.lsp_document_symbols)
-          declare_method_if_supported("textDocument/typeDefinition", "<leader>D", builtin.lsp_type_definitions)
+          declare_method_if_supported(
+            "textDocument/documentSymbol",
+            "<leader>ds",
+            builtin.lsp_document_symbols
+          )
+          declare_method_if_supported(
+            "textDocument/typeDefinition",
+            "<leader>D",
+            builtin.lsp_type_definitions
+          )
           declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
 
           if client and client.supports_method("textDocument/codeAction") then
@@ -965,7 +984,7 @@ require("lazy").setup({
           init_options = {
             completion = {
               -- LSP snippets turned out to insisting on inserting parens everywhere
-              disableSnippets = true
+              disableSnippets = true,
             },
           },
           capabilities = capabilities,
@@ -978,7 +997,7 @@ require("lazy").setup({
 
       require("mason-lspconfig").setup({
         handlers = {
-         function(server_name)
+          function(server_name)
             local server = servers[server_name] or {}
             server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
             require("lspconfig")[server_name].setup(server)
@@ -989,7 +1008,7 @@ require("lazy").setup({
   },
 
   {
-    'nvim-lualine/lualine.nvim',
+    "nvim-lualine/lualine.nvim",
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
       -- Remove the constant changing of colors while changing modes
@@ -1004,42 +1023,50 @@ require("lazy").setup({
       require("lualine").setup({
         options = {
           theme = custom_gruvbox,
-          component_separators = { left = '', right = ''},
-          section_separators = { left = '', right = ''},
+          component_separators = { left = "", right = "" },
+          section_separators = { left = "", right = "" },
         },
         sections = {
-          lualine_a = { 'branch' },
-          lualine_b = {'diff', function() return '|' end, 'diagnostics'},
-          lualine_x = { function()
-            local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
-            if #attached_clients == 0 then
-              return ""
-            end
-            local names = vim.iter(attached_clients)
-            :map(function(client)
-              local name = client.name:gsub("language.server", "ls")
-              return name
-            end)
-            :totable()
-            return table.concat(names, " ")
-          end},
-          lualine_y = {'filetype', 'progress'},
-          lualine_z = {'location'}
+          lualine_a = { "branch" },
+          lualine_b = {
+            "diff",
+            function()
+              return "|"
+            end,
+            "diagnostics",
+          },
+          lualine_x = {
+            function()
+              local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
+              if #attached_clients == 0 then
+                return ""
+              end
+              local names = vim.iter(attached_clients)
+                  :map(function(client)
+                    local name = client.name:gsub("language.server", "ls")
+                    return name
+                  end)
+                  :totable()
+              return table.concat(names, " ")
+            end,
+          },
+          lualine_y = { "filetype", "progress" },
+          lualine_z = { "location" },
         },
         inactive_sections = {
-          lualine_a = {'filename'},
+          lualine_a = { "filename" },
           lualine_b = {},
           lualine_c = {},
           lualine_x = {},
           lualine_y = {},
-          lualine_z = {}
+          lualine_z = {},
         },
         tabline = {},
         winbar = {},
         inactive_winbar = {},
-        extensions = {}
+        extensions = {},
       })
-    end
+    end,
   },
 
   -- Generic log highlighting
@@ -1059,11 +1086,15 @@ require("lazy").setup({
           keymap = {
             accept = "<Right>",
             next = "<C-X><C-E>",
-          }
-        }
+          },
+        },
       })
-      vim.keymap.set("i", "<C-X><C-e>", function() require("copilot.suggestion").next() end)
-      vim.keymap.set("i", "<Right>", function() require("copilot.suggestion").accept() end)
+      vim.keymap.set("i", "<C-X><C-e>", function()
+        require("copilot.suggestion").next()
+      end)
+      vim.keymap.set("i", "<Right>", function()
+        require("copilot.suggestion").accept()
+      end)
     end,
   },
 
@@ -1081,60 +1112,60 @@ require("lazy").setup({
 
   { -- indentation text objects and jumps
     "niilohlin/neoindent",
-    config = function ()
+    config = function()
       require("neoindent").setup()
-    end
+    end,
   },
 
   { -- Completion engine.
-    'saghen/blink.cmp',
-    dependencies = { 'rafamadriz/friendly-snippets' },
+    "saghen/blink.cmp",
+    dependencies = { "rafamadriz/friendly-snippets" },
     opts = {
       keymap = {
-        preset = 'default',
-        ['<C-l>'] = { 'snippet_forward', 'fallback' },
-        ['<C-h>'] = { 'snippet_backward', 'fallback' },
-        ['<C-k>'] = { 'show_documentation', 'fallback' },
-        ['<C-c>'] = { 'cancel', 'fallback' },
+        preset = "default",
+        ["<C-l>"] = { "snippet_forward", "fallback" },
+        ["<C-h>"] = { "snippet_backward", "fallback" },
+        ["<C-k>"] = { "show_documentation", "fallback" },
+        ["<C-c>"] = { "cancel", "fallback" },
       },
       appearance = {
         use_nvim_cmp_as_default = true,
         kind_icons = {
-          Text = 'Text',
-          Method = 'Method',
-          Function = 'Function',
-          Constructor = 'Constructor',
+          Text = "Text",
+          Method = "Method",
+          Function = "Function",
+          Constructor = "Constructor",
 
-          Field = 'Field',
-          Variable = 'Variable',
-          Property = 'Property',
+          Field = "Field",
+          Variable = "Variable",
+          Property = "Property",
 
-          Class = 'Class',
-          Interface = 'Interface',
-          Struct = 'Struct',
-          Module = 'Module',
+          Class = "Class",
+          Interface = "Interface",
+          Struct = "Struct",
+          Module = "Module",
 
-          Unit = 'Unit',
-          Value = 'Value',
-          Enum = 'Enum',
-          EnumMember = 'EnumMember',
+          Unit = "Unit",
+          Value = "Value",
+          Enum = "Enum",
+          EnumMember = "EnumMember",
 
-          Keyword = 'Keyword',
-          Constant = 'Constant',
+          Keyword = "Keyword",
+          Constant = "Constant",
 
-          Snippet = 'Snippet',
-          Color = 'Color',
-          File = 'File',
-          Reference = 'Reference',
-          Folder = 'Folder',
-          Event = 'Event',
-          Operator = 'Operator',
-          TypeParameter = 'TypeParameter',
+          Snippet = "Snippet",
+          Color = "Color",
+          File = "File",
+          Reference = "Reference",
+          Folder = "Folder",
+          Event = "Event",
+          Operator = "Operator",
+          TypeParameter = "TypeParameter",
         },
       },
 
       sources = {
-        default = { 'lazydev', 'lsp', 'path', 'snippets', 'buffer' },
+        default = { "lazydev", "lsp", "path", "snippets", "buffer" },
         providers = {
           lazydev = {
             name = "LazyDev",
@@ -1154,9 +1185,9 @@ require("lazy").setup({
       },
     },
     opts_extend = { "sources.default" },
-    build = function ()
+    build = function()
       vim.fn.system("cd /Users/niilohlin/.local/share/nvim/lazy/blink.cmp/ && cargo build --release")
-    end
+    end,
   },
 
   { -- code action previewer
@@ -1167,7 +1198,7 @@ require("lazy").setup({
         config = function()
           require("telescope").load_extension("ui-select")
         end,
-      }
+      },
     },
     "aznhe21/actions-preview.nvim",
     config = function()
@@ -1200,7 +1231,7 @@ require("lazy").setup({
 
   { -- async Make, Dispatch (run), and more, integrates with tmux
     "tpope/vim-dispatch",
-    config = function ()
+    config = function()
       vim.keymap.set("n", "<leader>rr", function() -- rr ReRun last
         local historynr = vim.fn.histnr("cmd")
         for i = historynr, 1, -1 do
@@ -1215,10 +1246,10 @@ require("lazy").setup({
         end
         print("No matching command found")
       end)
-    end
+    end,
   },
 
-  { -- nvim development utils
+  {           -- nvim development utils
     "folke/lazydev.nvim",
     ft = "lua", -- only load on lua files
     opts = {
@@ -1227,20 +1258,18 @@ require("lazy").setup({
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
       },
     },
   },
 })
 
-
-
 -- stop snippet if active on
-vim.keymap.set({ 's' }, '<ESC>', function()
+vim.keymap.set({ "s" }, "<ESC>", function()
   if vim.snippet then
-   vim.snippet.stop()
+    vim.snippet.stop()
   end
-  return '<ESC>'
+  return "<ESC>"
 end)
 
 local bullseye = require("bullseye")
@@ -1250,103 +1279,94 @@ vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 vim.keymap.set("n", "Q", "<nop>")
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")                     -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")                     -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
 
-vim.keymap.set("v", "<leader>cq", function()                -- open selected in quickfix list
+vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')
   vim.cmd([[ cexpr split(@v, "\n") ]])
-  vim.cmd('copen')
+  vim.cmd("copen")
 end)
 
-vim.api.nvim_command("command W w")                         -- Remap :W to :w
+vim.api.nvim_command("command W w") -- Remap :W to :w
 
-vim.api.nvim_create_user_command(
-  'ReplaceReturns',
-  function(input)
-    vim.cmd("%s/\\\\n/\\r/g")
-  end,
-  { nargs = '*' }
-)
+vim.api.nvim_create_user_command("ReplaceReturns", function(input)
+  vim.cmd("%s/\\\\n/\\r/g")
+end, { nargs = "*" })
 
-vim.api.nvim_create_user_command(
-  'PrettyPrint',
-  function(input)
-    local text_range = vim.fn.getline(input.line1, input.line2)
+vim.api.nvim_create_user_command("PrettyPrint", function(input)
+  local text_range = vim.fn.getline(input.line1, input.line2)
 
-    local text = ""
-    if type(text_range) == 'table' then
-      text = table.concat(text_range)
+  local text = ""
+  if type(text_range) == "table" then
+    text = table.concat(text_range)
+  else
+    text = text_range
+  end
+
+  local indentation = 0
+  local result = { "" }
+  for i = 1, #text do
+    local c = text:sub(i, i)
+    local openers = { ["{"] = true, ["["] = true, ["("] = true }
+    local closers = { ["}"] = true, ["]"] = true, [")"] = true }
+    if openers[c] then
+      indentation = indentation + 1
+      result[#result] = result[#result] .. c
+      result[#result + 1] = string.rep("    ", indentation)
+    elseif closers[c] then
+      indentation = indentation - 1
+      result[#result + 1] = string.rep("    ", indentation) .. c
+    elseif c == "," then
+      result[#result] = result[#result] .. c
+      result[#result + 1] = string.rep("    ", indentation)
     else
-      text = text_range
+      result[#result] = result[#result] .. c
     end
-
-    local indentation = 0
-    local result = {""}
-    for i = 1, #text do
-      local c = text:sub(i,i)
-      local openers = { ["{"]=true, ["["]=true, ["("]=true }
-      local closers = { ["}"]=true, ["]"]=true, [")"]=true }
-      if openers[c] then
-        indentation = indentation + 1
-        result[#result] = result[#result] .. c
-        result[#result + 1] = string.rep("    ", indentation)
-      elseif closers[c] then
-        indentation = indentation - 1
-        result[#result + 1] = string.rep("    ", indentation) .. c
-      elseif c == "," then
-        result[#result] = result[#result] .. c
-        result[#result + 1] = string.rep("    ", indentation)
-      else
-        result[#result] = result[#result] .. c
-      end
-    end
-    -- write result
-    vim.api.nvim_buf_set_lines(0, input.line1 - 1, input.line2, true, result)
-  end,
-  { nargs = '*', range = true }
-)
+  end
+  -- write result
+  vim.api.nvim_buf_set_lines(0, input.line1 - 1, input.line2, true, result)
+end, { nargs = "*", range = true })
 
 -- Last paste object
-vim.keymap.set({ "o" } , "iP", function()
+vim.keymap.set({ "o" }, "iP", function()
   vim.cmd("normal `[v`]`")
 end)
-vim.keymap.set('x', 'iP', function ()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+vim.keymap.set("x", "iP", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
   vim.cmd("normal `[v`]`")
 end)
 
 vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
 
 -- map textobject to select the continuous comment with vim._comment.textobject
-vim.keymap.set("o" , "ic", require("vim._comment").textobject)
-vim.keymap.set('x', 'ic', function ()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
+vim.keymap.set("o", "ic", require("vim._comment").textobject)
+vim.keymap.set("x", "ic", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
   require("vim._comment").textobject()
 end)
 
-vim.keymap.set('o', 'ie', function ()
-  vim.cmd('normal! ggVG')
+vim.keymap.set("o", "ie", function()
+  vim.cmd("normal! ggVG")
 end)
 
-vim.keymap.set('x', 'ie', function ()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
-  vim.cmd('normal! ggVG')
+vim.keymap.set("x", "ie", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
+  vim.cmd("normal! ggVG")
 end)
 
-vim.keymap.set('o', 'ae', function ()
-  vim.cmd('normal! ggVG')
+vim.keymap.set("o", "ae", function()
+  vim.cmd("normal! ggVG")
 end)
 
-vim.keymap.set('x', 'ae', function ()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', false, true, true), 'nx', false)
-  vim.cmd('normal! ggVG')
+vim.keymap.set("x", "ae", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
+  vim.cmd("normal! ggVG")
 end)
-
 
 -- check if running via ssh
 if os.getenv("SSH_CLIENT") then
-  vim.keymap.set('v', '"*y', function ()
+  vim.keymap.set("v", '"*y', function()
     -- copy to system clipboard
     vim.cmd('normal! "+y')
     -- run sync-clipboard terminal program
@@ -1358,7 +1378,6 @@ if os.getenv("SSH_CLIENT") then
   end)
 end
 
-
-if vim.fn.exists('g:GuiLoaded') == 1 or vim.fn.exists('g:neovide') == 1 or vim.fn.exists('g:nvy') == 1 then
+if vim.fn.exists("g:GuiLoaded") == 1 or vim.fn.exists("g:neovide") == 1 or vim.fn.exists("g:nvy") == 1 then
   require("gui")
 end
