@@ -36,9 +36,8 @@ if ! tmux has-session -t=$selected_name 2> /dev/null; then
     # -s flag is to specify the session name
     # -c flag is to specify the working directory
     tmux new-session -ds $selected_name -c $selected
-    if [[ -f "$selected/session.ini" ]]; then
-        tmux send-keys -t $selected_name ". tmux-setup-workspace '$selected/session.ini'" Enter
-        # . tmux-setup-workspace "$selected/session.ini"
+    if [[ -f "$selected/nvimproj.lua" ]]; then
+        tmux send-keys -t $selected_name "nvim -c 'luafile nvimproj.lua'" Enter
     fi
 fi
 
