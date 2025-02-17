@@ -211,23 +211,23 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 })
 
 -- options
-vim.opt.showcmd = true        -- Show the current command in the bottom right
-vim.opt.incsearch = true      -- Incremental search
-vim.opt.showmatch = true      -- Highlight search match
-vim.opt.ignorecase = true     -- Ignore search casing
-vim.opt.smartcase = true      -- But not when searching with uppercase letters
-vim.opt.smartindent = true    -- Language-aware indent
-vim.opt.autowrite = true      -- Automatically write on :n and :p
-vim.opt.autoread = true       -- Automatically read file from disk on change
-vim.opt.number = true         -- Set line numbers
+vim.opt.showcmd = true -- Show the current command in the bottom right
+vim.opt.incsearch = true -- Incremental search
+vim.opt.showmatch = true -- Highlight search match
+vim.opt.ignorecase = true -- Ignore search casing
+vim.opt.smartcase = true -- But not when searching with uppercase letters
+vim.opt.smartindent = true -- Language-aware indent
+vim.opt.autowrite = true -- Automatically write on :n and :p
+vim.opt.autoread = true -- Automatically read file from disk on change
+vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true          -- Show cursor col and row position
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
-vim.opt.modifiable = true     -- Make buffers modifiable.
-vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
-vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true -- Show cursor col and row position
+vim.opt.colorcolumn = "120" -- Show max column highlight.
+vim.opt.modifiable = true -- Make buffers modifiable.
+vim.opt.cursorline = true -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
 
 -- Remove annoying auto inserting comment string
@@ -359,16 +359,16 @@ require("lazy").setup({
     "echasnovski/mini.surround",
     opts = {
       mappings = {
-        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-        delete = "ds",       -- Delete surrounding
-        replace = "cs",      -- Replace surrounding
+        add = "gs", -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds", -- Delete surrounding
+        replace = "cs", -- Replace surrounding
 
-        find = "",           -- Find surrounding (to the right)
-        find_left = "",      -- Find surrounding (to the left)
-        highlight = "",      -- Highlight surrounding
+        find = "", -- Find surrounding (to the right)
+        find_left = "", -- Find surrounding (to the left)
+        highlight = "", -- Highlight surrounding
         update_n_lines = "", -- Update `n_lines`
-        suffix_last = "",    -- Suffix to search with "prev" method
-        suffix_next = "",    -- Suffix to search with "next" method
+        suffix_last = "", -- Suffix to search with "prev" method
+        suffix_next = "", -- Suffix to search with "next" method
       },
     },
   },
@@ -419,7 +419,7 @@ require("lazy").setup({
         local selected_text = vim.fn.getreg("v")
         builtin.find_files({ default_text = selected_text })
       end)
-      vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last telescope search
+      vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
       vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
       vim.keymap.set("v", "<leader>sg", function()
         vim.cmd('normal! "vy')
@@ -428,11 +428,11 @@ require("lazy").setup({
       end)
       vim.keymap.set("n", "<leader>sf", function()
         builtin.find_files({ hidden = true })
-      end, {})                                                                 -- live find files (including hidden files)
-      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
-      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)          -- live find symbols
-      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
-      vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+      end, {}) -- live find files (including hidden files)
+      vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
+      vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+      vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -522,13 +522,13 @@ require("lazy").setup({
 
         sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-        ignore_install = {},  -- List of parsers to ignore installing
+        ignore_install = {}, -- List of parsers to ignore installing
 
         auto_install = false, -- Automatically install missing parsers when entering buffer
 
         highlight = {
           enable = true, -- `false` will disable the whole extension
-          disable = {},  -- list of language that will be disabled
+          disable = {}, -- list of language that will be disabled
           additional_vim_regex_highlighting = false,
         },
         textobjects = {
@@ -667,8 +667,8 @@ require("lazy").setup({
 
         vim.loop.fs_event_start(handle, current_file, {
           watch_entry = false, -- true = when dir, watch dir inode, not dir content
-          stat = false,        -- true = don't use inotify/kqueue but periodic check, not implemented
-          recursive = false,   -- true = watch dirs inside dirs
+          stat = false, -- true = don't use inotify/kqueue but periodic check, not implemented
+          recursive = false, -- true = watch dirs inside dirs
         }, event_cb)
         return handle
       end
@@ -1043,8 +1043,6 @@ require("lazy").setup({
       custom_gruvbox.command = custom_gruvbox.normal
       custom_gruvbox.inactive = custom_gruvbox.normal
 
-      -- local branch_name_with_symbols = require("lualine-branch")
-
       require("lualine").setup({
         options = {
           theme = custom_gruvbox,
@@ -1067,12 +1065,12 @@ require("lazy").setup({
                 return ""
               end
               local names = vim
-                  .iter(attached_clients)
-                  :map(function(client)
-                    local name = client.name:gsub("language.server", "ls")
-                    return name
-                  end)
-                  :totable()
+                .iter(attached_clients)
+                :map(function(client)
+                  local name = client.name:gsub("language.server", "ls")
+                  return name
+                end)
+                :totable()
               return table.concat(names, " ")
             end,
           },
@@ -1251,7 +1249,7 @@ require("lazy").setup({
     end,
   },
 
-  {             -- nvim development utils
+  { -- nvim development utils
     "folke/lazydev.nvim",
     ft = "lua", -- only load on lua files
     opts = {
@@ -1260,7 +1258,7 @@ require("lazy").setup({
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
   },
@@ -1282,8 +1280,8 @@ vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 vim.keymap.set("n", "Q", "<nop>")
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')

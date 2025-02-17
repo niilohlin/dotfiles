@@ -16,11 +16,19 @@ vim.keymap.set({ "n", "i" }, "<D-v>", function()
   vim.cmd('normal "+p')
 end)
 
--- paste into cmd line
 vim.keymap.set("c", "<D-v>", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<c-r>", true, false, true), "c", false)
   vim.api.nvim_feedkeys("*", "c", false)
 end)
+
+-- disable neovide animation
+vim.g.neovide_position_animation_length = 0.05
+vim.g.neovide_cursor_animation_length = 0.05
+vim.g.neovide_cursor_trail_size = 0
+vim.g.neovide_cursor_animate_in_insert_mode = false
+vim.g.neovide_cursor_animate_command_line = false
+-- vim.g.neovide_scroll_animation_far_lines = 0
+vim.g.neovide_scroll_animation_length = 0.1
 
 local last_project_path = vim.fn.stdpath("data") .. "/last_project"
 vim.keymap.set("n", "<c-b>h", function()
