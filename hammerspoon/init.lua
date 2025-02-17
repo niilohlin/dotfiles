@@ -140,7 +140,7 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", openSlack)
 function FocusWindowByName(windowName)
   local windows = hs.window.allWindows()
   for _, window in ipairs(windows) do
-    if window:title():match(windowName) then
+    if window:title() == windowName then
       window:focus()
       return true
     end

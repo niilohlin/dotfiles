@@ -1,5 +1,7 @@
 local M = {}
 
+-- project file located at ~/.local/share/nvim/projects.lua
+
 ---@return table
 function M.all_projects()
   local project_file = vim.fn.stdpath("data") .. "/projects.lua"
@@ -24,6 +26,12 @@ function M.find_project_file(path)
 end
 
 function M.load(name, project)
+  if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
+    vim.env.PYTHONPATH = project.path
+    vim.env.VIRTUAL_ENV = project.path .. "/venv"
+    vim.fn.system(". venv/bin/activate")
+  end
+
   project.setup()
   vim.api.nvim_command("let &titlestring = '" .. name .. "'")
 end
