@@ -1,4 +1,5 @@
 ---@diagnostic disable: undefined-global
+require("hs.ipc")
 
 local go_to_in_slack = hs.hotkey.new({ "cmd", "shift" }, "o", function()
   hs.eventtap.keyStroke({ "cmd" }, "k")
@@ -31,9 +32,9 @@ local function disable_slack_enhancements()
 end
 
 hs.window.filter
-    .new("Slack")
-    :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
-    :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
+  .new("Slack")
+  :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
+  :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
 
 hs.window.animationDuration = 0
 
@@ -51,14 +52,10 @@ local function moveWindowRight()
     local nextScreen = screen:toEast()
     if nextScreen then
       local nextScreenFrame = nextScreen:frame()
-      win:setFrame(
-        hs.geometry.rect(nextScreenFrame.x, nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h)
-      )
+      win:setFrame(hs.geometry.rect(nextScreenFrame.x, nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h))
     end
   else
-    win:setFrame(
-      hs.geometry.rect(screenFrame.x + (screenFrame.w / 2), screenFrame.y, screenFrame.w / 2, screenFrame.h)
-    )
+    win:setFrame(hs.geometry.rect(screenFrame.x + (screenFrame.w / 2), screenFrame.y, screenFrame.w / 2, screenFrame.h))
   end
 end
 
@@ -119,13 +116,6 @@ local function moveWindowBottom()
   win:setFrame(hs.geometry.rect(max.x, max.y + (max.h / 2), max.w, max.h / 2))
 end
 
--- local function reloadConfig()
---   hs.reload()
---   hs.alert.show("Hammerspoon config reloaded")
--- end
-
--- hs.hotkey.bind({"cmd", "ctrl", "alt", "shift"}, "R", reloadConfig)
-
 local function openFirefox()
   hs.application.launchOrFocus("Firefox")
 end
@@ -146,3 +136,14 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", openFirefox)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", openGhostty)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", openSlack)
+
+function FocusWindowByName(windowName)
+  local windows = hs.window.allWindows()
+  for _, window in ipairs(windows) do
+    if window:title():match(windowName) then
+      window:focus()
+      return true
+    end
+  end
+  return false
+end
