@@ -179,7 +179,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = { "*.log", "*.logs", "*.out", "output" },
+  pattern = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
   callback = function()
     vim.cmd([[ set ft=log ]])
 
@@ -211,24 +211,33 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 })
 
 -- options
-vim.opt.showcmd = true        -- Show the current command in the bottom right
-vim.opt.incsearch = true      -- Incremental search
-vim.opt.showmatch = true      -- Highlight search match
-vim.opt.ignorecase = true     -- Ignore search casing
-vim.opt.smartcase = true      -- But not when searching with uppercase letters
-vim.opt.smartindent = true    -- Language-aware indent
-vim.opt.autowrite = true      -- Automatically write on :n and :p
-vim.opt.autoread = true       -- Automatically read file from disk on change
-vim.opt.number = true         -- Set line numbers
+vim.opt.showcmd = true -- Show the current command in the bottom right
+vim.opt.incsearch = true -- Incremental search
+vim.opt.showmatch = true -- Highlight search match
+vim.opt.ignorecase = true -- Ignore search casing
+vim.opt.smartcase = true -- But not when searching with uppercase letters
+vim.opt.smartindent = true -- Language-aware indent
+vim.opt.autowrite = true -- Automatically write on :n and :p
+vim.opt.autoread = true -- Automatically read file from disk on change
+vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true          -- Show cursor col and row position
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
-vim.opt.modifiable = true     -- Make buffers modifiable.
-vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
-vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true -- Show cursor col and row position
+vim.opt.colorcolumn = "120" -- Show max column highlight.
+vim.opt.modifiable = true -- Make buffers modifiable.
+vim.opt.cursorline = true -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
+
+-- Remove annoying auto inserting comment string
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    -- o means auto insert comment string only when hitting o in normal mode
+    -- r means auto insert comment string only when hitting enter
+    vim.opt.formatoptions:remove({ "o", "r" })
+  end,
+})
 
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 vim.opt.updatetime = 500
@@ -246,7 +255,6 @@ vim.opt.whichwrap = vim.opt.whichwrap + "<,>,[,],l,h" -- Move cursor to next lin
 vim.opt.undofile = true -- Use undo file
 vim.opt.undodir = os.getenv("HOME") .. "/.config/nvim/undodir" -- Set undo dir
 vim.opt.scrolloff = 1 -- Scroll 1 line before cursor hits bottom
-vim.opt.mouse = "" -- Disable mouse
 vim.opt.path:append("**") -- make :find search recursively
 vim.opt.wildignore:append("*.o,*.obj,*.pyc,*.class") -- ignore build files when recursively searching
 -- ignore git and pycache
@@ -360,13 +368,13 @@ require("lazy").setup({
     "echasnovski/mini.surround",
     opts = {
       mappings = {
-        add = "gs",      -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-        delete = "ds",   -- Delete surrounding
-        replace = "cs",  -- Replace surrounding
+        add = "gs", -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds", -- Delete surrounding
+        replace = "cs", -- Replace surrounding
 
-        find = "",       -- Find surrounding (to the right)
-        find_left = "",  -- Find surrounding (to the left)
-        highlight = "",  -- Highlight surrounding
+        find = "", -- Find surrounding (to the right)
+        find_left = "", -- Find surrounding (to the left)
+        highlight = "", -- Highlight surrounding
         update_n_lines = "", -- Update `n_lines`
         suffix_last = "", -- Suffix to search with "prev" method
         suffix_next = "", -- Suffix to search with "next" method
@@ -407,14 +415,14 @@ require("lazy").setup({
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     },
     config = function()
+      local builtin = require("telescope.builtin")
       require("telescope").setup({
         defaults = {
           prompt_prefix = "",
         },
       })
       require("telescope").load_extension("fzf")
-      local builtin = require("telescope.builtin")
-      vim.keymap.set("n", "<leader>sf", builtin.find_files, {}) -- find files
+      vim.keymap.set("n", "<leader>sF", builtin.find_files, {}) -- find files
       vim.keymap.set("v", "<leader>sf", function()
         vim.cmd('normal! "vy')
         local selected_text = vim.fn.getreg("v")
@@ -427,13 +435,13 @@ require("lazy").setup({
         local selected_text = vim.fn.getreg("v")
         builtin.live_grep({ default_text = selected_text })
       end)
-      vim.keymap.set("n", "<Leader>sF", function()
+      vim.keymap.set("n", "<leader>sf", function()
         builtin.find_files({ hidden = true })
-      end, {})                                                              -- live find files (including hidden files)
-      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                   -- Open old files
-      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)       -- live find symbols
-      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                -- Open buffers
-      vim.keymap.set("n", "<leader>st", builtin.tags)                       -- live find symbols
+      end, {}) -- live find files (including hidden files)
+      vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
+      vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+      vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -613,6 +621,7 @@ require("lazy").setup({
         adapters = {
           require("neotest-python")({
             dap = { justMyCode = false },
+            -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
           }),
         },
       })
@@ -640,15 +649,58 @@ require("lazy").setup({
       vim.api.nvim_create_user_command("NeotestWatchCurrentFileToggle", function()
         neotest.watch.toggle(vim.fn.expand("%"))
       end, { nargs = "*" })
+
+      function link_altfile()
+        local current_file = vim.fn.expand("%")
+        local altfile_buf = vim.fn.bufnr("#")
+
+        local handle = vim.loop.new_fs_event()
+        local unwatch_cb = function()
+          print("unwatching")
+          vim.loop.fs_event_stop(handle)
+        end
+
+        local event_cb = function(err)
+          if err then
+            print("error", vim.inspect(err))
+            unwatch_cb()
+          else
+            vim.defer_fn(function()
+              print("saving altfile", altfile_buf)
+              vim.api.nvim_buf_call(altfile_buf, function()
+                vim.api.nvim_command("write")
+              end)
+            end, 0)
+          end
+        end
+
+        vim.loop.fs_event_start(handle, current_file, {
+          watch_entry = false, -- true = when dir, watch dir inode, not dir content
+          stat = false, -- true = don't use inotify/kqueue but periodic check, not implemented
+          recursive = false, -- true = watch dirs inside dirs
+        }, event_cb)
+        return handle
+      end
+
+      vim.api.nvim_create_user_command("WatchAltFile", function()
+        _G.AltfileHandle = link_altfile()
+      end, { nargs = "*" })
     end,
   },
 
   { -- Debug support
     dependencies = {
       "mfussenegger/nvim-dap-python",
+      { -- json5
+        "Joakker/lua-json5",
+        build = function()
+          vim.fn.system("./install.sh")
+        end,
+      },
     },
     "mfussenegger/nvim-dap",
     config = function()
+      require("dap.ext.vscode").json_decode = require("json5").parse
       local dap = require("dap")
       vim.keymap.set("n", "<leader>dc", function()
         dap.continue()
@@ -747,16 +799,9 @@ require("lazy").setup({
                   title = "Disable pylint (" .. diag.code .. ")",
                   action = function()
                     local line = diag.range.start.line
-                    local line_text =
-                        vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
                     local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
-                    vim.api.nvim_buf_set_lines(
-                      params.bufnr,
-                      line,
-                      line + 1,
-                      false,
-                      { line_text_with_disable }
-                    )
+                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
                   end,
                 })
               elseif diag.source == "mypy" then
@@ -764,19 +809,9 @@ require("lazy").setup({
                   title = "Disable mypy [" .. diag.code .. "]",
                   action = function()
                     local line = diag.range.start.line
-                    local line_text =
-                        vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                    local line_text_with_disable = line_text
-                        .. "  # type: ignore["
-                        .. diag.code
-                        .. "]"
-                    vim.api.nvim_buf_set_lines(
-                      params.bufnr,
-                      line,
-                      line + 1,
-                      false,
-                      { line_text_with_disable }
-                    )
+                    local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                    local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
+                    vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
                   end,
                 })
               end
@@ -823,7 +858,9 @@ require("lazy").setup({
       null_ls.setup({
         sources = {
           null_ls.builtins.diagnostics.checkmake,
-          null_ls.builtins.formatting.stylua,
+          null_ls.builtins.formatting.stylua.with({
+            extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
+          }),
           null_ls.builtins.formatting.black.with({
             timeout = 10 * 1000,
             prefer_local = "venv/bin",
@@ -906,16 +943,8 @@ require("lazy").setup({
           declare_method_if_supported("textDocument/signatureHelp", "<C-k>", vim.lsp.buf.signature_help)
           declare_method_if_supported("textDocument/references", "gr", builtin.lsp_references)
           declare_method_if_supported("textDocument/rename", "<leader>rn", vim.lsp.buf.rename)
-          declare_method_if_supported(
-            "textDocument/documentSymbol",
-            "<leader>ds",
-            builtin.lsp_document_symbols
-          )
-          declare_method_if_supported(
-            "textDocument/typeDefinition",
-            "<leader>D",
-            builtin.lsp_type_definitions
-          )
+          declare_method_if_supported("textDocument/documentSymbol", "<leader>ds", builtin.lsp_document_symbols)
+          declare_method_if_supported("textDocument/typeDefinition", "<leader>D", builtin.lsp_type_definitions)
           declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
 
           if client and client.supports_method("textDocument/codeAction") then
@@ -1041,12 +1070,13 @@ require("lazy").setup({
               if #attached_clients == 0 then
                 return ""
               end
-              local names = vim.iter(attached_clients)
-                  :map(function(client)
-                    local name = client.name:gsub("language.server", "ls")
-                    return name
-                  end)
-                  :totable()
+              local names = vim
+                .iter(attached_clients)
+                :map(function(client)
+                  local name = client.name:gsub("language.server", "ls")
+                  return name
+                end)
+                :totable()
               return table.concat(names, " ")
             end,
           },
@@ -1069,8 +1099,16 @@ require("lazy").setup({
     end,
   },
 
-  -- Generic log highlighting
-  "MTDL9/vim-log-highlighting",
+  { -- Generic log highlighting
+    "fei6409/log-highlight.nvim",
+    opts = {
+      extension = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
+      filename = {},
+      pattern = {
+        "/var/log/.*",
+      },
+    },
+  },
 
   -- Vim open file including line number, including gF
   -- $ vim file.py:10
@@ -1130,38 +1168,6 @@ require("lazy").setup({
       },
       appearance = {
         use_nvim_cmp_as_default = true,
-        kind_icons = {
-          Text = "Text",
-          Method = "Method",
-          Function = "Function",
-          Constructor = "Constructor",
-
-          Field = "Field",
-          Variable = "Variable",
-          Property = "Property",
-
-          Class = "Class",
-          Interface = "Interface",
-          Struct = "Struct",
-          Module = "Module",
-
-          Unit = "Unit",
-          Value = "Value",
-          Enum = "Enum",
-          EnumMember = "EnumMember",
-
-          Keyword = "Keyword",
-          Constant = "Constant",
-
-          Snippet = "Snippet",
-          Color = "Color",
-          File = "File",
-          Reference = "Reference",
-          Folder = "Folder",
-          Event = "Event",
-          Operator = "Operator",
-          TypeParameter = "TypeParameter",
-        },
       },
 
       sources = {
@@ -1249,7 +1255,7 @@ require("lazy").setup({
     end,
   },
 
-  {           -- nvim development utils
+  { -- nvim development utils
     "folke/lazydev.nvim",
     ft = "lua", -- only load on lua files
     opts = {
@@ -1258,7 +1264,7 @@ require("lazy").setup({
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
   },
@@ -1279,8 +1285,8 @@ vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 vim.keymap.set("n", "Q", "<nop>")
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')

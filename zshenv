@@ -15,6 +15,7 @@ export PYTHONDONTWRITEBYTECODE=1
 export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
 export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
 export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
+export CARGO_HOME=$HOME/.cargo/
 
 export LANG=C
 export CC=clang
