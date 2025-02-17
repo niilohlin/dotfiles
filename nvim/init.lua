@@ -1028,6 +1028,11 @@ require("lazy").setup({
   },
 
   {
+    dependencies = { {
+      "abccsss/nvim-gitstatus",
+      event = "VeryLazy",
+      config = true,
+    } },
     "nvim-lualine/lualine.nvim",
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
@@ -1047,7 +1052,7 @@ require("lazy").setup({
           section_separators = { left = "", right = "" },
         },
         sections = {
-          lualine_a = { "branch" },
+          lualine_a = { "branch", "gitstatus" },
           lualine_b = {
             "diff",
             function()
