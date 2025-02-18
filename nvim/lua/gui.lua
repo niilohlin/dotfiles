@@ -1,7 +1,3 @@
-if not (vim.fn.exists("g:GuiLoaded") == 1 or vim.fn.exists("g:neovide") == 1 or vim.fn.exists("g:nvy") == 1) then
-  return
-end
-
 vim.cmd("set title")
 
 vim.keymap.set("n", "<D-s>", function()
@@ -21,7 +17,7 @@ vim.keymap.set("c", "<D-v>", function()
   vim.api.nvim_feedkeys("*", "c", false)
 end)
 
--- disable neovide animation
+-- speedup neovide animation
 vim.g.neovide_position_animation_length = 0.05
 vim.g.neovide_cursor_animation_length = 0.05
 vim.g.neovide_cursor_trail_size = 0
@@ -46,36 +42,46 @@ vim.keymap.set("n", "<c-b>h", function()
   local custom_picker = function(opts)
     opts = opts or {}
     pickers
-      .new(opts, {
-        prompt_title = "Workspaces",
-        finder = finders.new_table({
-          results = project_names,
-          entry_maker = function(entry)
-            return {
-              value = entry,
-              display = entry,
-              ordinal = entry,
-            }
+        .new(opts, {
+          prompt_title = "Workspaces",
+          finder = finders.new_table({
+            results = project_names,
+            entry_maker = function(entry)
+              return {
+                value = entry,
+                display = entry,
+                ordinal = entry,
+              }
+            end,
+          }),
+          sorter = conf.generic_sorter(opts),
+          attach_mappings = function(prompt_bufnr, map)
+            local actions = require("telescope.actions")
+            actions.select_default:replace(function()
+              actions.close(prompt_bufnr)
+
+              vim.fn.writefile({ vim.o.titlestring }, last_project_path)
+
+              local selection = require("telescope.actions.state").get_selected_entry()
+              local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
+              if result == "false" then
+                local random_port = math.random(10000, 20000)
+                vim.fn.system(
+                  " ( cd " .. project.all_projects()[selection.value].path .. " && neovide & )"
+                -- "( cd "
+                -- .. project.all_projects()[selection.value].path
+                -- .. " && nvim --headless --listen localhost:"
+                -- .. random_port
+                -- .. " &; neovide --server=localhost:"
+                -- .. random_port
+                -- .. " )"
+                )
+              end
+            end)
+            return true
           end,
-        }),
-        sorter = conf.generic_sorter(opts),
-        attach_mappings = function(prompt_bufnr, map)
-          local actions = require("telescope.actions")
-          actions.select_default:replace(function()
-            actions.close(prompt_bufnr)
-
-            vim.fn.writefile({ vim.o.titlestring }, last_project_path)
-
-            local selection = require("telescope.actions.state").get_selected_entry()
-            local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
-            if result == "false" then
-              vim.fn.system("( cd " .. project.all_projects()[selection.value].path .. " && neovide &)")
-            end
-          end)
-          return true
-        end,
-      })
-      :find()
+        })
+        :find()
   end
 
   custom_picker()

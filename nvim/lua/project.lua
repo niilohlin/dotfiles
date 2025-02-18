@@ -27,23 +27,33 @@ end
 
 function M.load(name, project)
   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
-    vim.env.PYTHONPATH = project.path
-    vim.env.VIRTUAL_ENV = project.path .. "/venv"
-    vim.fn.system(". venv/bin/activate")
+    if not vim.env.VIRTUAL_ENV then
+      local full_path = vim.fn.expand(project.path)
+      vim.env.PYTHONPATH = full_path
+      vim.env.VIRTUAL_ENV = full_path .. "/venv"
+      vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
+    end
+    vim.fn.system("python -m pip install rope debugpy bpython")
   end
 
   project.setup()
-  vim.api.nvim_command("let &titlestring = '" .. name .. "'")
+  vim.o.titlestring = name
 end
 
 function M.setup(opts)
   local augroup = vim.api.nvim_create_augroup("nvimproj", { clear = true })
 
-  vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter", "DirChanged" }, {
+  vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
     callback = function()
       local project_name = M.find_project_file(vim.fn.getcwd())
       local projects = M.all_projects()
-      if project_name and projects[project_name] and projects[project_name]["setup"] then
+
+      if
+          project_name
+          and projects[project_name]
+          and projects[project_name]["setup"]
+          and vim.o.titlestring ~= project_name
+      then
         M.load(project_name, projects[project_name])
       else
       end
