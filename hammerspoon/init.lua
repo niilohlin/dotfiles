@@ -32,9 +32,12 @@ local function disable_slack_enhancements()
 end
 
 hs.window.filter
-  .new("Slack")
-  :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
-  :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
+    .new("Slack")
+    :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
+    :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
+
+-- local focus_next_window = hs.hotkey.new({ "ctrl", "shift" }, "`", function()
+-- end)
 
 hs.window.animationDuration = 0
 

@@ -12,6 +12,11 @@ vim.keymap.set({ "n", "i" }, "<D-v>", function()
   vim.cmd('normal "+p')
 end)
 
+vim.keymap.set({ "t" }, "<D-v>", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<c-\\><c-n>", true, false, true), "*", false)
+  vim.api.nvim_feedkeys('"+pa', "*", false)
+end)
+
 vim.keymap.set("c", "<D-v>", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<c-r>", true, false, true), "c", false)
   vim.api.nvim_feedkeys("*", "c", false)
@@ -27,7 +32,7 @@ vim.g.neovide_cursor_animate_command_line = false
 vim.g.neovide_scroll_animation_length = 0.1
 
 local last_project_path = vim.fn.stdpath("data") .. "/last_project"
-vim.keymap.set("n", "<c-b>h", function()
+vim.keymap.set({ "n", "t" }, "<c-b>h", function()
   local project = require("project")
 
   local pickers = require("telescope.pickers")
@@ -87,10 +92,47 @@ vim.keymap.set("n", "<c-b>h", function()
   custom_picker()
 end)
 
-vim.keymap.set("n", "<c-b>L", function()
+vim.keymap.set({ "n", "t" }, "<c-b>L", function()
   if vim.fn.filereadable(last_project_path) then
     local selection = vim.fn.readfile(last_project_path)[1]
     vim.fn.writefile({ vim.o.titlestring }, last_project_path)
     vim.fn.system("hs -c \"FocusWindowByName('" .. selection .. "')\""):gsub("\n", "")
   end
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>c", function()
+  vim.cmd("tabnew | terminal")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>n", function()
+  vim.cmd("tabnext")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>p", function()
+  vim.cmd("tabprev")
+end)
+
+vim.keymap.set("t", "<c-b>[", function()
+  -- go to normal mode
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<c-\\><c-n>", true, false, true), "n", false)
+end)
+
+vim.keymap.set({ "n", "t" }, '<c-b>"', function()
+  vim.cmd("split | terminal")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>0", function()
+  vim.cmd("tabn 1")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>1", function()
+  vim.cmd("tabn 2")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>3", function()
+  vim.cmd("tabn 4")
+end)
+
+vim.keymap.set({ "n", "t" }, "<c-b>4", function()
+  vim.cmd("tabn 5")
 end)
