@@ -211,23 +211,23 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 })
 
 -- options
-vim.opt.showcmd = true        -- Show the current command in the bottom right
-vim.opt.incsearch = true      -- Incremental search
-vim.opt.showmatch = true      -- Highlight search match
-vim.opt.ignorecase = true     -- Ignore search casing
-vim.opt.smartcase = true      -- But not when searching with uppercase letters
-vim.opt.smartindent = true    -- Language-aware indent
-vim.opt.autowrite = true      -- Automatically write on :n and :p
-vim.opt.autoread = true       -- Automatically read file from disk on change
-vim.opt.number = true         -- Set line numbers
+vim.opt.showcmd = true -- Show the current command in the bottom right
+vim.opt.incsearch = true -- Incremental search
+vim.opt.showmatch = true -- Highlight search match
+vim.opt.ignorecase = true -- Ignore search casing
+vim.opt.smartcase = true -- But not when searching with uppercase letters
+vim.opt.smartindent = true -- Language-aware indent
+vim.opt.autowrite = true -- Automatically write on :n and :p
+vim.opt.autoread = true -- Automatically read file from disk on change
+vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true          -- Show cursor col and row position
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
-vim.opt.modifiable = true     -- Make buffers modifiable.
-vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
-vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true -- Show cursor col and row position
+vim.opt.colorcolumn = "120" -- Show max column highlight.
+vim.opt.modifiable = true -- Make buffers modifiable.
+vim.opt.cursorline = true -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
 
 -- Remove annoying auto inserting comment string
@@ -352,25 +352,83 @@ require("lazy").setup({
   -- Git plugin
   "tpope/vim-fugitive",
 
-  -- CamelCase to snake case (crc, crm, crs, cru)
-  "tpope/vim-abolish",
+  { -- CamelCase to snake case (crc, crm, crs, cru)
+    "tpope/vim-abolish",
+    init = function()
+      vim.api.nvim_create_user_command("TrainAbolish", function()
+        math.randomseed(os.time())
+        -- Read words from dictionary file
+        local words = {}
+        local file = io.open("/usr/share/dict/words", "r")
+        if file then
+          for line in file:lines() do
+            table.insert(words, line)
+          end
+          file:close()
+        else
+          print("Could not open dictionary file")
+          os.exit(1)
+        end
+
+        local function to_camel_case(word1, word2)
+          return word1:sub(1, 1):upper() .. word1:sub(2):lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
+        end
+
+        local function to_lower_camel_case(word1, word2)
+          return word1:lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
+        end
+
+        local function to_snake_case(word1, word2)
+          return word1:lower() .. "_" .. word2:lower()
+        end
+
+        local function to_screaming_case(word1, word2)
+          return word1:upper() .. "_" .. word2:upper()
+        end
+
+        local cases = { to_camel_case, to_lower_camel_case, to_snake_case, to_screaming_case }
+
+        local output_file = io.open("/tmp/output.txt", "w")
+        if output_file == nil then
+          return
+        end
+        for _ = 1, 20 do
+          local word1 = words[math.random(#words)]
+          local word2 = words[math.random(#words)]
+          local case_func = cases[math.random(#cases)]
+          local target_func = cases[math.random(#cases)]
+          output_file:write(case_func(word1, word2) .. " -- " .. target_func(word1, word2) .. "\n")
+        end
+        output_file:close()
+
+        vim.cmd("edit /tmp/output.txt")
+      end, {})
+    end,
+  },
 
   { -- Surround plugin, adds text objects like ci" and so on.
     "echasnovski/mini.surround",
-    opts = {
-      mappings = {
-        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-        delete = "ds",       -- Delete surrounding
-        replace = "cs",      -- Replace surrounding
+    config = function()
+      local surround = require("mini.surround")
+      surround.setup({
+        mappings = {
+          add = "gs", -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+          delete = "ds", -- Delete surrounding
+          replace = "cs", -- Replace surrounding
 
-        find = "",           -- Find surrounding (to the right)
-        find_left = "",      -- Find surrounding (to the left)
-        highlight = "",      -- Highlight surrounding
-        update_n_lines = "", -- Update `n_lines`
-        suffix_last = "",    -- Suffix to search with "prev" method
-        suffix_next = "",    -- Suffix to search with "next" method
-      },
-    },
+          find = "", -- Find surrounding (to the right)
+          find_left = "", -- Find surrounding (to the left)
+          highlight = "", -- Highlight surrounding
+          update_n_lines = "", -- Update `n_lines`
+          suffix_last = "", -- Suffix to search with "prev" method
+          suffix_next = "", -- Suffix to search with "next" method
+        },
+      })
+      vim.keymap.set("v", "C", function() -- C for "call"
+        vim.cmd('normal "vc()"vPg;h')
+        vim.cmd("startinsert")
+      end)
+    end,
   },
 
   { -- Text objects plugin
@@ -419,7 +477,7 @@ require("lazy").setup({
         local selected_text = vim.fn.getreg("v")
         builtin.find_files({ default_text = selected_text })
       end)
-      vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last telescope search
+      vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
       vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
       vim.keymap.set("v", "<leader>sg", function()
         vim.cmd('normal! "vy')
@@ -428,11 +486,11 @@ require("lazy").setup({
       end)
       vim.keymap.set("n", "<leader>sf", function()
         builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
-      end, {})                                                                 -- live find files (including hidden files)
-      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
-      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)          -- live find symbols
-      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
-      vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+      end, {}) -- live find files (including hidden files)
+      vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
+      vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+      vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -522,13 +580,13 @@ require("lazy").setup({
 
         sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-        ignore_install = {},  -- List of parsers to ignore installing
+        ignore_install = {}, -- List of parsers to ignore installing
 
         auto_install = false, -- Automatically install missing parsers when entering buffer
 
         highlight = {
           enable = true, -- `false` will disable the whole extension
-          disable = {},  -- list of language that will be disabled
+          disable = {}, -- list of language that will be disabled
           additional_vim_regex_highlighting = false,
         },
         textobjects = {
@@ -686,6 +744,14 @@ require("lazy").setup({
       end)
 
       require("dap-python").setup("./venv/bin/python")
+      vim.env.GEVENT_SUPPORT = "True"
+      table.insert(dap.configurations.python, {
+        type = "python",
+        request = "launch",
+        name = "dap Django",
+        program = vim.fn.getcwd() .. "/quickbit/manage.py", -- NOTE: Adapt path to manage.py as needed
+        args = { "runserver", "--noreload" },
+      })
     end,
   },
 
@@ -703,7 +769,7 @@ require("lazy").setup({
     config = function()
       local mc = require("multicursor-nvim")
       mc.setup()
-      vim.keymap.set("c", "<c-v>", function()
+      vim.keymap.set("c", "<c-x>", function()
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
         vim.defer_fn(function()
           local start_pos = vim.api.nvim_win_get_cursor(0)
@@ -730,9 +796,25 @@ require("lazy").setup({
       vim.keymap.set("v", "I", mc.insertVisual)
       vim.keymap.set("v", "A", mc.appendVisual)
 
-      vim.keymap.set("n", "]<c-v>", mc.nextCursor)
-      vim.keymap.set("n", "[<c-v>", mc.prevCursor)
-      vim.keymap.set("n", "<leader><c-v>", mc.clearCursors)
+      vim.keymap.set("n", "]<c-x>", mc.nextCursor)
+      vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+      vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
+    end,
+  },
+
+  { -- refactoring library
+    "ThePrimeagen/refactoring.nvim",
+    config = function()
+      local refactoring = require("refactoring")
+      refactoring.setup({})
+      vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
+        refactoring.select_refactor()
+      end)
+      vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
+      vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
+      vim.api.nvim_create_user_command("RefactorClean", function()
+        refactoring.debug.cleanup({})
+      end, { nargs = "*" })
     end,
   },
 
@@ -1036,12 +1118,12 @@ require("lazy").setup({
                 return ""
               end
               local names = vim
-                  .iter(attached_clients)
-                  :map(function(client)
-                    local name = client.name:gsub("language.server", "ls")
-                    return name
-                  end)
-                  :totable()
+                .iter(attached_clients)
+                :map(function(client)
+                  local name = client.name:gsub("language.server", "ls")
+                  return name
+                end)
+                :totable()
               return table.concat(names, " ")
             end,
           },
@@ -1202,25 +1284,9 @@ require("lazy").setup({
 
   { -- async Make, Dispatch (run), and more, integrates with tmux
     "tpope/vim-dispatch",
-    config = function()
-      vim.keymap.set("n", "<leader>rr", function() -- rr ReRun last
-        local historynr = vim.fn.histnr("cmd")
-        for i = historynr, 1, -1 do
-          if vim.fn.histget("cmd", i):match("^" .. "Make.*") then
-            vim.cmd(vim.fn.histget("cmd", i))
-            return
-          end
-          if vim.fn.histget("cmd", i):match("^" .. "Dispatch.*") then
-            vim.cmd(vim.fn.histget("cmd", i))
-            return
-          end
-        end
-        print("No matching command found")
-      end)
-    end,
   },
 
-  {             -- nvim development utils
+  { -- nvim development utils
     "folke/lazydev.nvim",
     ft = "lua", -- only load on lua files
     opts = {
@@ -1229,7 +1295,7 @@ require("lazy").setup({
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
   },
@@ -1250,8 +1316,16 @@ vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 vim.keymap.set("n", "Q", "<nop>")
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz")
+vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
+
+-- Never use Q for ex mode.
+vim.keymap.set("n", "Q", "<nop>")
+
+-- Normal remaps
+vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')

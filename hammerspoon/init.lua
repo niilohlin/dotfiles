@@ -119,27 +119,48 @@ local function moveWindowBottom()
   win:setFrame(hs.geometry.rect(max.x, max.y + (max.h / 2), max.w, max.h / 2))
 end
 
-local function openFirefox()
-  hs.application.launchOrFocus("Firefox")
-end
-
-local function openGhostty()
-  hs.application.launchOrFocus("Ghostty")
-end
-
-local function openSlack()
-  hs.application.launchOrFocus("Slack")
-end
-
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "K", moveWindowTop)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "J", moveWindowBottom)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "L", moveWindowRight)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", openFirefox)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", openGhostty)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", openSlack)
 
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", function()
+  hs.application.launchOrFocus("Firefox")
+end)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", function()
+  hs.application.launchOrFocus("Ghostty")
+end)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", function()
+  hs.application.launchOrFocus("Slack")
+end)
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "W", function()
+  hs.application.launchOrFocus("Obsidian")
+end)
+
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "W", function()
+  hs.application.launchOrFocus("Obsidian")
+end)
+
+local marks = {}
+local incomingMark = false
+
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "M", function()
+  incomingMark = true
+end)
+
+for _, character in ipairs({ "A", "B", "C" }) do
+  hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, character, function()
+    if incomingMark then
+      marks[character] = hs.application.frontmostApplication():name()
+    elseif marks[character] then
+      hs.application.launchOrFocus(marks[character])
+    end
+    incomingMark = false
+  end)
+end
+
+-- used by neovide project switcher
 function FocusWindowByName(windowName)
   local windows = hs.window.allWindows()
   for _, window in ipairs(windows) do
