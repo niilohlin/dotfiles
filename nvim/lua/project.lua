@@ -26,9 +26,9 @@ function M.find_project_file(path)
 end
 
 function M.load(name, project)
+  local full_path = vim.fn.expand(project.path)
   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
     if not vim.env.VIRTUAL_ENV then
-      local full_path = vim.fn.expand(project.path)
       vim.env.PYTHONPATH = full_path
       vim.env.VIRTUAL_ENV = full_path .. "/venv"
       vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
@@ -36,7 +36,20 @@ function M.load(name, project)
     vim.fn.system("python -m pip install rope debugpy bpython")
   end
 
-  project.setup()
+  -- load vscode env if exists
+  local vscodeenv = vim.fn.glob(vim.fn.expand(full_path) .. "/.vscodeenv", true, true)
+  if #vscodeenv > 0 then
+    for _, line in ipairs(vim.fn.readfile(vscodeenv[1])) do
+      local key, value = line:match("([^=]+)=(.*)")
+      if key and value then
+        vim.env[key] = value
+      end
+    end
+  end
+
+  if project["setup"] then
+    project.setup()
+  end
   vim.o.titlestring = name
 end
 
@@ -48,12 +61,7 @@ function M.setup(opts)
       local project_name = M.find_project_file(vim.fn.getcwd())
       local projects = M.all_projects()
 
-      if
-          project_name
-          and projects[project_name]
-          and projects[project_name]["setup"]
-          and vim.o.titlestring ~= project_name
-      then
+      if project_name and projects[project_name] and vim.o.titlestring ~= project_name then
         M.load(project_name, projects[project_name])
       else
       end

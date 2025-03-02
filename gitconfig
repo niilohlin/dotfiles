@@ -1,3 +1,6 @@
+
+
+
 [core]
 # Please adapt and uncomment the following lines:
 	user = Niil Öhlin
@@ -19,7 +22,9 @@
 [credential]
 	helper = osxkeychain
 [rebase]
-    autosquash = true
+	autosquash = true
+	autoStash = true
+	updateRefs = true
 [alias]
 	co = checkout
     chp = cherry-pick
@@ -54,6 +59,7 @@
 	rebase = true
 [rerere]
 	enabled = true
+	autoupdate = true
 [init]
 	defaultBranch = main
 [branch]
@@ -62,3 +68,25 @@
 	repo = /Users/niilohlin/workspace/quickbit
 [gpg]
 	format = ssh
+[column]
+	ui = auto
+[tag]
+	sort = version:refname
+[diff]
+	algorithm = histogram
+	colorMoved = plain
+	mnemonicPrefix = true
+	renames = true
+[push]
+	default = simple
+	autoSetupRemote = true
+	followTags = true
+[fetch]
+	prune = true
+	pruneTags = true
+	all = true
+
+[help]
+	autocorrect = prompt
+[commit]
+	verbose = true

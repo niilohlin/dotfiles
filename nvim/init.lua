@@ -201,9 +201,15 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
+-- automatically load the file if it has changed from an external source
 vim.api.nvim_create_autocmd({ "CursorHold" }, {
   callback = function()
-    -- check if the current buffer is a terminal
+    if vim.fn.mode() == "i" then
+      return
+    end
+    if vim.fn.getbufvar(vim.fn.bufnr("%"), "&modifiable") == 0 then
+      return
+    end
     if vim.fn.getbufvar(vim.fn.bufnr("%"), "&buftype") ~= "nofile" then
       vim.api.nvim_command("checktime")
     end
@@ -353,8 +359,11 @@ require("lazy").setup({
   "tpope/vim-fugitive",
 
   { -- CamelCase to snake case (crc, crm, crs, cru)
-    "tpope/vim-abolish",
-    init = function()
+    "johmsalas/text-case.nvim",
+    config = function()
+      require("textcase").setup({})
+      require("telescope").load_extension("textcase")
+
       vim.api.nvim_create_user_command("TrainAbolish", function()
         math.randomseed(os.time())
         -- Read words from dictionary file
