@@ -126,7 +126,7 @@ hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
 
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", function()
-  hs.application.launchOrFocus("Brave Browser")
+  hs.application.launchOrFocus("Safari")
 end)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", function()
   hs.application.launchOrFocus("Ghostty")
