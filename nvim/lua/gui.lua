@@ -12,6 +12,17 @@ vim.keymap.set({ "n", "i" }, "<D-v>", function()
   vim.cmd('normal "+p')
 end)
 
+vim.keymap.set("v", "<D-c>", function()
+  vim.cmd('normal "+y')
+end)
+
+vim.keymap.set({ "n", "v" }, "<D-+>", function()
+  vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
+end)
+vim.keymap.set({ "n", "v" }, "<D-->", function()
+  vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1
+end)
+
 vim.keymap.set({ "t" }, "<D-v>", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<c-\\><c-n>", true, false, true), "*", false)
   vim.api.nvim_feedkeys('"+pa', "*", false)
@@ -47,32 +58,32 @@ vim.keymap.set({ "n", "t" }, "<c-b>h", function()
   local custom_picker = function(opts)
     opts = opts or {}
     pickers
-        .new(opts, {
-          prompt_title = "Workspaces",
-          finder = finders.new_table({
-            results = project_names,
-            entry_maker = function(entry)
-              return {
-                value = entry,
-                display = entry,
-                ordinal = entry,
-              }
-            end,
-          }),
-          sorter = conf.generic_sorter(opts),
-          attach_mappings = function(prompt_bufnr, map)
-            local actions = require("telescope.actions")
-            actions.select_default:replace(function()
-              actions.close(prompt_bufnr)
+      .new(opts, {
+        prompt_title = "Workspaces",
+        finder = finders.new_table({
+          results = project_names,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              display = entry,
+              ordinal = entry,
+            }
+          end,
+        }),
+        sorter = conf.generic_sorter(opts),
+        attach_mappings = function(prompt_bufnr, map)
+          local actions = require("telescope.actions")
+          actions.select_default:replace(function()
+            actions.close(prompt_bufnr)
 
-              vim.fn.writefile({ vim.o.titlestring }, last_project_path)
+            vim.fn.writefile({ vim.o.titlestring }, last_project_path)
 
-              local selection = require("telescope.actions.state").get_selected_entry()
-              local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
-              if result == "false" then
-                local random_port = math.random(10000, 20000)
-                vim.fn.system(
-                  " ( cd " .. project.all_projects()[selection.value].path .. " && neovide & )"
+            local selection = require("telescope.actions.state").get_selected_entry()
+            local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
+            if result == "false" then
+              local random_port = math.random(10000, 20000)
+              vim.fn.system(
+                " ( cd " .. project.all_projects()[selection.value].path .. " && neovide & )"
                 -- "( cd "
                 -- .. project.all_projects()[selection.value].path
                 -- .. " && nvim --headless --listen localhost:"
@@ -80,13 +91,13 @@ vim.keymap.set({ "n", "t" }, "<c-b>h", function()
                 -- .. " &; neovide --server=localhost:"
                 -- .. random_port
                 -- .. " )"
-                )
-              end
-            end)
-            return true
-          end,
-        })
-        :find()
+              )
+            end
+          end)
+          return true
+        end,
+      })
+      :find()
   end
 
   custom_picker()

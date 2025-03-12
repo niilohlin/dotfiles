@@ -136,3 +136,6 @@ fi
 
 # increase the limit of open files
 ulimit -n 8192
+
+# set neovim to man
+export MANPAGER='nvim +Man!'
