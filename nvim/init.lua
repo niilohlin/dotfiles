@@ -474,9 +474,22 @@ require("lazy").setup({
     },
     config = function()
       local builtin = require("telescope.builtin")
+      local actions = require("telescope.actions")
       require("telescope").setup({
         defaults = {
           prompt_prefix = "",
+        },
+        pickers = {
+          find_files = {
+            mappings = {
+              i = {
+                ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+              },
+              n = {
+                ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+              },
+            },
+          },
         },
       })
       require("telescope").load_extension("fzf")
@@ -534,14 +547,15 @@ require("lazy").setup({
 
       -- Open file under cursor, if it's unique, or it can be found in the current directory
       -- otherwise open telescope
-      vim.keymap.set("n", "gf", function()
-        local file = vim.fn.expand("<cfile>")
-        if vim.fn.filereadable(file) == 1 then
-          vim.cmd("edit " .. file)
-        else
-          find_file_using_rg(file, builtin.find_files)
-        end
-      end)
+      -- disabled why I try out pathfinder.nvim
+      -- vim.keymap.set("n", "gf", function()
+      --   local file = vim.fn.expand("<cfile>")
+      --   if vim.fn.filereadable(file) == 1 then
+      --     vim.cmd("edit " .. file)
+      --   else
+      --     find_file_using_rg(file, builtin.find_files)
+      --   end
+      -- end)
 
       vim.keymap.set("n", "z=", builtin.spell_suggest)
     end,
@@ -688,7 +702,9 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>td", function()
         neotest.run.run({ strategy = "dap" })
       end)
-      vim.keymap.set("n", "<leader>ts", neotest.run.stop)
+
+      vim.keymap.set("n", "<leader>ts", neotest.summary.open)
+      vim.api.nvim_create_user_command("NeotestStopTest", neotest.run.stop, { nargs = "*" })
       vim.keymap.set("n", "<c-w>t", neotest.output.open)
       vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
       vim.keymap.set("n", "]j", function()
@@ -698,15 +714,8 @@ require("lazy").setup({
         neotest.jump.prev({ status = "failed" })
       end)
 
-      vim.api.nvim_create_user_command("NeotestPanelOpen", function()
-        neotest.output_panel.open()
-      end, { nargs = "*" })
-      vim.api.nvim_create_user_command("NeotestSummaryOpen", function()
-        neotest.summary.open()
-      end, { nargs = "*" })
-      vim.api.nvim_create_user_command("NeotestWatchCurrentFileToggle", function()
-        neotest.watch.toggle(vim.fn.expand("%"))
-      end, { nargs = "*" })
+      vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
+      vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
     end,
   },
 
@@ -839,6 +848,7 @@ require("lazy").setup({
       local rope = require("rope")
       null_ls.register(rope.auto_import)
       null_ls.register(rope.completion)
+      vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
 
       local pylint_disable = {
         method = null_ls.methods.CODE_ACTION,
@@ -1157,7 +1167,8 @@ require("lazy").setup({
             end,
             "diagnostics",
           },
-          lualine_x = {
+          lualine_x = {},
+          lualine_y = {
             function()
               local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
               if #attached_clients == 0 then
@@ -1173,8 +1184,7 @@ require("lazy").setup({
               return table.concat(names, " ")
             end,
           },
-          lualine_y = { "filetype", "progress" },
-          lualine_z = { "location" },
+          lualine_z = { "filetype" },
         },
         inactive_sections = {
           lualine_a = { "filename" },
@@ -1206,6 +1216,10 @@ require("lazy").setup({
   -- Vim open file including line number, including gF
   -- $ vim file.py:10
   "wsdjeg/vim-fetch",
+  { -- Improved gF and gf
+    "HawkinsT/pathfinder.nvim",
+    opts = {},
+  },
 
   { -- Pure lua replacement for github/copilot. Has more features and is more efficient.
     "zbirenbaum/copilot.lua",
@@ -1383,6 +1397,10 @@ vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd("copen")
 end)
 
+vim.keymap.set("i", "<C-X><C-G>", function()
+  vim.api.nvim_put({ vim.fn.expand("%") }, "c", true, true)
+end)
+
 vim.api.nvim_command("command W w") -- Remap :W to :w
 
 vim.api.nvim_create_user_command("ReplaceReturns", function()
@@ -1480,5 +1498,5 @@ vim.api.nvim_create_autocmd("Filetype", {
     vim.keymap.del("i", "<right>", { buffer = true })
   end,
 })
-
 require("gui")
+require("cgip")

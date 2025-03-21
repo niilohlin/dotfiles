@@ -1,12 +1,16 @@
 local M = {}
 
-function M.setup()
-end
+function M.setup() end
 
 local null_ls = require("null-ls")
 
 local function import_assist(prefix, number, done)
-  local python_code = 'print(__import__("json").dumps([{k: v} for k, v in sorted(__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).import_assist("' .. prefix .. '"))[0:' .. number .. ']]))'
+  local python_code =
+      'print(__import__("json").dumps([{k: v} for k, v in sorted(__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).import_assist("'
+      .. prefix
+      .. '"))[0:'
+      .. number
+      .. "]]))"
   vim.fn.jobstart("python -c '" .. python_code .. "'", {
     cwd = vim.fn.getcwd(),
     stdout_buffered = true,
@@ -27,10 +31,9 @@ local function import_assist(prefix, number, done)
       if code ~= 0 then
         done({})
       end
-    end
+    end,
   })
 end
-
 
 M.auto_import = {
   method = null_ls.methods.CODE_ACTION,
@@ -39,11 +42,25 @@ M.auto_import = {
     fn = function(params, done)
       local actions = {}
       local is_undefined = false
+
       for _, diag in ipairs(params.lsp_params.context.diagnostics) do
         if diag.code == "undefined-variable" or diag.code == "name-defined" then
           is_undefined = true
+          break
         end
       end
+
+      local bufnr = vim.api.nvim_get_current_buf()
+      local line_number = vim.api.nvim_win_get_cursor(0)[1] - 1
+      local diags = vim.lsp.diagnostic.get_line_diagnostics(bufnr, line_number)
+
+      for _, diag in ipairs(diags) do
+        if diag.code == "undefined-variable" or diag.code == "name-defined" then
+          is_undefined = true
+          break
+        end
+      end
+
       if not is_undefined then
         done({})
         return
@@ -68,23 +85,36 @@ M.auto_import = {
 
                 local import_line = "from " .. module .. " import " .. name
                 if last_import_line == 0 then
-                  vim.api.nvim_buf_set_lines(params.bufnr, last_import_line, last_import_line + 1, false, { import_line })
+                  vim.api.nvim_buf_set_lines(
+                    params.bufnr,
+                    last_import_line,
+                    last_import_line + 1,
+                    false,
+                    { import_line }
+                  )
                 else
-                  vim.api.nvim_buf_set_lines(params.bufnr, last_import_line + 1, last_import_line + 1, false, { import_line })
+                  vim.api.nvim_buf_set_lines(
+                    params.bufnr,
+                    last_import_line - 1,
+                    last_import_line - 1,
+                    false,
+                    { import_line }
+                  )
                 end
               end,
             })
+          else
+            print("no module or name")
           end
         end
+        print("rope done")
 
         done(actions)
       end)
     end,
     async = true,
-  }
+  },
 }
-
-
 
 M.completion = {
   method = null_ls.methods.COMPLETION,
@@ -108,7 +138,6 @@ M.completion = {
             newText = insertText,
           }
 
-
           items[#items + 1] = {
             label = name,
             kind = vim.lsp.protocol.CompletionItemKind.Text,
@@ -116,15 +145,14 @@ M.completion = {
             detail = module,
             insertText = insertText,
             textEdit = textEdit,
-            additionalTextEdits = nil -- does not seem to be working :(
+            additionalTextEdits = nil, -- does not seem to be working :(
           }
         end
         done({ { items = items, isIncomplete = #items == 0 } })
       end)
-
     end,
     async = true,
-  }
+  },
 }
 
 function M.GenerateRopeCache(params)
@@ -134,7 +162,8 @@ function M.GenerateRopeCache(params)
       if code ~= 0 then
         print("Error occurred while installing rope")
       end
-      local python_code = '__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).generate_cache()'
+      local python_code =
+      '__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).generate_cache()'
       vim.fn.jobstart("python -c '" .. python_code .. "'", {
         cwd = vim.fn.getcwd(),
         on_stderr = function(_, data, _)
@@ -148,7 +177,7 @@ function M.GenerateRopeCache(params)
             return
           end
           print("successfully generated python cache")
-        end
+        end,
       })
     end,
   })
