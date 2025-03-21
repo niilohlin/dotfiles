@@ -1,37 +1,46 @@
--- taken from https://github.com/divanvisagie/dotfiles/blob/main/nvim/after/plugin/custom-windows.lua
+local M = {}
 
--- Track the current chat buffer
 local current_chat_bufnr = nil
 
-function OpenChat()
-  -- Start by getting the git root or cwd
-  local root_dir = vim.fn.getcwd()
+local function get_root_dir()
   local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
   if git_root and git_root ~= "" and not git_root:match("fatal") then
-    root_dir = git_root
+    return git_root
   end
+  return vim.loop.cwd()
+end
 
-  -- Create the unique hash
-  local salt = root_dir
+local function unique_chat_path()
+  local salt = get_root_dir()
   local unique_hash = vim.fn.system("echo -n '" .. salt .. "' | shasum -a 256 | awk '{print $1}'")
   -- shorten hash
   unique_hash = string.sub(unique_hash, 1, 8)
 
   local date = os.date("*t")
-  local year = date.year
-  local month = string.format("%02d", date.month)
-  local day = string.format("%02d", date.day)
-  local journal_dir = vim.fn.expand("~/Documents/Archives/Chat/")
-  local journal_path = journal_dir .. year .. "-" .. month .. "-" .. day .. "-" .. unique_hash .. ".md"
+  local chat_path = vim.fn.stdpath("cache") .. "/cgip/"
+  if vim.fn.isdirectory(chat_path) == 0 then
+    vim.fn.mkdir(chat_path, "p")
+  end
 
-  -- Ensure the directory exists
-  os.execute("mkdir -p " .. vim.fn.shellescape(journal_dir))
+  local journal_path = chat_path
+    .. date.year
+    .. "-"
+    .. string.format("%02d", date.month)
+    .. "-"
+    .. string.format("%02d", date.day)
+    .. "-"
+    .. unique_hash
+    .. ".md"
 
-  -- Check if we already have this buffer open
-  local buf_name = vim.fn.expand(journal_path)
+  return journal_path
+end
+
+function M.OpenChat()
+  local chat_path = unique_chat_path()
+
+  local buf_name = chat_path
   local existing_bufnr = vim.fn.bufnr(buf_name)
 
-  -- If the buffer exists, use it
   if existing_bufnr ~= -1 then
     current_chat_bufnr = existing_bufnr
     local win_id = vim.fn.win_findbuf(existing_bufnr)
@@ -45,7 +54,6 @@ function OpenChat()
       vim.cmd("buffer " .. existing_bufnr)
     end
   else
-    -- Buffer doesn't exist, create it
     vim.cmd("vsplit " .. buf_name)
     vim.bo.filetype = "markdown"
     current_chat_bufnr = vim.fn.bufnr(buf_name)
@@ -55,14 +63,14 @@ function OpenChat()
 end
 
 -- Key mappings
-vim.keymap.set("n", "<C-W>cp", OpenChat)
+vim.keymap.set("n", "<C-W>cp", M.OpenChat)
 
 -- Keymap in visual mode (x mode covers char, line, and block visual selections)
 vim.keymap.set("x", "<leader>cp", function()
   -- 1. Get selection start and end positions in the buffer
   local _, srow, scol, _ = unpack(vim.fn.getpos("v")) -- visual start position (mark 'v')
   local _, erow, ecol, _ = unpack(vim.fn.getpos(".")) -- visual end position (cursor)
-  local mode = vim.fn.mode()                          -- current visual mode: 'v', 'V', or Ctrl-V (shown as '\22')
+  local mode = vim.fn.mode() -- current visual mode: 'v', 'V', or Ctrl-V (shown as '\22')
   local lines = {}
 
   if mode == "V" then
@@ -116,11 +124,11 @@ vim.keymap.set("x", "<leader>cp", function()
   local first_line = math.min(srow, erow)
   local last_line = math.max(srow, erow)
   local line_info = (first_line == last_line) and tostring(first_line)
-      or (tostring(first_line) .. "-" .. tostring(last_line))
+    or (tostring(first_line) .. "-" .. tostring(last_line))
 
   -- Language for markdown code fence (use file extension if available)
   local ext = vim.fn.fnamemodify(file, ":e") -- file extension
-  local lang = (ext ~= "" and ext) or ""     -- default to empty if no extension
+  local lang = (ext ~= "" and ext) or "" -- default to empty if no extension
 
   local diag_lines = {}
   local diags = vim.diagnostic.get()
@@ -137,7 +145,7 @@ vim.keymap.set("x", "<leader>cp", function()
   vim.list_extend(snippet_lines, lines) -- append all selected lines
   snippet_lines[#snippet_lines + 1] = "```"
 
-  if #diag_lines then
+  if #diag_lines > 0 then
     snippet_lines[#snippet_lines + 1] = ""
     snippet_lines[#snippet_lines + 1] = "```diagnostics"
     vim.list_extend(snippet_lines, diag_lines) -- append all selected lines
@@ -148,9 +156,9 @@ vim.keymap.set("x", "<leader>cp", function()
   local cur_win = vim.api.nvim_get_current_win() -- save current window
 
   -- Exit visual mode before switching buffers
-  vim.cmd("normal! " .. string.char(27))          -- ASCII 27 is ESC
+  vim.cmd("normal! " .. string.char(27)) -- ASCII 27 is ESC
 
-  pcall(OpenChat)                                 -- open the chat buffer (existing function)
+  pcall(M.OpenChat) -- open the chat buffer (existing function)
   local chat_buf = vim.api.nvim_get_current_buf() -- chat buffer (now current)
 
   -- Append lines at end of chat buffer
@@ -158,5 +166,72 @@ vim.keymap.set("x", "<leader>cp", function()
 
   -- Restore focus to the original window
   vim.api.nvim_set_current_win(cur_win)
-  -- vim.cmd('normal! ' .. string.char(27))                                 -- reselect the visual area
 end)
+
+local augroup = vim.api.nvim_create_augroup("cgip", { clear = true })
+
+local function run_with_spinner(function_with_callback)
+  local spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+  local spinner_index = 1
+  local job_running = true
+
+  local function update_spinner()
+    if job_running then
+      vim.api.nvim_echo({ { spinner_frames[spinner_index], "None" } }, false, {})
+      spinner_index = (spinner_index % #spinner_frames) + 1
+      vim.defer_fn(update_spinner, 100) -- Update every 100ms
+    end
+  end
+
+  function_with_callback(function()
+    job_running = false
+  end)
+  update_spinner()
+end
+
+function M.Send_To_llm(buf)
+  local prompt = vim.fn.input("cgip: ")
+  local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  local text = table.concat(lines, "\n")
+
+  run_with_spinner(function(done)
+    local job_id = vim.fn.jobstart({ "cgip", prompt }, {
+      stdout_buffered = false,
+      stdin = "pipe",
+      on_stdout = function(_, data, _)
+        vim.api.nvim_buf_set_lines(buf, -1, -1, false, data)
+      end,
+      on_stderr = function(_, data, _)
+        print("Error:", table.concat(data, "\n"))
+      end,
+      on_exit = done,
+    })
+    -- Send input to the job
+    vim.fn.chansend(job_id, text)
+    vim.fn.chanclose(job_id, "stdin")
+  end)
+end
+
+vim.api.nvim_create_autocmd({ "BufEnter" }, {
+  pattern = "*.md",
+  callback = function(opts)
+    if current_chat_bufnr and vim.fn.bufnr(opts.buf) == current_chat_bufnr then
+      vim.keymap.set({ "i", "n", "x" }, "<C-H>", function()
+        M.Send_To_llm(opts.buf)
+      end)
+    end
+  end,
+  group = augroup,
+})
+
+vim.api.nvim_create_autocmd({ "BufLeave" }, {
+  pattern = "*.md",
+  callback = function(opts)
+    if current_chat_bufnr and vim.fn.bufnr(opts.buf) == current_chat_bufnr then
+      vim.keymap.del({ "i", "n", "x" }, "<C-H>")
+    end
+  end,
+  group = augroup,
+})
+
+return M
