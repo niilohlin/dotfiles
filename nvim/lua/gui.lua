@@ -58,46 +58,53 @@ vim.keymap.set({ "n", "t" }, "<c-b>h", function()
   local custom_picker = function(opts)
     opts = opts or {}
     pickers
-      .new(opts, {
-        prompt_title = "Workspaces",
-        finder = finders.new_table({
-          results = project_names,
-          entry_maker = function(entry)
-            return {
-              value = entry,
-              display = entry,
-              ordinal = entry,
-            }
+        .new(opts, {
+          prompt_title = "Workspaces",
+          finder = finders.new_table({
+            results = project_names,
+            entry_maker = function(entry)
+              return {
+                value = entry,
+                display = entry,
+                ordinal = entry,
+              }
+            end,
+          }),
+          sorter = conf.generic_sorter(opts),
+          attach_mappings = function(prompt_bufnr, map)
+            local actions = require("telescope.actions")
+            actions.select_default:replace(function()
+              actions.close(prompt_bufnr)
+
+              vim.fn.writefile({ vim.o.titlestring }, last_project_path)
+              local selection = require("telescope.actions.state").get_selected_entry()
+
+              if vim.fn.has("gui_running") == 1 then
+                local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
+                if result == "false" then
+                  local random_port = math.random(10000, 20000)
+                  vim.fn.system(
+                    " ( cd " .. project.all_projects()[selection.value].path .. " && neovide & )"
+                  -- "( cd "
+                  -- .. project.all_projects()[selection.value].path
+                  -- .. " && nvim --headless --listen localhost:"
+                  -- .. random_port
+                  -- .. " &; neovide --server=localhost:"
+                  -- .. random_port
+                  -- .. " )"
+                  )
+                end
+              elseif vim.env.TMUX then -- should never happen
+                vim.fn.system("tmux-sessionizer " .. selection.value)
+              else
+                -- "cd" triggers "DirChanged" which sets up the project
+                vim.cmd("cd " .. project.all_projects()[selection.value].path)
+              end
+            end)
+            return true
           end,
-        }),
-        sorter = conf.generic_sorter(opts),
-        attach_mappings = function(prompt_bufnr, map)
-          local actions = require("telescope.actions")
-          actions.select_default:replace(function()
-            actions.close(prompt_bufnr)
-
-            vim.fn.writefile({ vim.o.titlestring }, last_project_path)
-
-            local selection = require("telescope.actions.state").get_selected_entry()
-            local result = vim.fn.system("hs -c \"FocusWindowByName('" .. selection.value .. "')\""):gsub("\n", "")
-            if result == "false" then
-              local random_port = math.random(10000, 20000)
-              vim.fn.system(
-                " ( cd " .. project.all_projects()[selection.value].path .. " && neovide & )"
-                -- "( cd "
-                -- .. project.all_projects()[selection.value].path
-                -- .. " && nvim --headless --listen localhost:"
-                -- .. random_port
-                -- .. " &; neovide --server=localhost:"
-                -- .. random_port
-                -- .. " )"
-              )
-            end
-          end)
-          return true
-        end,
-      })
-      :find()
+        })
+        :find()
   end
 
   custom_picker()
