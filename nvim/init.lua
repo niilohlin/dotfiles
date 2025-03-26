@@ -1075,7 +1075,7 @@ require("lazy").setup({
       --       cmd = { "/Users/niilohlin/personal/sith-language-server/target/debug/sith-lsp" },
       --       init_options = {
       --         settings = {
-      --           logLevel = "trace",
+      --           logLevel = "debug",
       --           logFile = "/tmp/sith.log",
       --           ruff = {
       --             lint = {
@@ -1515,3 +1515,27 @@ vim.api.nvim_create_autocmd("Filetype", {
 })
 require("gui")
 require("cgip")
+
+local yank_path = vim.fn.stdpath("state") .. "/yank"
+local augroup = vim.api.nvim_create_augroup("shared_yank_register", { clear = true })
+
+vim.api.nvim_create_autocmd({ "FocusGained" }, {
+  callback = function()
+    if vim.fn.filereadable(yank_path) == 1 then
+      vim.fn.setreg('"', vim.fn.readfile(yank_path))
+    end
+  end,
+  group = augroup,
+})
+
+vim.api.nvim_create_autocmd({ "FocusLost" }, {
+  callback = function()
+    local file = io.open(yank_path, "w")
+    if file ~= nil then
+      io.output(file)
+      io.write(vim.fn.getreg('"'))
+      io.close(file)
+    end
+  end,
+  group = augroup,
+})

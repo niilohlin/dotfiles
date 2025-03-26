@@ -23,14 +23,14 @@ local function unique_chat_path()
   end
 
   local journal_path = chat_path
-    .. date.year
-    .. "-"
-    .. string.format("%02d", date.month)
-    .. "-"
-    .. string.format("%02d", date.day)
-    .. "-"
-    .. unique_hash
-    .. ".md"
+      .. date.year
+      .. "-"
+      .. string.format("%02d", date.month)
+      .. "-"
+      .. string.format("%02d", date.day)
+      .. "-"
+      .. unique_hash
+      .. ".md"
 
   return journal_path
 end
@@ -70,7 +70,7 @@ vim.keymap.set("x", "<leader>cp", function()
   -- 1. Get selection start and end positions in the buffer
   local _, srow, scol, _ = unpack(vim.fn.getpos("v")) -- visual start position (mark 'v')
   local _, erow, ecol, _ = unpack(vim.fn.getpos(".")) -- visual end position (cursor)
-  local mode = vim.fn.mode() -- current visual mode: 'v', 'V', or Ctrl-V (shown as '\22')
+  local mode = vim.fn.mode()                          -- current visual mode: 'v', 'V', or Ctrl-V (shown as '\22')
   local lines = {}
 
   if mode == "V" then
@@ -124,17 +124,17 @@ vim.keymap.set("x", "<leader>cp", function()
   local first_line = math.min(srow, erow)
   local last_line = math.max(srow, erow)
   local line_info = (first_line == last_line) and tostring(first_line)
-    or (tostring(first_line) .. "-" .. tostring(last_line))
+      or (tostring(first_line) .. "-" .. tostring(last_line))
 
   -- Language for markdown code fence (use file extension if available)
   local ext = vim.fn.fnamemodify(file, ":e") -- file extension
-  local lang = (ext ~= "" and ext) or "" -- default to empty if no extension
+  local lang = (ext ~= "" and ext) or ""     -- default to empty if no extension
 
   local diag_lines = {}
   local diags = vim.diagnostic.get()
   for _, diag in ipairs(diags) do
     if first_line <= diag.lnum + 1 and diag.lnum <= last_line then
-      diag_lines[#diag_lines + 1] = diag.source .. ": " .. diag.message
+      diag_lines[#diag_lines + 1] = (diag.source .. ": " .. diag.message):gsub("\n", " ")
     end
   end
 
@@ -156,9 +156,9 @@ vim.keymap.set("x", "<leader>cp", function()
   local cur_win = vim.api.nvim_get_current_win() -- save current window
 
   -- Exit visual mode before switching buffers
-  vim.cmd("normal! " .. string.char(27)) -- ASCII 27 is ESC
+  vim.cmd("normal! " .. string.char(27))          -- ASCII 27 is ESC
 
-  pcall(M.OpenChat) -- open the chat buffer (existing function)
+  pcall(M.OpenChat)                               -- open the chat buffer (existing function)
   local chat_buf = vim.api.nvim_get_current_buf() -- chat buffer (now current)
 
   -- Append lines at end of chat buffer
@@ -167,8 +167,6 @@ vim.keymap.set("x", "<leader>cp", function()
   -- Restore focus to the original window
   vim.api.nvim_set_current_win(cur_win)
 end)
-
-local augroup = vim.api.nvim_create_augroup("cgip", { clear = true })
 
 local function run_with_spinner(function_with_callback)
   local spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
@@ -212,6 +210,8 @@ function M.Send_To_llm(buf)
   end)
 end
 
+local augroup = vim.api.nvim_create_augroup("cgip", { clear = true })
+
 vim.api.nvim_create_autocmd({ "BufEnter" }, {
   pattern = "*.md",
   callback = function(opts)
@@ -228,6 +228,7 @@ vim.api.nvim_create_autocmd({ "BufLeave" }, {
   pattern = "*.md",
   callback = function(opts)
     if current_chat_bufnr and vim.fn.bufnr(opts.buf) == current_chat_bufnr then
+      vim.keymap.set({ "i", "n", "x" }, "<C-H>", function() end)
       vim.keymap.del({ "i", "n", "x" }, "<C-H>")
     end
   end,
