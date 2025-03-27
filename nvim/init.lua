@@ -217,23 +217,23 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 })
 
 -- options
-vim.opt.showcmd = true        -- Show the current command in the bottom right
-vim.opt.incsearch = true      -- Incremental search
-vim.opt.showmatch = true      -- Highlight search match
-vim.opt.ignorecase = true     -- Ignore search casing
-vim.opt.smartcase = true      -- But not when searching with uppercase letters
-vim.opt.smartindent = true    -- Language-aware indent
-vim.opt.autowrite = true      -- Automatically write on :n and :p
-vim.opt.autoread = true       -- Automatically read file from disk on change
-vim.opt.number = true         -- Set line numbers
+vim.opt.showcmd = true -- Show the current command in the bottom right
+vim.opt.incsearch = true -- Incremental search
+vim.opt.showmatch = true -- Highlight search match
+vim.opt.ignorecase = true -- Ignore search casing
+vim.opt.smartcase = true -- But not when searching with uppercase letters
+vim.opt.smartindent = true -- Language-aware indent
+vim.opt.autowrite = true -- Automatically write on :n and :p
+vim.opt.autoread = true -- Automatically read file from disk on change
+vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true          -- Show cursor col and row position
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
-vim.opt.modifiable = true     -- Make buffers modifiable.
-vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
-vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true -- Show cursor col and row position
+vim.opt.colorcolumn = "120" -- Show max column highlight.
+vim.opt.modifiable = true -- Make buffers modifiable.
+vim.opt.cursorline = true -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
 
 -- Remove annoying auto inserting comment string
@@ -267,9 +267,6 @@ vim.opt.wildignore:append("*.o,*.obj,*.pyc,*.class") -- ignore build files when 
 vim.opt.wildignore:append("*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store,*/.vscode/*,*/.pytest_cache/*,*/__pycache__/*")
 -- ignore venv
 vim.opt.wildignore:append("*/venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist/*,*/.next/*,*/.cache/*")
--- simple replacements for telescope/fzf inputs
--- vim.keymap.set("n", "<leader>sf", ":find ")
--- vim.keymap.set("n", "<leader>sg", ":vim //g `git ls-files`<left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>")
 
 vim.g.markdown_enable_spell_checking = 0
 
@@ -314,14 +311,14 @@ require("lazy").setup({
         end
       end)
 
-      function Review()
+      vim.api.nvim_create_user_command("Review", function()
         gitsigns.change_base("main", true)
         gitsigns.setqflist("all")
-      end
+      end, { nargs = "*" })
 
-      function Unreview()
+      vim.api.nvim_create_user_command("Unreview", function()
         gitsigns.change_base(nil, true)
-      end
+      end, { nargs = "*" })
     end,
   },
 
@@ -421,16 +418,16 @@ require("lazy").setup({
       local surround = require("mini.surround")
       surround.setup({
         mappings = {
-          add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-          delete = "ds",       -- Delete surrounding
-          replace = "cs",      -- Replace surrounding
+          add = "gs", -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+          delete = "ds", -- Delete surrounding
+          replace = "cs", -- Replace surrounding
 
-          find = "",           -- Find surrounding (to the right)
-          find_left = "",      -- Find surrounding (to the left)
-          highlight = "",      -- Highlight surrounding
+          find = "", -- Find surrounding (to the right)
+          find_left = "", -- Find surrounding (to the left)
+          highlight = "", -- Highlight surrounding
           update_n_lines = "", -- Update `n_lines`
-          suffix_last = "",    -- Suffix to search with "prev" method
-          suffix_next = "",    -- Suffix to search with "next" method
+          suffix_last = "", -- Suffix to search with "prev" method
+          suffix_next = "", -- Suffix to search with "next" method
         },
       })
       vim.keymap.set("v", "C", function() -- C for "call"
@@ -499,7 +496,7 @@ require("lazy").setup({
         local selected_text = vim.fn.getreg("v")
         builtin.find_files({ default_text = selected_text })
       end)
-      vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last telescope search
+      vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
       vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
       vim.keymap.set("v", "<leader>sg", function()
         vim.cmd('normal! "vy')
@@ -508,11 +505,11 @@ require("lazy").setup({
       end)
       vim.keymap.set("n", "<leader>sf", function()
         builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
-      end, {})                                                                 -- live find files (including hidden files)
-      vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
-      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)          -- live find symbols
-      vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
-      vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+      end, {}) -- live find files (including hidden files)
+      vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+      vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
+      vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+      vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
       vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
       vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -545,33 +542,9 @@ require("lazy").setup({
         end
       end, {}) -- Search for tags or lsp workspace symbols
 
-      -- Open file under cursor, if it's unique, or it can be found in the current directory
-      -- otherwise open telescope
-      -- disabled why I try out pathfinder.nvim
-      -- vim.keymap.set("n", "gf", function()
-      --   local file = vim.fn.expand("<cfile>")
-      --   if vim.fn.filereadable(file) == 1 then
-      --     vim.cmd("edit " .. file)
-      --   else
-      --     find_file_using_rg(file, builtin.find_files)
-      --   end
-      -- end)
-
       vim.keymap.set("n", "z=", builtin.spell_suggest)
     end,
   },
-
-  -- -- frecency per project
-  -- { -- sort files by frecency (frequency + recency)
-  --   dependencies = { "nvim-telescope/telescope.nvim" },
-  --   "nvim-telescope/telescope-frecency.nvim",
-  --   version = "*",
-  --   config = function()
-  --     vim.keymap.set("n", "<leader>sf", function () -- override find files
-  --       vim.cmd("Telescope frecency")
-  --     end)
-  --   end,
-  -- },
 
   -- Silversearcher plugin (search project)
   { "kelly-lin/telescope-ag", dependencies = { "nvim-telescope/telescope.nvim" } },
@@ -603,13 +576,13 @@ require("lazy").setup({
 
         sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-        ignore_install = {},  -- List of parsers to ignore installing
+        ignore_install = {}, -- List of parsers to ignore installing
 
         auto_install = false, -- Automatically install missing parsers when entering buffer
 
         highlight = {
           enable = true, -- `false` will disable the whole extension
-          disable = {},  -- list of language that will be disabled
+          disable = {}, -- list of language that will be disabled
           additional_vim_regex_highlighting = false,
         },
         textobjects = {
@@ -748,17 +721,14 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>dr", function()
         dap.repl.open()
       end)
-      vim.keymap.set("n", "<leader>dc", function()
-        dap.disconnect()
-      end)
-      vim.keymap.set("n", "<leader>dc", function()
-        dap.disconnect()
-      end)
       vim.keymap.set("n", "<leader>dt", function()
         dap.terminate()
       end)
       vim.keymap.set("n", "<leader>dn", function()
         dap.continue({ new = true })
+      end)
+      vim.keymap.set("n", "<leader>ds", function()
+        dap.step_over()
       end)
 
       require("dap-python").setup("./venv/bin/python")
@@ -825,9 +795,6 @@ require("lazy").setup({
     config = function()
       local refactoring = require("refactoring")
       refactoring.setup({})
-      vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
-        refactoring.select_refactor()
-      end)
       vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
         refactoring.select_refactor()
       end)
@@ -1021,27 +988,18 @@ require("lazy").setup({
             if client == nil then
               return
             end
-            if client.supports_method(method) then
+            if client:supports_method(method) then
               vim.keymap.set("n", command, fn, opts)
             end
           end
 
-          declare_method_if_supported("textDocument/declaration", "gD", vim.lsp.buf.declaration)
           declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
-          declare_method_if_supported("textDocument/hover", "K", vim.lsp.buf.hover)
-          declare_method_if_supported("textDocument/implementation", "gi", builtin.lsp_implementations)
-          declare_method_if_supported("textDocument/signatureHelp", "<C-k>", vim.lsp.buf.signature_help)
-          declare_method_if_supported("textDocument/references", "gr", builtin.lsp_references)
-          declare_method_if_supported("textDocument/rename", "<leader>rn", vim.lsp.buf.rename)
-          declare_method_if_supported("textDocument/documentSymbol", "<leader>ds", builtin.lsp_document_symbols)
-          declare_method_if_supported("textDocument/typeDefinition", "<leader>D", builtin.lsp_type_definitions)
+          declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
+          declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
+          declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
           declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
 
-          if client and client.supports_method("textDocument/codeAction") then
-            vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
-          end
-
-          if client and client.supports_method("textDocument/formatting") then
+          if client and client:supports_method("textDocument/formatting") then
             vim.keymap.set("n", "<leader>=", function()
               vim.lsp.buf.format({ async = true })
             end, opts)
@@ -1152,11 +1110,6 @@ require("lazy").setup({
   },
 
   {
-    dependencies = { {
-      "abccsss/nvim-gitstatus",
-      event = "VeryLazy",
-      config = true,
-    } },
     "nvim-lualine/lualine.nvim",
     config = function()
       local custom_gruvbox = require("lualine.themes.gruvbox")
@@ -1174,7 +1127,8 @@ require("lazy").setup({
           section_separators = { left = "", right = "" },
         },
         sections = {
-          lualine_a = { "branch", "gitstatus" },
+          lualine_a = { "branch" },
+          -- lualine_a = { "branch", "gitstatus" },
           lualine_b = {
             "diff",
             function()
@@ -1190,12 +1144,12 @@ require("lazy").setup({
                 return ""
               end
               local names = vim
-                  .iter(attached_clients)
-                  :map(function(client)
-                    local name = client.name:gsub("language.server", "ls")
-                    return name
-                  end)
-                  :totable()
+                .iter(attached_clients)
+                :map(function(client)
+                  local name = client.name:gsub("language.server", "ls")
+                  return name
+                end)
+                :totable()
               return table.concat(names, " ")
             end,
           },
@@ -1361,7 +1315,7 @@ require("lazy").setup({
     "tpope/vim-dispatch",
   },
 
-  {             -- nvim development utils
+  { -- nvim development utils
     "folke/lazydev.nvim",
     ft = "lua", -- only load on lua files
     opts = {
@@ -1370,7 +1324,7 @@ require("lazy").setup({
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     },
   },
@@ -1403,8 +1357,8 @@ vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 vim.keymap.set("n", "Q", "<nop>")
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')
