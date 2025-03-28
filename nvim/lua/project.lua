@@ -33,7 +33,16 @@ function M.load(name, project)
       vim.env.VIRTUAL_ENV = full_path .. "/venv"
       vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
     end
-    vim.fn.system("python -m pip install rope debugpy bpython")
+    vim.fn.system("pip install rope debugpy bpython")
+  end
+
+  if vim.fn.isdirectory(vim.fn.expand(project.path .. "/.venv")) == 1 then
+    if not vim.env.VIRTUAL_ENV then
+      vim.env.PYTHONPATH = full_path
+      vim.env.VIRTUAL_ENV = full_path .. "/.venv"
+      vim.env.PATH = full_path .. "/.venv/bin:" .. vim.env.PATH
+    end
+    vim.fn.system("uv pip install rope debugpy bpython")
   end
 
   -- load vscode env if exists

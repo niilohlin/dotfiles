@@ -1305,7 +1305,7 @@ require("lazy").setup({
         group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
         callback = function(ev)
           local opts = { buffer = ev.buf }
-          vim.keymap.set({ "v", "n" }, "<leader>ca", actions_preview.code_actions, opts)
+          vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
         end,
       })
     end,
