@@ -1220,10 +1220,95 @@ vim.api.nvim_create_autocmd("LspAttach", {
   end,
 })
 
+local vim_runtime_paths = {
+  vim.fn.expand("$VIMRUNTIME/lua"),
+  vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
+  vim.fn.expand("$VIMRUNTIME/lua/vim"),
+}
+local rest = vim.api.nvim_list_runtime_paths()
+table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
+
 vim.lsp.config("*", {
   capabilities = require("blink.cmp").get_lsp_capabilities(),
   root_markers = { ".git" },
 })
+
+-- local pwd = vim.loop.cwd()
+-- vim.env.RUST_BACKTRACE = 1
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "python",
+--   callback = function()
+--     vim.lsp.start({
+--       name = "SithLSP",
+--       filetypes = { "python" },
+--       root_dir = pwd,
+--       cmd = { "/Users/niilohlin/personal/sith-language-server/target/debug/sith-lsp" },
+--       init_options = {
+--         settings = {
+--           logLevel = "debug",
+--           logFile = "/tmp/sith.log",
+--           ruff = {
+--             lint = {
+--               enable = false,
+--             },
+--           },
+--         },
+--       },
+--     })
+--   end,
+-- })
+
+vim.lsp.config.lua_ls = {
+  cmd = { "lua-language-server" },
+  filetypes = { "lua" },
+  root_markers = { ".luarc.jsonc", ".luarc.json" },
+  settings = {
+    Lua = {
+      runtime = { version = "LuaJIT" },
+      diagnostics = {},
+      workspace = {
+        checkThirdParty = false,
+        library = vim_runtime_paths,
+      },
+      completion = {
+        callSnippet = "Replace",
+      },
+    },
+  },
+}
+
+vim.lsp.config.ts_ls = {
+  cmd = { "typescript-language-server", "--stdio" },
+  filetypes = { "typescript", "typescriptreact", "typescript.tsx" },
+  root_markers = { "package.json" },
+}
+
+vim.lsp.config.rust_analyzer = {
+  cmd = { "rust-analyzer" },
+  filetypes = { "rust" },
+  root_markers = { "Cargo.toml" },
+}
+
+vim.lsp.config.eslint = {
+  on_attach = function(_, bufnr)
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      command = "EslintFixAll",
+    })
+  end,
+}
+
+vim.lsp.config.jedi_language_server = {
+  cmd = { "jedi-language-server" },
+  filetypes = { "python" },
+  root_markers = { "pyproject.toml", "setup.py", "setup.cfg", "requirements.txt" },
+  init_options = {
+    completion = {
+      -- LSP snippets turned out to insisting on inserting parens everywhere
+      disableSnippets = true,
+    },
+  },
+}
 
 vim.lsp.enable({
   "lua_ls",
@@ -1231,7 +1316,6 @@ vim.lsp.enable({
   "eslint",
   "rust_analyzer",
   "ts_ls",
-  -- "sith_lsp",
 })
 
 vim.keymap.set({ "s" }, "<c-e>", function()
