@@ -572,6 +572,7 @@ require("lazy").setup({
           "yaml",
           "swift",
           "haskell",
+          "html",
         },
 
         sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
@@ -588,9 +589,7 @@ require("lazy").setup({
         textobjects = {
           select = {
             enable = true,
-
             lookahead = true,
-
             keymaps = {
               ["af"] = "@function.outer",
               ["if"] = "@function.inner",
@@ -1494,3 +1493,12 @@ vim.api.nvim_create_autocmd({ "FocusLost" }, {
   end,
   group = augroup,
 })
+-- (call
+--   function: (identifier) @func_name  (#eq? @func_name "Template")
+--   arguments: (argument_list (string) @content)
+-- ) @template_call
+--
+-- (call
+--   function: (identifier) @func_name  (#eq? @func_name "HTMLResponse")
+--   arguments: (argument_list (string) @content)
+-- ) @template_call
