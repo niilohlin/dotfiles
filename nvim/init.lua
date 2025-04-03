@@ -1106,6 +1106,7 @@ require("lazy").setup({
           end,
         },
       })
+      require("lspconfig").gleam.setup({})
     end,
   },
 
