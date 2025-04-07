@@ -248,7 +248,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- This setting controls how long to wait (in ms) before fetching type / symbol information.
 vim.opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
-vim.opt.cmdheight = 2
+-- vim.opt.cmdheight = 2 -- handled by auto-cmdheight
 -- opt.cmdheight = 0          -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
@@ -785,6 +785,10 @@ require("lazy").setup({
 
       vim.keymap.set("n", "]<c-x>", mc.nextCursor)
       vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+      vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+      vim.keymap.set("n", "<leader><down>", function()
+        mc.lineAddCursor(1)
+      end)
       vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
     end,
   },
@@ -815,6 +819,11 @@ require("lazy").setup({
         refactoring.debug.cleanup({})
       end, { nargs = "*" })
     end,
+  },
+
+  { -- removes all "press enter to continue"
+    "jake-stewart/auto-cmdheight.nvim",
+    opts = {},
   },
 
   -- Yaml utility, helps distinguish indendation
