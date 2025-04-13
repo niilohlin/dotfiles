@@ -37,7 +37,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx" },
+  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx", "html", "htmldjango" },
   callback = function()
     SetTabLength(2)
   end,
@@ -201,6 +201,14 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   end,
 })
 
+-- Open diagnostics on hover
+vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+  pattern = "*",
+  callback = function()
+    vim.diagnostic.open_float(nil, { focus = false })
+  end,
+})
+
 -- automatically load the file if it has changed from an external source
 vim.api.nvim_create_autocmd({ "CursorHold" }, {
   callback = function()
@@ -355,7 +363,7 @@ require("lazy").setup({
   -- Git plugin
   "tpope/vim-fugitive",
 
-  { -- CamelCase to snake case (crc, crm, crs, cru)
+  { -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
     "johmsalas/text-case.nvim",
     config = function()
       require("textcase").setup({})
@@ -665,6 +673,7 @@ require("lazy").setup({
         adapters = {
           require("neotest-python")({
             dap = { justMyCode = false },
+            args = { "-vv" },
             -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
           }),
         },
@@ -689,6 +698,13 @@ require("lazy").setup({
       vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
       vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
     end,
+  },
+
+  { -- tailwind tools
+    "luckasRanarison/tailwind-tools.nvim",
+    name = "tailwind-tools",
+    build = ":UpdateRemotePlugins",
+    opts = {},
   },
 
   { -- Debug support
@@ -742,12 +758,15 @@ require("lazy").setup({
     end,
   },
 
-  { -- Gruvbox with treesitter support (fixed gitsigns)
-    "niilohlin/gruvbox.nvim",
-    branch = "fix-gitsigns",
+  { -- Gruvbox with treesitter support
+    "ellisonleao/gruvbox.nvim",
     config = function()
       require("gruvbox").setup()
+      vim.o.background = "dark"
       vim.cmd("colorscheme gruvbox")
+      vim.api.nvim_set_hl(0, "Search", { bg = "#b57614", fg = "#282828" })
+      vim.api.nvim_set_hl(0, "IncSearch", { bg = "#af3a03", fg = "#fbf1c7" })
+      vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
     end,
   },
 
@@ -936,6 +955,7 @@ require("lazy").setup({
               return { PYTHONPATH = params.root }
             end,
           }),
+          null_ls.builtins.formatting.djlint,
         },
         on_attach = function(client, bufnr)
           if client.supports_method("textDocument/formatting") then
@@ -948,6 +968,12 @@ require("lazy").setup({
               end,
             })
           end
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            pattern = "*.html",
+            callback = function()
+              vim.lsp.buf.format({ async = false })
+            end,
+          })
         end,
       })
     end,
@@ -1030,6 +1056,21 @@ require("lazy").setup({
       table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
 
       -- local pwd = vim.loop.cwd()
+      -- vim.api.nvim_create_autocmd("FileType", {
+      --   pattern = "python",
+      --   callback = function()
+      --     vim.lsp.start({
+      --       name = "Omnisearch LSP",
+      --       filetypes = { "python" },
+      --       root_dir = pwd,
+      --       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
+      --       cmd = function(dispatchers)
+      --       end,
+      --     })
+      --   end,
+      -- })
+
+      -- local pwd = vim.loop.cwd()
       -- vim.env.RUST_BACKTRACE = 1
       -- vim.api.nvim_create_autocmd("FileType", {
       --   pattern = "python",
@@ -1053,6 +1094,63 @@ require("lazy").setup({
       --     })
       --   end,
       -- })
+      -- local pwd = vim.loop.cwd()
+      -- vim.env.RUST_BACKTRACE = 1
+      -- vim.api.nvim_create_autocmd("FileType", {
+      --   pattern = "python",
+      --   callback = function()
+      --     vim.lsp.start({
+      --       name = "SithLSP",
+      --       filetypes = { "python" },
+      --       root_dir = pwd,
+      --       cmd = { "/Users/niilohlin/personal/sith-language-server/target/debug/sith-lsp" },
+      --       init_options = {
+      --         settings = {
+      --           logLevel = "debug",
+      --           logFile = "/tmp/sith.log",
+      --           ruff = {
+      --             lint = {
+      --               enable = false,
+      --             },
+      --           },
+      --         },
+      --       },
+      --     })
+      --   end,
+      -- })
+
+      vim.filetype.add({
+        extension = {
+          jinja = "jinja",
+          jinja2 = "jinja",
+          j2 = "jinja",
+        },
+      })
+
+      local configs = require("lspconfig.configs")
+
+      if not configs.jinja_lsp then
+        configs.jinja_lsp = {
+          default_config = {
+            name = "jinja-lsp",
+            cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
+            filetypes = { "jinja", "html", "htmldjango" },
+            root_dir = function(fname)
+              return "."
+              --return nvim_lsp.util.find_git_ancestor(fname)
+            end,
+            init_options = {
+              templates = "./templates",
+              backend = { "./src" },
+              lang = "python",
+            },
+          },
+        }
+      end
+      lspconfig.jinja_lsp.setup({
+        capabilities = capabilities,
+      })
+      -- lspconfig.jinja_lsp.setup({})
 
       local servers = {
         lua_ls = {
@@ -1096,8 +1194,12 @@ require("lazy").setup({
               -- LSP snippets turned out to insisting on inserting parens everywhere
               disableSnippets = true,
             },
+            -- disable workspace symbols
           },
           capabilities = capabilities,
+          on_init = function()
+            -- client.server_capabilities.workspaceSymbolProvider = false
+          end,
         },
       }
 
