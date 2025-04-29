@@ -476,6 +476,9 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
       -- fzf native plugin, make it possible to fuzzy search in telescope
       { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+      -- following is for inline images
+      "nvim-lua/popup.nvim",
+      "nvim-telescope/telescope-media-files.nvim",
     },
     config = function()
       local builtin = require("telescope.builtin")
@@ -494,6 +497,12 @@ require("lazy").setup({
                 ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
               },
             },
+          },
+        },
+        extensions = {
+          media_files = {
+            filetypes = { "png", "webp", "jpg", "jpeg", "svg" },
+            find_cmd = "rg",
           },
         },
       })
@@ -859,6 +868,9 @@ require("lazy").setup({
       null_ls.register(rope.completion)
       vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
 
+      local tailwind = require("tailwind")
+      null_ls.register(tailwind.completion)
+
       local pylint_disable = {
         method = null_ls.methods.CODE_ACTION,
         filetypes = { "python" },
@@ -955,7 +967,16 @@ require("lazy").setup({
               return { PYTHONPATH = params.root }
             end,
           }),
-          null_ls.builtins.formatting.djlint,
+          null_ls.builtins.formatting.prettier.with({
+            prefer_local = "./node_modules/prettier/bin/",
+            filetypes = {
+              "css",
+              "html",
+              "htmldjango",
+            },
+            extra_args = { "--write" },
+            env = function(params) end,
+          }),
         },
         on_attach = function(client, bufnr)
           if client.supports_method("textDocument/formatting") then
@@ -1326,6 +1347,7 @@ require("lazy").setup({
   { -- File explorer
     "stevearc/oil.nvim",
     event = "VimEnter",
+    dependencies = { { "echasnovski/mini.icons", opts = {} } },
     config = function()
       require("oil").setup()
       vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
@@ -1453,19 +1475,34 @@ vim.api.nvim_create_user_command("SnippetStop", function()
   end
 end, { nargs = "*" })
 
+vim.api.nvim_create_user_command("Translate", function()
+  local start_pos = vim.fn.getpos("'<")
+  local end_pos = vim.fn.getpos("'>")
+  local lines = vim.fn.getline(start_pos[2], end_pos[2])
+
+  if #lines == 1 then
+    local line = lines[1]
+    local start_col = start_pos[3]
+    local end_col = end_pos[3]
+    local selected = line:sub(start_col, end_col)
+    lines[1] = line:sub(1, start_col - 1) .. '{{ _("' .. selected .. '") }}' .. line:sub(end_col + 1)
+  else
+    print("Multiline selection is not supported yet.")
+    return
+  end
+
+  -- Replace lines
+  vim.fn.setline(start_pos[2], lines)
+end, { range = true })
+
 local bullseye = require("bullseye")
 vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
 
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
 
--- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")
-vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
-
--- Never use Q for ex mode.
-vim.keymap.set("n", "Q", "<nop>")
+vim.keymap.set("n", "p", "p=`]") -- paste and reindent
+vim.keymap.set("n", "P", "P=`]") -- paste and reindent above
 
 -- Normal remaps
 vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
