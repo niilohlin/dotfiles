@@ -32,9 +32,9 @@ local function disable_slack_enhancements()
 end
 
 hs.window.filter
-  .new("Slack")
-  :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
-  :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
+    .new("Slack")
+    :subscribe(hs.window.filter.windowFocused, enable_slack_enhancements)
+    :subscribe(hs.window.filter.windowUnfocused, disable_slack_enhancements)
 
 -- local focus_next_window = hs.hotkey.new({ "ctrl", "shift" }, "`", function()
 -- end)
@@ -119,11 +119,11 @@ local function moveWindowBottom()
   win:setFrame(hs.geometry.rect(max.x, max.y + (max.h / 2), max.w, max.h / 2))
 end
 
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "K", moveWindowTop)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "J", moveWindowBottom)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "L", moveWindowRight)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
+-- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "K", moveWindowTop)
+-- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "J", moveWindowBottom)
+-- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "L", moveWindowRight)
+-- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
+-- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
 
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", function()
   hs.application.launchOrFocus("Safari")

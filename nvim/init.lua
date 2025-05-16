@@ -779,6 +779,32 @@ require("lazy").setup({
     end,
   },
 
+  { -- normal mode in the cmd line
+    "jake-stewart/normal-cmdline.nvim",
+    event = "CmdlineEnter",
+    config = function()
+      -- make the cmdline insert mode a beam
+      vim.opt.guicursor:append("ci:ver1,c:ver1")
+
+      local cmd = require("normal-cmdline")
+      cmd.setup({
+        -- key to hit within cmdline to enter normal mode:
+        key = "<esc>",
+        -- the cmdline text highlight when in normal mode:
+        hl = "Normal",
+        -- these mappings only apply to normal mode in cmdline:
+        mappings = {
+          ["k"] = cmd.history.prev,
+          ["j"] = cmd.history.next,
+          ["<cr>"] = cmd.accept,
+          ["<esc>"] = cmd.cancel,
+          ["<c-c>"] = cmd.cancel,
+          [":"] = cmd.reset,
+        },
+      })
+    end,
+  },
+
   { -- multi cursor support
     "jake-stewart/multicursor.nvim",
     config = function()
@@ -865,7 +891,7 @@ require("lazy").setup({
       local null_ls = require("null-ls")
       local rope = require("rope")
       null_ls.register(rope.auto_import)
-      null_ls.register(rope.completion)
+      -- null_ls.register(rope.completion)
       vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
 
       local tailwind = require("tailwind")
@@ -946,6 +972,9 @@ require("lazy").setup({
             extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
           }),
           null_ls.builtins.formatting.black.with({
+            condition = function()
+              return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
+            end,
             timeout = 10 * 1000,
             prefer_local = "venv/bin",
             env = function(params)
@@ -953,6 +982,9 @@ require("lazy").setup({
             end,
           }),
           null_ls.builtins.diagnostics.pylint.with({
+            condition = function()
+              return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
+            end,
             timeout = 10 * 1000,
             prefer_local = "venv/bin",
             env = function(params)
@@ -961,7 +993,7 @@ require("lazy").setup({
           }),
           null_ls.builtins.diagnostics.mypy.with({
             timeout = 10 * 1000,
-            prefer_local = "venv/bin",
+            prefer_local = ".venv/bin",
             extra_args = {},
             env = function(params)
               return { PYTHONPATH = params.root }
@@ -1015,8 +1047,8 @@ require("lazy").setup({
   { -- LSP setup
     dependencies = {
       -- Mason makes sure that LSPs are installed
-      { "williamboman/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
-      "williamboman/mason-lspconfig.nvim",
+      { "mason-org/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
+      "mason-org/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
     },
     "neovim/nvim-lspconfig",
@@ -1091,55 +1123,6 @@ require("lazy").setup({
       --   end,
       -- })
 
-      -- local pwd = vim.loop.cwd()
-      -- vim.env.RUST_BACKTRACE = 1
-      -- vim.api.nvim_create_autocmd("FileType", {
-      --   pattern = "python",
-      --   callback = function()
-      --     vim.lsp.start({
-      --       name = "SithLSP",
-      --       filetypes = { "python" },
-      --       root_dir = pwd,
-      --       cmd = { "/Users/niilohlin/personal/sith-language-server/target/debug/sith-lsp" },
-      --       init_options = {
-      --         settings = {
-      --           logLevel = "debug",
-      --           logFile = "/tmp/sith.log",
-      --           ruff = {
-      --             lint = {
-      --               enable = false,
-      --             },
-      --           },
-      --         },
-      --       },
-      --     })
-      --   end,
-      -- })
-      -- local pwd = vim.loop.cwd()
-      -- vim.env.RUST_BACKTRACE = 1
-      -- vim.api.nvim_create_autocmd("FileType", {
-      --   pattern = "python",
-      --   callback = function()
-      --     vim.lsp.start({
-      --       name = "SithLSP",
-      --       filetypes = { "python" },
-      --       root_dir = pwd,
-      --       cmd = { "/Users/niilohlin/personal/sith-language-server/target/debug/sith-lsp" },
-      --       init_options = {
-      --         settings = {
-      --           logLevel = "debug",
-      --           logFile = "/tmp/sith.log",
-      --           ruff = {
-      --             lint = {
-      --               enable = false,
-      --             },
-      --           },
-      --         },
-      --       },
-      --     })
-      --   end,
-      -- })
-
       vim.filetype.add({
         extension = {
           jinja = "jinja",
@@ -1209,8 +1192,28 @@ require("lazy").setup({
           end,
         },
 
+        -- ruff = {
+        --   capabilities = capabilities,
+        --   on_attach = function(client, bufnr)
+        --     if client.supports_method("textDocument/formatting") then
+        --       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+        --       vim.api.nvim_create_autocmd("BufWritePre", {
+        --         group = augroup,
+        --         buffer = bufnr,
+        --         callback = function()
+        --           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+        --         end,
+        --       })
+        --     end
+        --   end,
+        -- },
+
         jedi_language_server = {
           init_options = {
+            codeAction = {
+              nameExtractVariable = "jls_extract_var",
+              nameExtractFunction = "jls_extract_def",
+            },
             completion = {
               -- LSP snippets turned out to insisting on inserting parens everywhere
               disableSnippets = true,

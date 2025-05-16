@@ -11,6 +11,8 @@ local function import_assist(prefix, number, done)
       .. '"))[0:'
       .. number
       .. "]]))"
+  -- print("python code", python_code)
+
   vim.fn.jobstart("python -c '" .. python_code .. "'", {
     cwd = vim.fn.getcwd(),
     stdout_buffered = true,
@@ -28,6 +30,7 @@ local function import_assist(prefix, number, done)
       end
     end,
     on_exit = function(_, code, _)
+      print("python code exit")
       if code ~= 0 then
         done({})
       end
@@ -43,6 +46,7 @@ M.auto_import = {
       local actions = {}
       local is_undefined = false
 
+      -- Check diagnostics from LSP context
       for _, diag in ipairs(params.lsp_params.context.diagnostics) do
         if diag.code == "undefined-variable" or diag.code == "name-defined" then
           is_undefined = true
@@ -50,14 +54,16 @@ M.auto_import = {
         end
       end
 
-      local bufnr = vim.api.nvim_get_current_buf()
-      local line_number = vim.api.nvim_win_get_cursor(0)[1] - 1
-      local diags = vim.lsp.diagnostic.get_line_diagnostics(bufnr, line_number)
+      if not is_undefined then
+        local bufnr = vim.api.nvim_get_current_buf()
+        local line_number = vim.api.nvim_win_get_cursor(0)[1] - 1
+        local diags = vim.diagnostic.get(bufnr, { lnum = line_number })
 
-      for _, diag in ipairs(diags) do
-        if diag.code == "undefined-variable" or diag.code == "name-defined" then
-          is_undefined = true
-          break
+        for _, diag in ipairs(diags) do
+          if diag.code == "undefined-variable" or diag.code == "name-defined" then
+            is_undefined = true
+            break
+          end
         end
       end
 
@@ -77,7 +83,7 @@ M.auto_import = {
               action = function()
                 local last_import_line = 0
                 for i = 1, params.row do
-                  local line = vim.api.nvim_buf_get_lines(params.bufnr, i, i + 1, false)[1]
+                  local line = vim.api.nvim_buf_get_lines(params.bufnr, i - 1, i, false)[1]
                   if line:match("^from") or line:match("^import") then
                     last_import_line = i
                   end
@@ -85,29 +91,17 @@ M.auto_import = {
 
                 local import_line = "from " .. module .. " import " .. name
                 if last_import_line == 0 then
-                  vim.api.nvim_buf_set_lines(
-                    params.bufnr,
-                    last_import_line,
-                    last_import_line + 1,
-                    false,
-                    { import_line }
-                  )
+                  vim.api.nvim_buf_set_lines(params.bufnr, 0, 0, false, { import_line })
                 else
-                  vim.api.nvim_buf_set_lines(
-                    params.bufnr,
-                    last_import_line - 1,
-                    last_import_line - 1,
-                    false,
-                    { import_line }
-                  )
+                  vim.api.nvim_buf_set_lines(params.bufnr, last_import_line, last_import_line, false, { import_line })
                 end
               end,
             })
           else
-            print("no module or name")
+            print("No module or name found")
           end
         end
-        print("rope done")
+        print("Import suggestions completed")
 
         done(actions)
       end)
@@ -156,6 +150,7 @@ M.completion = {
 }
 
 function M.GenerateRopeCache(params)
+  local path = params["args"] or "./"
   vim.fn.jobstart("python -m pip install rope", {
     cwd = vim.fn.getcwd(),
     on_exit = function(_, code, _)
@@ -163,7 +158,9 @@ function M.GenerateRopeCache(params)
         print("Error occurred while installing rope")
       end
       local python_code =
-      '__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("./")).generate_cache()'
+          '__import__("rope.contrib.autoimport", fromlist="AutoImport").AutoImport(__import__("rope.base.project", fromlist="Project").Project("'
+          .. path
+          .. '")).generate_cache()'
       vim.fn.jobstart("python -c '" .. python_code .. "'", {
         cwd = vim.fn.getcwd(),
         on_stderr = function(_, data, _)

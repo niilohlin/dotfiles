@@ -79,6 +79,7 @@ eval "$(pyenv virtualenv-init -)"
 eval "$(rbenv init - --no-rehash zsh)"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+nvm use "22.14.0"
 
 # Load /etc/paths.d/ into the PATH
 eval $(/usr/libexec/path_helper -s)
