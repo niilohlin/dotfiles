@@ -1,0 +1,2 @@
+alias w_ _ = [print(f'{frame.filename}:{frame.lineno} in {frame.name}\n    {frame.line}') for frame in __import__("traceback").extract_stack() if not __import__("os").environ.get('VIRTUAL_ENV') or (not frame.filename.startswith(__import__("os").environ.get('VIRTUAL_ENV')) and "Python" not  in frame.filename and "site-packages" not in frame.filename and "Cellar" not  in frame.filename)]
+

@@ -1,5 +1,7 @@
 
 export PATH=/opt/homebrew/bin/:$PATH
+export PATH=/opt/homebrew/opt/node@22/bin:$PATH
+export PATH=/opt/homebrew/opt/llvm/bin:$PATH
 export PATH="/Users/niilohlin/.local/bin:$PATH"
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
@@ -8,14 +10,15 @@ export PATH=$PATH:$HOME/.pyenv/bin
 export PATH=$PATH:$HOME/.rbenv/shims/
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
 
+
 export NVIM_BIN=/opt/homebrew/bin/nvim
 
 export PYTHONDONTWRITEBYTECODE=1
 
 # postgresql 16 config
 export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
-export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
-export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include -I/opt/homebrew/opt/llvm/include"
+export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib -L/opt/homebrew/opt/llvm/lib"
 export CARGO_HOME=$HOME/.cargo/
 
 export LANG=C
