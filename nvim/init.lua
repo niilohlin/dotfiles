@@ -331,29 +331,15 @@ require("lazy").setup({
   },
 
   { -- ChatGPT plugin
-    "robitx/gp.nvim",
+    dependencies = { "echasnovski/mini.diff" },
+    "olimorris/codecompanion.nvim",
     config = function()
-      require("gp").setup({})
-      vim.api.nvim_create_autocmd({ "User" }, {
-        pattern = { "GpDone" },
-        callback = function(event)
-          -- All this is just to hard wrap the output.
-          local bufnr = event.buf
-          local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
-          local input_text = table.concat(lines, "\n")
-
-          local cmd = "echo " .. vim.fn.shellescape(input_text) .. " | hard_wrap"
-          local formatted_text = vim.fn.system(cmd)
-
-          if vim.v.shell_error ~= 0 then
-            print("Error occurred while running the formatter:", formatted_text)
-            return
-          end
-
-          vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.split(formatted_text, "\n"))
-        end,
+      local diff = require("mini.diff")
+      diff.setup({
+        -- Disabled by default
+        source = diff.gen_source.none(),
       })
+      require("codecompanion").setup({})
     end,
   },
 
@@ -1646,7 +1632,6 @@ vim.api.nvim_create_autocmd("Filetype", {
   end,
 })
 require("gui")
-require("cgip")
 
 local yank_path = vim.fn.stdpath("state") .. "/yank"
 local augroup = vim.api.nvim_create_augroup("shared_yank_register", { clear = true })
