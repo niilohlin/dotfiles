@@ -25,6 +25,12 @@ export LANG=C
 export CC=clang
 export LC_ALL=en_US.UTF-8
 export INPUTRC=~/.inputrc
+export EDITOR=nvim
+
+export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
+
 
 # if [ "$SSH_AUTH_SOCK" = "" -a -x /usr/bin/ssh-agent ]; then
 #     eval `/usr/bin/ssh-agent`
@@ -38,3 +44,4 @@ export PYENV_ROOT="$HOME/.pyenv"
 export NVM_DIR="$HOME/.nvm"
 
 source ~/dotfiles/.env
+. "$HOME/.cargo/env"

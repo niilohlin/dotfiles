@@ -2,7 +2,6 @@
 
 
 [core]
-# Please adapt and uncomment the following lines:
 	user = Niil Öhlin
 	email = niilohlin@gmail.com
 	excludesfile = /Users/niilohlin/.gitignore
@@ -26,27 +25,17 @@
 	autoStash = true
 	updateRefs = true
 [alias]
-	co = checkout
-    chp = cherry-pick
+	; co = checkout
+	;    go = checkout -b
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
-    go = checkout -b
 	branches = !git for-each-ref --sort=committerdate --format=\"%(refname:short) | %(authorname) | %(committerdate:short)\" refs/heads/ | column -t -s \"|\"
-    stashpull = "!git stash && git pull && git stash pop"
-    fix = !git add . && git commit --amend --no-edit
-    fixup = !git commit --fixup $(git log -1 --pretty=format:%h)
-    branch-name = "!git rev-parse --abbrev-ref HEAD"
     publish = "!git push -u origin $(git branch-name)"
-    # publish = !llm_gh_body > /tmp/gh_body && gh pr create --title \"$(llm_gh_title)\" --body-file /tmp/gh_body
     autocommit = !llm_commit > /tmp/COMMIT_EDITMSG && git commit -e -t /tmp/COMMIT_EDITMSG
     prdiff = !git diff origin/main...$(git rev-parse --abbrev-ref HEAD)
     next = "!git log --reverse --pretty=%H main | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
     prev = "!git checkout HEAD^1"
     patch = !git --no-pager diff --no-color
-    delete = "!git branch -D"
-    nuke = "!git clean -df && git reset HEAD --hard && git submodule update --recursive"
-    wip = "!git add . && git commit -m \"WIP\" --no-verify"
-    added = diff --cached
-    remote-tags = ls-remote --tags
+    ; nuke = "!git clean -df && git reset HEAD --hard && git submodule update --recursive"
 [includeIf "gitdir:~/work/"]
     path = ~/work/gitconfig
 [includeIf "gitdir:~/personal/"]
@@ -72,6 +61,7 @@
 	ui = auto
 [tag]
 	sort = version:refname
+	gpgsign = true
 [diff]
 	algorithm = histogram
 	colorMoved = plain
@@ -90,3 +80,5 @@
 	autocorrect = prompt
 [commit]
 	verbose = true
+[gpg "ssh"]
+	allowedSignersFile = /Users/niilohlin/.config/git/allowed_signers

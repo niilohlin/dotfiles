@@ -26,22 +26,13 @@ function ls() {
     fi
 }
 
-# alias ls='eza -G -F'
 alias ll='eza -l --group-directories-first --color=auto -F'
 alias la='eza -la --group-directories-first --color=auto -F'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
 alias free='free -m'                      # show sizes in MB
 alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph"
-alias gap="git add -p"
-alias gs="git status";
-alias gd="git diff";
-alias gdc="git diff --cached";
-alias gc="git commit";
-alias ga="git add";
-alias gb='git branch'
 alias vim='nvim'
-alias tree='broot'
 alias less='vim -R' # use vim in readonly mode as a pager
 alias psp='source ~/dotfiles/bin/cd_to_pane_start_path'
 alias lg='lazygit'
@@ -105,9 +96,6 @@ source ~/.zsh/fzf-history
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Dynamic tree navigation
-source ~/.config/broot/launcher/bash/br
-
 # ci", ci', ci`, di", etc
 autoload -U select-quoted
 zle -N select-quoted
@@ -126,7 +114,7 @@ for m in visual viopp; do
     done
 done
 
-eval $(keychain --eval --agents ssh id_rsa)
+eval $(keychain --eval id_rsa)
 
 if [[ $- =~ i ]] && [[ -z "$TMUX" ]] && [[ -n "$SSH_TTY" ]]; then
   tmux attach-session || tmux new-session
@@ -137,3 +125,4 @@ ulimit -n 8192
 
 # set neovim to man
 export MANPAGER='nvim +Man!'
+

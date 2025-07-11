@@ -137,9 +137,8 @@ end)
 hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "W", function()
   hs.application.launchOrFocus("Obsidian")
 end)
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "W", function()
-  hs.application.launchOrFocus("Obsidian")
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "S", function()
+  hs.application.launchOrFocus("Zen")
 end)
 
 local marks = {}
