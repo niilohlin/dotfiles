@@ -626,7 +626,183 @@ require("blink.cmp").setup({
 -- ?? idk where this is going
 -- opts_extend = { "sources.default" },
 
+-- LSP server Installer/manager
+MiniDeps.add("mason-org/mason.nvim")
+require("mason").setup()
 
+-- LSP setup
+MiniDeps.add("neovim/nvim-lspconfig")
+local lspconfig = require("lspconfig")
+local capabilities = require("blink.cmp").get_lsp_capabilities()
+
+local vim_runtime_paths = {
+  vim.fn.expand("$VIMRUNTIME/lua"),
+  vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
+  vim.fn.expand("$VIMRUNTIME/lua/vim"),
+}
+local rest = vim.api.nvim_list_runtime_paths()
+table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
+
+lspconfig.lua_ls.setup({
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      runtime = { version = "LuaJIT" },
+      diagnostics = {},
+      workspace = {
+        checkThirdParty = false,
+        library = vim_runtime_paths,
+      },
+      completion = {
+        callSnippet = "Replace",
+      },
+    },
+  },
+})
+vim.lsp.config("lua_ls", lspconfig.lua_ls)
+
+lspconfig.ts_ls.setup({
+  capabilities = capabilities,
+})
+vim.lsp.config("ts_ls", lspconfig.ts_ls)
+
+lspconfig.rust_analyzer.setup({
+  capabilities = capabilities,
+})
+vim.lsp.config("rust_analyzer", lspconfig.rust_analyzer)
+
+lspconfig.eslint.setup({
+  on_attach = function(client, bufnr)
+    -- Enable formatting capability for ESLint
+    client.server_capabilities.documentFormattingProvider = true
+
+    -- Auto-format on save
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      buffer = bufnr,
+      callback = function()
+        vim.lsp.buf.format({ bufnr = bufnr })
+      end,
+    })
+  end,
+})
+vim.lsp.config("eslint", lspconfig.eslint)
+
+-- ruff = {
+--   capabilities = capabilities,
+--   on_attach = function(client, bufnr)
+--     if client.supports_method("textDocument/formatting") then
+--       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+--       vim.api.nvim_create_autocmd("BufWritePre", {
+--         group = augroup,
+--         buffer = bufnr,
+--         callback = function()
+--           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+--         end,
+--       })
+--     end
+--   end,
+-- },
+
+lspconfig.jedi_language_server.setup({
+  init_options = {
+    codeAction = {
+      nameExtractVariable = "jls_extract_var",
+      nameExtractFunction = "jls_extract_def",
+    },
+    completion = {
+      -- LSP snippets turned out to insisting on inserting parens everywhere
+      disableSnippets = true,
+    },
+    -- disable workspace symbols
+  },
+  capabilities = capabilities,
+  on_init = function()
+    -- client.server_capabilities.workspaceSymbolProvider = false
+  end,
+})
+vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
+
+-- Global mappings.
+vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
+
+-- Use LspAttach autocommand to only map the following keys
+-- after the language server attaches to the current buffer
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+  callback = function(ev)
+    -- Enable completion triggered by <c-x><c-o>
+    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+
+    -- Buffer local mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    local opts = { buffer = ev.buf }
+    local builtin = require("telescope.builtin")
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+    -- Do not override the keymap if the lsp server does not support the method.
+    local function declare_method_if_supported(method, command, fn)
+      if client == nil then
+        return
+      end
+      if client:supports_method(method) then
+        vim.keymap.set("n", command, fn, opts)
+      end
+    end
+
+    declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
+    declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
+    declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
+    declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
+    declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
+  end,
+})
+
+-- local pwd = vim.loop.cwd()
+-- vim.api.nvim_create_autocmd("FileType", {
+--   pattern = "python",
+--   callback = function()
+--     vim.lsp.start({
+--       name = "Omnisearch LSP",
+--       filetypes = { "python" },
+--       root_dir = pwd,
+--       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
+--       cmd = function(dispatchers)
+--       end,
+--     })
+--   end,
+-- })
+
+vim.filetype.add({
+  extension = {
+    jinja = "jinja",
+    jinja2 = "jinja",
+    j2 = "jinja",
+  },
+})
+
+local lsp_configs = require("lspconfig.configs")
+
+if not lsp_configs.jinja_lsp then
+  lsp_configs.jinja_lsp = {
+    default_config = {
+      name = "jinja-lsp",
+      cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
+      filetypes = { "jinja", "html", "htmldjango" },
+      root_dir = function(fname)
+        return "."
+        --return nvim_lsp.util.find_git_ancestor(fname)
+      end,
+      init_options = {
+        templates = "./templates",
+        backend = { "./src" },
+        lang = "python",
+      },
+    },
+  }
+end
+lspconfig.jinja_lsp.setup({
+  capabilities = capabilities,
+})
 
 --   { -- ChatGPT plugin
 --     dependencies = { "echasnovski/mini.diff" },
@@ -1104,208 +1280,6 @@ require("blink.cmp").setup({
 --   },
 --   -- https://github.com/kevinhwang91/nvim-hlslens
 --
---   { -- LSP setup
---     dependencies = {
---       -- Mason makes sure that LSPs are installed
---       { "mason-org/mason.nvim", config = true }, -- NOTE: Must be loaded before dependants
---       "mason-org/mason-lspconfig.nvim",
---       "WhoIsSethDaniel/mason-tool-installer.nvim",
---     },
---     "neovim/nvim-lspconfig",
---     config = function()
---       -- Global mappings.
---       vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
---
---       -- Use LspAttach autocommand to only map the following keys
---       -- after the language server attaches to the current buffer
---       vim.api.nvim_create_autocmd("LspAttach", {
---         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
---         callback = function(ev)
---           -- Enable completion triggered by <c-x><c-o>
---           vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
---
---           -- Buffer local mappings.
---           -- See `:help vim.lsp.*` for documentation on any of the below functions
---           local opts = { buffer = ev.buf }
---           local builtin = require("telescope.builtin")
---           local client = vim.lsp.get_client_by_id(ev.data.client_id)
---
---           -- Do not override the keymap if the lsp server does not support the method.
---           local function declare_method_if_supported(method, command, fn)
---             if client == nil then
---               return
---             end
---             if client:supports_method(method) then
---               vim.keymap.set("n", command, fn, opts)
---             end
---           end
---
---           declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
---           declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
---           declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
---           declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
---           declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
---
---           if client and client:supports_method("textDocument/formatting") then
---             vim.keymap.set("n", "<leader>=", function()
---               vim.lsp.buf.format({ async = true })
---             end, opts)
---           end
---         end,
---       })
---
---       -- Set up lspconfig.
---       local capabilities = require("blink.cmp").get_lsp_capabilities()
---       local lspconfig = require("lspconfig")
---
---       lspconfig["sourcekit"].setup({ capabilities = capabilities })
---
---       local vim_runtime_paths = {
---         vim.fn.expand("$VIMRUNTIME/lua"),
---         vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
---         vim.fn.expand("$VIMRUNTIME/lua/vim"),
---       }
---       local rest = vim.api.nvim_list_runtime_paths()
---       table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
---
---       -- local pwd = vim.loop.cwd()
---       -- vim.api.nvim_create_autocmd("FileType", {
---       --   pattern = "python",
---       --   callback = function()
---       --     vim.lsp.start({
---       --       name = "Omnisearch LSP",
---       --       filetypes = { "python" },
---       --       root_dir = pwd,
---       --       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
---       --       cmd = function(dispatchers)
---       --       end,
---       --     })
---       --   end,
---       -- })
---
---       vim.filetype.add({
---         extension = {
---           jinja = "jinja",
---           jinja2 = "jinja",
---           j2 = "jinja",
---         },
---       })
---
---       local configs = require("lspconfig.configs")
---
---       if not configs.jinja_lsp then
---         configs.jinja_lsp = {
---           default_config = {
---             name = "jinja-lsp",
---             cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
---             filetypes = { "jinja", "html", "htmldjango" },
---             root_dir = function(fname)
---               return "."
---               --return nvim_lsp.util.find_git_ancestor(fname)
---             end,
---             init_options = {
---               templates = "./templates",
---               backend = { "./src" },
---               lang = "python",
---             },
---           },
---         }
---       end
---       lspconfig.jinja_lsp.setup({
---         capabilities = capabilities,
---       })
---       -- lspconfig.jinja_lsp.setup({})
---
---       local servers = {
---         lua_ls = {
---           capabilities = capabilities,
---           settings = {
---             Lua = {
---               runtime = { version = "LuaJIT" },
---               diagnostics = {},
---               workspace = {
---                 checkThirdParty = false,
---                 library = vim_runtime_paths,
---               },
---               completion = {
---                 callSnippet = "Replace",
---               },
---             },
---           },
---         },
---
---         ts_ls = {
---           capabilities = capabilities,
---         },
---
---         rust_analyzer = {
---           capabilities = capabilities,
---         },
---
---         eslint = {
---           on_attach = function(client, bufnr)
---             -- Enable formatting capability for ESLint
---             client.server_capabilities.documentFormattingProvider = true
---
---             -- Auto-format on save
---             vim.api.nvim_create_autocmd("BufWritePre", {
---               buffer = bufnr,
---               callback = function()
---                 vim.lsp.buf.format({ bufnr = bufnr })
---               end,
---             })
---           end,
---         },
---
---         -- ruff = {
---         --   capabilities = capabilities,
---         --   on_attach = function(client, bufnr)
---         --     if client.supports_method("textDocument/formatting") then
---         --       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
---         --       vim.api.nvim_create_autocmd("BufWritePre", {
---         --         group = augroup,
---         --         buffer = bufnr,
---         --         callback = function()
---         --           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
---         --         end,
---         --       })
---         --     end
---         --   end,
---         -- },
---
---         jedi_language_server = {
---           init_options = {
---             codeAction = {
---               nameExtractVariable = "jls_extract_var",
---               nameExtractFunction = "jls_extract_def",
---             },
---             completion = {
---               -- LSP snippets turned out to insisting on inserting parens everywhere
---               disableSnippets = true,
---             },
---             -- disable workspace symbols
---           },
---           capabilities = capabilities,
---           on_init = function()
---             -- client.server_capabilities.workspaceSymbolProvider = false
---           end,
---         },
---       }
---
---       require("mason").setup()
---       local ensure_installed = vim.tbl_keys(servers or {})
---
---       require("mason-lspconfig").setup({
---         ensure_installed = ensure_installed,
---       })
---       for _, server_name in ipairs(ensure_installed) do
---         local server = servers[server_name] or {}
---         server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
---         vim.lsp.config(server_name, server)
---       end
---       require("lspconfig").gleam.setup({})
---     end,
---   },
 --
 --   {
 --     "nvim-lualine/lualine.nvim",
