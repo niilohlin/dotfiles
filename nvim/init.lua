@@ -298,7 +298,7 @@ vim.diagnostic.config({
 })
 
 -- Git status of changed lines to the left.
-MiniDeps.add( "lewis6991/gitsigns.nvim")
+MiniDeps.add("lewis6991/gitsigns.nvim")
 local gitsigns = require("gitsigns")
 gitsigns.setup({
   signs = {
@@ -348,11 +348,19 @@ MiniDeps.add("nvim-lua/plenary.nvim")
 
 -- fzf native plugin, make it possible to fuzzy search in telescope
 -- Provides `load_extension("fzf")`
-MiniDeps.add({ source="nvim-telescope/telescope-fzf-native.nvim", hooks = { post_install = function() vim.fn.system("make") end } })
+MiniDeps.add({
+  source = "nvim-telescope/telescope-fzf-native.nvim",
+  hooks = {
+    post_install = function()
+      vim.fn.system(
+        "make")
+    end
+  }
+})
 
 MiniDeps.add({
-  source="nvim-telescope/telescope.nvim",
-  dependencies={
+  source = "nvim-telescope/telescope.nvim",
+  dependencies = {
     "nvim-lua/plenary.nvim",
   }
 })
@@ -523,17 +531,17 @@ configs.setup({
 })
 
 -- Tree sitter text objects
-MiniDeps.add("nvim-treesitter/nvim-treesitter-textobjects" )
+MiniDeps.add("nvim-treesitter/nvim-treesitter-textobjects")
 
- -- Text objects plugin
-MiniDeps.add({ source="echasnovski/mini.ai", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } })
+-- Text objects plugin
+MiniDeps.add({ source = "echasnovski/mini.ai", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } })
 require("mini.ai").setup()
 
 -- Surround plugin, adds text objects like ci" and so on.
 MiniDeps.add("echasnovski/mini.surround")
 local surround = require("mini.surround")
 surround.setup({
-mappings = {
+  mappings = {
     add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
     delete = "ds",       -- Delete surrounding
     replace = "cs",      -- Replace surrounding
@@ -561,7 +569,7 @@ MiniDeps.add("echasnovski/mini.icons")
 require("mini.icons").setup()
 
 -- File explorer
-MiniDeps.add({ source="stevearc/oil.nvim", dependencies= {"echasnovski/mini.icons"}})
+MiniDeps.add({ source = "stevearc/oil.nvim", dependencies = { "echasnovski/mini.icons" } })
 require("oil").setup()
 vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
 -- Disable netrw. We don't need it if we use oil
@@ -572,10 +580,14 @@ vim.g.loaded_netrwPlugin = 1
 MiniDeps.add("rafamadriz/friendly-snippets")
 
 -- Completion engine.
-MiniDeps.add({source="saghen/blink.cmp", hooks = { post_install =function()
-  vim.fn.system("cd /Users/niilohlin/.local/share/nvim/site/pack/deps/opt/blink.cmp/ && cargo build --release")
-
-end }} )
+MiniDeps.add({
+  source = "saghen/blink.cmp",
+  hooks = {
+    post_install = function()
+      vim.fn.system("cd /Users/niilohlin/.local/share/nvim/site/pack/deps/opt/blink.cmp/ && cargo build --release")
+    end
+  }
+})
 
 
 -- nvim development utils
@@ -604,7 +616,7 @@ require("blink.cmp").setup({
   },
 
   sources = {
-    default = { "lazydev","lsp", "path", "snippets", "buffer" },
+    default = { "lazydev", "lsp", "path", "snippets", "buffer" },
     providers = {
       lazydev = {
         name = "LazyDev",
@@ -803,6 +815,177 @@ end
 lspconfig.jinja_lsp.setup({
   capabilities = capabilities,
 })
+
+
+-- Make anything into an lsp, like linter output etc.
+MiniDeps.add("nvimtools/none-ls.nvim")
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+
+local null_ls = require("null-ls")
+local rope = require("rope")
+null_ls.register(rope.auto_import)
+-- null_ls.register(rope.completion)
+vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
+
+local tailwind = require("tailwind")
+null_ls.register(tailwind.completion)
+
+local pylint_disable = {
+  method = null_ls.methods.CODE_ACTION,
+  filetypes = { "python" },
+  generator = {
+    fn = function(params)
+      local actions = {}
+      for _, diag in ipairs(params.lsp_params.context.diagnostics) do
+        if diag.source == "pylint" then
+          table.insert(actions, {
+            title = "Disable pylint (" .. diag.code .. ")",
+            action = function()
+              local line = diag.range.start.line
+              local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+              local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
+              vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+            end,
+          })
+        elseif diag.source == "mypy" then
+          table.insert(actions, {
+            title = "Disable mypy [" .. diag.code .. "]",
+            action = function()
+              local line = diag.range.start.line
+              local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+              local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
+              vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+            end,
+          })
+        end
+      end
+      return actions
+    end,
+  },
+}
+
+null_ls.register(pylint_disable)
+
+local generic_assignment = {
+  method = null_ls.methods.COMPLETION,
+  filetypes = { "python", "lua" },
+  generator = {
+    fn = function(params)
+      local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
+      if not snake_case_word then
+        return {}
+      end
+      local words = {}
+      for word in snake_case_word:gmatch("[^_]+") do
+        table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
+      end
+      local camel_case_word = table.concat(words)
+      return {
+        {
+          items = {
+            {
+              label = camel_case_word,
+              insertText = camel_case_word,
+              documentation = "CamelCase",
+            },
+          },
+          isIncomplete = true,
+        },
+      }
+    end,
+  },
+}
+
+null_ls.register(generic_assignment)
+null_ls.register({
+  name = "autoflake8_custom",
+  method = null_ls.methods.FORMATTING,
+  filetypes = { "python" },
+  generator = null_ls.formatter({
+    command = "autoflake8",
+    args = {
+      "$FILENAME",
+    },
+  }),
+  to_stderr = true,
+  to_stdout = true,
+})
+
+null_ls.setup({
+  sources = {
+    null_ls.builtins.diagnostics.checkmake,
+    null_ls.builtins.formatting.stylua.with({
+      extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
+    }),
+    null_ls.builtins.formatting.black.with({
+      condition = function()
+        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
+      end,
+      timeout = 10 * 1000,
+      prefer_local = "venv/bin",
+      env = function(params)
+        return { PYTHONPATH = params.root }
+      end,
+    }),
+    null_ls.builtins.formatting.isort.with({
+      condition = function()
+        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/isort") ~= 0
+      end,
+      timeout = 10 * 1000,
+      prefer_local = "venv/bin",
+      env = function(params)
+        return { PYTHONPATH = params.root }
+      end,
+    }),
+    null_ls.builtins.diagnostics.pylint.with({
+      condition = function()
+        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
+      end,
+      timeout = 10 * 1000,
+      prefer_local = "venv/bin",
+      env = function(params)
+        return { PYTHONPATH = params.root }
+      end,
+    }),
+    null_ls.builtins.diagnostics.mypy.with({
+      timeout = 10 * 1000,
+      prefer_local = ".venv/bin",
+      extra_args = {},
+      env = function(params)
+        return { PYTHONPATH = params.root }
+      end,
+    }),
+    null_ls.builtins.formatting.prettier.with({
+      prefer_local = "./node_modules/prettier/bin/",
+      filetypes = {
+        "css",
+        "html",
+        "htmldjango",
+      },
+      extra_args = { "--write" },
+    }),
+  },
+  on_attach = function(client, bufnr)
+    if client.supports_method("textDocument/formatting") then
+      vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+      vim.api.nvim_create_autocmd("BufWritePre", {
+        group = augroup,
+        buffer = bufnr,
+        callback = function()
+          vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+        end,
+      })
+    end
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = "*.html",
+      callback = function()
+        print("formatting")
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
+  end,
+})
+
 
 --   { -- ChatGPT plugin
 --     dependencies = { "echasnovski/mini.diff" },
@@ -1094,178 +1277,6 @@ lspconfig.jinja_lsp.setup({
 --   { -- removes all "press enter to continue"
 --     "jake-stewart/auto-cmdheight.nvim",
 --     opts = {},
---   },
---
---   { -- Make anything into an lsp, like linter output etc.
---     "nvimtools/none-ls.nvim",
---     config = function()
---       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
---
---       local null_ls = require("null-ls")
---       local rope = require("rope")
---       null_ls.register(rope.auto_import)
---       -- null_ls.register(rope.completion)
---       vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
---
---       local tailwind = require("tailwind")
---       null_ls.register(tailwind.completion)
---
---       local pylint_disable = {
---         method = null_ls.methods.CODE_ACTION,
---         filetypes = { "python" },
---         generator = {
---           fn = function(params)
---             local actions = {}
---             for _, diag in ipairs(params.lsp_params.context.diagnostics) do
---               if diag.source == "pylint" then
---                 table.insert(actions, {
---                   title = "Disable pylint (" .. diag.code .. ")",
---                   action = function()
---                     local line = diag.range.start.line
---                     local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
---                     local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
---                     vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
---                   end,
---                 })
---               elseif diag.source == "mypy" then
---                 table.insert(actions, {
---                   title = "Disable mypy [" .. diag.code .. "]",
---                   action = function()
---                     local line = diag.range.start.line
---                     local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
---                     local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
---                     vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
---                   end,
---                 })
---               end
---             end
---             return actions
---           end,
---         },
---       }
---
---       null_ls.register(pylint_disable)
---
---       local generic_assignment = {
---         method = null_ls.methods.COMPLETION,
---         filetypes = { "python", "lua" },
---         generator = {
---           fn = function(params)
---             local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
---             if not snake_case_word then
---               return {}
---             end
---             local words = {}
---             for word in snake_case_word:gmatch("[^_]+") do
---               table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
---             end
---             local camel_case_word = table.concat(words)
---             return {
---               {
---                 items = {
---                   {
---                     label = camel_case_word,
---                     insertText = camel_case_word,
---                     documentation = "CamelCase",
---                   },
---                 },
---                 isIncomplete = true,
---               },
---             }
---           end,
---         },
---       }
---
---       null_ls.register(generic_assignment)
---       null_ls.register({
---         name = "autoflake8_custom",
---         method = null_ls.methods.FORMATTING,
---         filetypes = { "python" },
---         generator = null_ls.formatter({
---           command = "autoflake8",
---           args = {
---             "$FILENAME",
---           },
---         }),
---         to_stderr = true,
---         to_stdout = true,
---       })
---
---       null_ls.setup({
---         sources = {
---           null_ls.builtins.diagnostics.checkmake,
---           null_ls.builtins.formatting.stylua.with({
---             extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
---           }),
---           null_ls.builtins.formatting.black.with({
---             condition = function()
---               return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
---             end,
---             timeout = 10 * 1000,
---             prefer_local = "venv/bin",
---             env = function(params)
---               return { PYTHONPATH = params.root }
---             end,
---           }),
---           null_ls.builtins.formatting.isort.with({
---             condition = function()
---               return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/isort") ~= 0
---             end,
---             timeout = 10 * 1000,
---             prefer_local = "venv/bin",
---             env = function(params)
---               return { PYTHONPATH = params.root }
---             end,
---           }),
---           null_ls.builtins.diagnostics.pylint.with({
---             condition = function()
---               return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
---             end,
---             timeout = 10 * 1000,
---             prefer_local = "venv/bin",
---             env = function(params)
---               return { PYTHONPATH = params.root }
---             end,
---           }),
---           null_ls.builtins.diagnostics.mypy.with({
---             timeout = 10 * 1000,
---             prefer_local = ".venv/bin",
---             extra_args = {},
---             env = function(params)
---               return { PYTHONPATH = params.root }
---             end,
---           }),
---           null_ls.builtins.formatting.prettier.with({
---             prefer_local = "./node_modules/prettier/bin/",
---             filetypes = {
---               "css",
---               "html",
---               "htmldjango",
---             },
---             extra_args = { "--write" },
---           }),
---         },
---         on_attach = function(client, bufnr)
---           if client.supports_method("textDocument/formatting") then
---             vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
---             vim.api.nvim_create_autocmd("BufWritePre", {
---               group = augroup,
---               buffer = bufnr,
---               callback = function()
---                 vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
---               end,
---             })
---           end
---           vim.api.nvim_create_autocmd("BufWritePre", {
---             pattern = "*.html",
---             callback = function()
---               print("formatting")
---               vim.lsp.buf.format({ async = false })
---             end,
---           })
---         end,
---       })
---     end,
 --   },
 --
 --   { -- add a scroll bar
