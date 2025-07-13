@@ -986,453 +986,422 @@ null_ls.setup({
   end,
 })
 
+-- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
+MiniDeps.add("johmsalas/text-case.nvim")
+require("textcase").setup({})
+require("telescope").load_extension("textcase")
 
---   { -- ChatGPT plugin
---     dependencies = { "echasnovski/mini.diff" },
---     "olimorris/codecompanion.nvim",
---     config = function()
---       local diff = require("mini.diff")
---       diff.setup({
---         -- Disabled by default
---         source = diff.gen_source.none(),
---       })
---       require("codecompanion").setup({})
---     end,
---   },
---
---   -- Markdown utility, go to link and so on.
---   "plasticboy/vim-markdown",
---
---   { -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
---     "johmsalas/text-case.nvim",
---     config = function()
---       require("textcase").setup({})
---       require("telescope").load_extension("textcase")
---
---       vim.api.nvim_create_user_command("TrainAbolish", function()
---         math.randomseed(os.time())
---         -- Read words from dictionary file
---         local words = {}
---         local file = io.open("/usr/share/dict/words", "r")
---         if file then
---           for line in file:lines() do
---             table.insert(words, line)
---           end
---           file:close()
---         else
---           print("Could not open dictionary file")
---           os.exit(1)
---         end
---
---         local function to_camel_case(word1, word2)
---           return word1:sub(1, 1):upper() .. word1:sub(2):lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
---         end
---
---         local function to_lower_camel_case(word1, word2)
---           return word1:lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
---         end
---
---         local function to_snake_case(word1, word2)
---           return word1:lower() .. "_" .. word2:lower()
---         end
---
---         local function to_screaming_case(word1, word2)
---           return word1:upper() .. "_" .. word2:upper()
---         end
---
---         local cases = { to_camel_case, to_lower_camel_case, to_snake_case, to_screaming_case }
---
---         local output_file = io.open("/tmp/output.txt", "w")
---         if output_file == nil then
---           return
---         end
---         for _ = 1, 20 do
---           local word1 = words[math.random(#words)]
---           local word2 = words[math.random(#words)]
---           local case_func = cases[math.random(#cases)]
---           local target_func = cases[math.random(#cases)]
---           output_file:write(case_func(word1, word2) .. " -- " .. target_func(word1, word2) .. "\n")
---         end
---         output_file:close()
---
---         vim.cmd("edit /tmp/output.txt")
---       end, {})
---     end,
---   },
---
---
---   { -- quickfix improvement
---     "stevearc/quicker.nvim",
---     event = "FileType qf",
---     opts = {},
---   },
---
---   -- Disable search highlight after searching.
---   "romainl/vim-cool",
---
---
---   { -- better python movements and text objects
---     "jeetsukumaran/vim-pythonsense",
---     init = function()
---       vim.g.is_pythonsense_suppress_object_keymaps = 1
---     end,
---   },
---
---   {
---     dependencies = {
---       "nvim-neotest/nvim-nio",
---       "nvim-lua/plenary.nvim",
---       "antoinemadec/FixCursorHold.nvim",
---       "nvim-treesitter/nvim-treesitter",
---       "nvim-neotest/neotest-python",
---     },
---     "nvim-neotest/neotest",
---     config = function()
---       ---@module "neotest"
---       local neotest = require("neotest")
---       neotest.setup({
---         summary = {
---           mappings = {
---             help = "g?", -- change "?" to "g?" so that you can search backwards.
---           },
---         },
---         adapters = {
---           require("neotest-python")({
---             dap = { justMyCode = false },
---             args = { "-vv" },
---             -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
---           }),
---         },
---       })
---
---       vim.keymap.set("n", "<leader>tr", neotest.run.run)
---       vim.keymap.set("n", "<leader>td", function()
---         neotest.run.run({ strategy = "dap" })
---       end)
---
---       vim.keymap.set("n", "<leader>ts", neotest.summary.open)
---       vim.api.nvim_create_user_command("NeotestStopTest", neotest.run.stop, { nargs = "*" })
---       vim.keymap.set("n", "<c-w>t", neotest.output.open)
---       vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
---       vim.keymap.set("n", "]j", function()
---         neotest.jump.next({ status = "failed" })
---       end)
---       vim.keymap.set("n", "[j", function()
---         neotest.jump.prev({ status = "failed" })
---       end)
---
---       vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
---       vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
---     end,
---   },
---
---   { -- Debug support
---     dependencies = {
---       "mfussenegger/nvim-dap-python",
---       { -- json5
---         "Joakker/lua-json5",
---         build = function()
---           vim.fn.system("./install.sh")
---         end,
---       },
---       { -- virtual text for debugger
---         "theHamsta/nvim-dap-virtual-text",
---         opts = {
---           virt_text_pos = "eol",
---         },
---       },
---     },
---     "mfussenegger/nvim-dap",
---     config = function()
---       require("dap.ext.vscode").json_decode = require("json5").parse
---       local dap = require("dap")
---       vim.keymap.set("n", "<leader>dc", function()
---         dap.continue()
---       end)
---       vim.keymap.set("n", "<leader>b", function()
---         dap.toggle_breakpoint()
---       end)
---       vim.keymap.set("n", "<leader>dr", function()
---         dap.repl.open()
---       end)
---       vim.keymap.set("n", "<leader>dt", function()
---         dap.terminate()
---       end)
---       vim.keymap.set("n", "<leader>dn", function()
---         dap.continue({ new = true })
---       end)
---       vim.keymap.set("n", "<leader>ds", function()
---         dap.step_over()
---       end)
---       vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
---
---       require("dap-python").setup("./venv/bin/python")
---       vim.env.GEVENT_SUPPORT = "True"
---       table.insert(dap.configurations.python, {
---         type = "python",
---         request = "launch",
---         name = "dap Django",
---         program = vim.fn.getcwd() .. "/quickbit/manage.py", -- NOTE: Adapt path to manage.py as needed
---         args = { "runserver", "--noreload" },
---       })
---     end,
---   },
---
---   { -- normal mode in the cmd line
---     "jake-stewart/normal-cmdline.nvim",
---     event = "CmdlineEnter",
---     config = function()
---       -- make the cmdline insert mode a beam
---       vim.opt.guicursor:append("ci:ver1,c:ver1")
---
---       local cmd = require("normal-cmdline")
---       cmd.setup({
---         -- key to hit within cmdline to enter normal mode:
---         key = "<esc>",
---         -- the cmdline text highlight when in normal mode:
---         hl = "Normal",
---         -- these mappings only apply to normal mode in cmdline:
---         mappings = {
---           ["k"] = cmd.history.prev,
---           ["j"] = cmd.history.next,
---           ["<cr>"] = cmd.accept,
---           ["<esc>"] = cmd.cancel,
---           ["<c-c>"] = cmd.cancel,
---           [":"] = cmd.reset,
---         },
---       })
---     end,
---   },
---
---   { -- multi cursor support
---     "jake-stewart/multicursor.nvim",
---     config = function()
---       local mc = require("multicursor-nvim")
---       mc.setup()
---       vim.keymap.set("c", "<c-x>", function()
---         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
---         vim.defer_fn(function()
---           local start_pos = vim.api.nvim_win_get_cursor(0)
---           local start_line = start_pos[1]
---           local start_col = start_pos[2]
---
---           local current_line = nil
---           local current_col = nil
---
---           local max_matches = 100
---
---           while not (start_line == current_line and start_col == current_col) and max_matches do
---             mc.toggleCursor()
---             vim.cmd("normal n")
---             local current_pos = vim.api.nvim_win_get_cursor(0)
---             current_line = current_pos[1]
---             current_col = current_pos[2]
---             max_matches = max_matches - 1
---           end
---           mc.enableCursors()
---         end, 0)
---       end)
---
---       vim.keymap.set("v", "I", mc.insertVisual)
---       vim.keymap.set("v", "A", mc.appendVisual)
---
---       vim.keymap.set("n", "]<c-x>", mc.nextCursor)
---       vim.keymap.set("n", "[<c-x>", mc.prevCursor)
---       vim.keymap.set("n", "[<c-x>", mc.prevCursor)
---       vim.keymap.set("n", "<leader><down>", function()
---         mc.lineAddCursor(1)
---       end)
---       vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
---     end,
---   },
---
---   { -- refactoring library
---     "ThePrimeagen/refactoring.nvim",
---     config = function()
---       local refactoring = require("refactoring")
---       refactoring.setup({})
---       vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
---         refactoring.select_refactor()
---       end)
---       vim.keymap.set({ "n", "x" }, "<leader>iv", function()
---         refactoring.refactor("Inline Variable")
---       end)
---       vim.keymap.set({ "n", "x" }, "<leader>if", function()
---         refactoring.refactor("Inline Function")
---       end)
---       vim.keymap.set({ "n", "x" }, "<leader>ev", function()
---         refactoring.refactor("Extract Variable")
---       end)
---       vim.keymap.set({ "n", "x" }, "<leader>ef", function()
---         refactoring.refactor("Extract Function")
---       end)
---       vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
---       vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
---       vim.api.nvim_create_user_command("RefactorClean", function()
---         refactoring.debug.cleanup({})
---       end, { nargs = "*" })
---     end,
---   },
---
---   { -- removes all "press enter to continue"
---     "jake-stewart/auto-cmdheight.nvim",
---     opts = {},
---   },
---
---   { -- add a scroll bar
---     "petertriho/nvim-scrollbar",
---     opts = {
---       marks = {
---         Cursor = {
---           text = " ", -- Remove cursor indicator
---         },
---       },
---     },
---   },
---   -- https://github.com/kevinhwang91/nvim-hlslens
---
---
---   {
---     "nvim-lualine/lualine.nvim",
---     config = function()
---       local custom_gruvbox = require("lualine.themes.gruvbox")
---       -- Remove the constant changing of colors while changing modes
---       custom_gruvbox.insert = custom_gruvbox.normal
---       custom_gruvbox.visual = custom_gruvbox.normal
---       custom_gruvbox.replace = custom_gruvbox.normal
---       custom_gruvbox.command = custom_gruvbox.normal
---       custom_gruvbox.inactive = custom_gruvbox.normal
---
---       require("lualine").setup({
---         options = {
---           theme = custom_gruvbox,
---           component_separators = { left = "", right = "" },
---           section_separators = { left = "", right = "" },
---         },
---         sections = {
---           lualine_a = { "branch" },
---           -- lualine_a = { "branch", "gitstatus" },
---           lualine_b = {
---             "diff",
---             function()
---               return "|"
---             end,
---             "diagnostics",
---           },
---           lualine_x = {},
---           lualine_y = {
---             function()
---               local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
---               if #attached_clients == 0 then
---                 return ""
---               end
---               local names = vim
---                   .iter(attached_clients)
---                   :map(function(client)
---                     local name = client.name:gsub("language.server", "ls")
---                     return name
---                   end)
---                   :totable()
---               return table.concat(names, " ")
---             end,
---           },
---           lualine_z = { "filetype" },
---         },
---         inactive_sections = {
---           lualine_a = { "filename" },
---           lualine_b = {},
---           lualine_c = {},
---           lualine_x = {},
---           lualine_y = {},
---           lualine_z = {},
---         },
---         tabline = {},
---         winbar = {},
---         inactive_winbar = {},
---         extensions = {},
---       })
---     end,
---   },
---
---   { -- Generic log highlighting
---     "fei6409/log-highlight.nvim",
---     opts = {
---       extension = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
---       filename = {},
---       pattern = {
---         "/var/log/.*",
---       },
---     },
---   },
---
---   -- Vim open file including line number, including gF
---   -- $ vim file.py:10
---   "wsdjeg/vim-fetch",
---   { -- Improved gF and gf
---     "HawkinsT/pathfinder.nvim",
---     opts = {},
---   },
---
---   { -- Pure lua replacement for github/copilot. Has more features and is more efficient.
---     "zbirenbaum/copilot.lua",
---     cmd = "Copilot",
---     event = "InsertEnter",
---     config = function()
---       require("copilot").setup({
---         suggesion = {
---           keymap = {
---             accept = "<Right>",
---             next = "<C-X><C-E>",
---           },
---         },
---       })
---       vim.keymap.set("i", "<C-X><C-e>", function()
---         require("copilot.suggestion").next()
---       end)
---       vim.keymap.set("i", "<Right>", function()
---         require("copilot.suggestion").accept()
---       end)
---     end,
---   },
---
---   { -- code action previewer
---     dependencies = {
---       "nvim-telescope/telescope.nvim",
---       {
---         "nvim-telescope/telescope-ui-select.nvim",
---         config = function()
---           require("telescope").load_extension("ui-select")
---         end,
---       },
---     },
---     "aznhe21/actions-preview.nvim",
---     config = function()
---       local actions_preview = require("actions-preview")
---       actions_preview.setup({
---         telescope = {
---           sorting_strategy = "ascending",
---           layout_strategy = "vertical",
---           layout_config = {
---             width = 0.8,
---             height = 0.9,
---             prompt_position = "top",
---             preview_cutoff = 20,
---             preview_height = function(_, _, max_lines)
---               return max_lines - 15
---             end,
---           },
---         },
---       })
---
---       vim.api.nvim_create_autocmd("LspAttach", {
---         group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
---         callback = function(ev)
---           local opts = { buffer = ev.buf }
---           vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
---         end,
---       })
---     end,
---   },
+vim.api.nvim_create_user_command("TrainAbolish", function()
+  math.randomseed(os.time())
+  -- Read words from dictionary file
+  local words = {}
+  local file = io.open("/usr/share/dict/words", "r")
+  if file then
+    for line in file:lines() do
+      table.insert(words, line)
+    end
+    file:close()
+  else
+    print("Could not open dictionary file")
+    os.exit(1)
+  end
+
+  local function to_camel_case(word1, word2)
+    return word1:sub(1, 1):upper() .. word1:sub(2):lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
+  end
+
+  local function to_lower_camel_case(word1, word2)
+    return word1:lower() .. word2:sub(1, 1):upper() .. word2:sub(2):lower()
+  end
+
+  local function to_snake_case(word1, word2)
+    return word1:lower() .. "_" .. word2:lower()
+  end
+
+  local function to_screaming_case(word1, word2)
+    return word1:upper() .. "_" .. word2:upper()
+  end
+
+  local cases = { to_camel_case, to_lower_camel_case, to_snake_case, to_screaming_case }
+
+  local output_file = io.open("/tmp/output.txt", "w")
+  if output_file == nil then
+    return
+  end
+  for _ = 1, 20 do
+    local word1 = words[math.random(#words)]
+    local word2 = words[math.random(#words)]
+    local case_func = cases[math.random(#cases)]
+    local target_func = cases[math.random(#cases)]
+    output_file:write(case_func(word1, word2) .. " -- " .. target_func(word1, word2) .. "\n")
+  end
+  output_file:close()
+
+  vim.cmd("edit /tmp/output.txt")
+end, {})
+
+-- json5
+MiniDeps.add({
+  source = "Joakker/lua-json5",
+  hooks = {
+    post_install = function()
+      vim.fn.system("./install.sh")
+    end
+  }
+})
+
+-- Debug support
+MiniDeps.add("mfussenegger/nvim-dap")
+require("dap.ext.vscode").json_decode = require("json5").parse
+local dap = require("dap")
+vim.keymap.set("n", "<leader>dc", function()
+  dap.continue()
+end)
+vim.keymap.set("n", "<leader>b", function()
+  dap.toggle_breakpoint()
+end)
+vim.keymap.set("n", "<leader>dr", function()
+  dap.repl.open()
+end)
+vim.keymap.set("n", "<leader>dt", function()
+  dap.terminate()
+end)
+vim.keymap.set("n", "<leader>dn", function()
+  dap.continue({ new = true })
+end)
+vim.keymap.set("n", "<leader>ds", function()
+  dap.step_over()
+end)
+vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
+
+
+MiniDeps.add("mfussenegger/nvim-dap-python")
+require("dap-python").setup("./venv/bin/python")
+vim.env.GEVENT_SUPPORT = "True"
+table.insert(dap.configurations.python, {
+  type = "python",
+  request = "launch",
+  name = "dap Django",
+  program = vim.fn.getcwd() .. "/quickbit/manage.py", -- NOTE: Adapt path to manage.py as needed
+  args = { "runserver", "--noreload" },
+})
+
+MiniDeps.add("theHamsta/nvim-dap-virtual-text")
+require("nvim-dap-virtual-text").setup({ virt_text_pos = "eol" })
+
+MiniDeps.add("nvim-neotest/nvim-nio")
+
+MiniDeps.add("nvim-neotest/neotest")
+MiniDeps.add("nvim-neotest/neotest-python")
+---@module "neotest"
+local neotest = require("neotest")
+neotest.setup({
+  summary = {
+    mappings = {
+      help = "g?", -- change "?" to "g?" so that you can search backwards.
+    },
+  },
+  adapters = {
+    require("neotest-python")({
+      dap = { justMyCode = false },
+      args = { "-vv" },
+      -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
+    }),
+  },
+})
+
+vim.keymap.set("n", "<leader>tr", neotest.run.run)
+vim.keymap.set("n", "<leader>td", function()
+  neotest.run.run({ strategy = "dap" })
+end)
+
+vim.keymap.set("n", "<leader>ts", neotest.summary.open)
+vim.api.nvim_create_user_command("NeotestStopTest", neotest.run.stop, { nargs = "*" })
+vim.keymap.set("n", "<c-w>t", neotest.output.open)
+vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
+vim.keymap.set("n", "]j", function()
+  neotest.jump.next({ status = "failed" })
+end)
+vim.keymap.set("n", "[j", function()
+  neotest.jump.prev({ status = "failed" })
+end)
+
+vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
+vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
+
+
+-- nicer status line
+MiniDeps.add("nvim-lualine/lualine.nvim")
+
+local custom_gruvbox = require("lualine.themes.gruvbox")
+-- Remove the constant changing of colors while changing modes
+custom_gruvbox.insert = custom_gruvbox.normal
+custom_gruvbox.visual = custom_gruvbox.normal
+custom_gruvbox.replace = custom_gruvbox.normal
+custom_gruvbox.command = custom_gruvbox.normal
+custom_gruvbox.inactive = custom_gruvbox.normal
+
+require("lualine").setup({
+  options = {
+    theme = custom_gruvbox,
+    component_separators = { left = "", right = "" },
+    section_separators = { left = "", right = "" },
+  },
+  sections = {
+    lualine_a = { "branch" },
+    -- lualine_a = { "branch", "gitstatus" },
+    lualine_b = {
+      "diff",
+      function()
+        return "|"
+      end,
+      "diagnostics",
+    },
+    lualine_x = {},
+    lualine_y = {
+      function()
+        local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
+        if #attached_clients == 0 then
+          return ""
+        end
+        local names = vim
+            .iter(attached_clients)
+            :map(function(client)
+              local name = client.name:gsub("language.server", "ls")
+              return name
+            end)
+            :totable()
+        return table.concat(names, " ")
+      end,
+    },
+    lualine_z = { "filetype" },
+  },
+  inactive_sections = {
+    lualine_a = { "filename" },
+    lualine_b = {},
+    lualine_c = {},
+    lualine_x = {},
+    lualine_y = {},
+    lualine_z = {},
+  },
+  tabline = {},
+  winbar = {},
+  inactive_winbar = {},
+  extensions = {},
+})
+
+
+-- Markdown utility, go to link and so on.
+MiniDeps.add("plasticboy/vim-markdown")
+
+
+-- quickfix improvement
+MiniDeps.add("stevearc/quicker.nvim")
+require("quicker").setup({})
+
+-- Disable search highlight after searching.
+MiniDeps.add("romainl/vim-cool")
+
+-- multi cursor support
+MiniDeps.add("jake-stewart/multicursor.nvim")
+local mc = require("multicursor-nvim")
+mc.setup()
+vim.keymap.set("c", "<c-x>", function()
+  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
+  vim.defer_fn(function()
+    local start_pos = vim.api.nvim_win_get_cursor(0)
+    local start_line = start_pos[1]
+    local start_col = start_pos[2]
+
+    local current_line = nil
+    local current_col = nil
+
+    local max_matches = 100
+
+    while not (start_line == current_line and start_col == current_col) and max_matches do
+      mc.toggleCursor()
+      vim.cmd("normal n")
+      local current_pos = vim.api.nvim_win_get_cursor(0)
+      current_line = current_pos[1]
+      current_col = current_pos[2]
+      max_matches = max_matches - 1
+    end
+    mc.enableCursors()
+  end, 0)
+end)
+
+vim.keymap.set("v", "I", mc.insertVisual)
+vim.keymap.set("v", "A", mc.appendVisual)
+
+vim.keymap.set("n", "]<c-x>", mc.nextCursor)
+vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+vim.keymap.set("n", "<leader><down>", function()
+  mc.lineAddCursor(1)
+end)
+vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
+
+-- normal mode in the cmd line
+MiniDeps.add("jake-stewart/normal-cmdline.nvim")
+-- make the cmdline insert mode a beam
+vim.opt.guicursor:append("ci:ver1,c:ver1")
+local cmd = require("normal-cmdline")
+cmd.setup({
+  -- key to hit within cmdline to enter normal mode:
+  key = "<esc>",
+  -- the cmdline text highlight when in normal mode:
+  hl = "Normal",
+  -- these mappings only apply to normal mode in cmdline:
+  mappings = {
+    ["k"] = cmd.history.prev,
+    ["j"] = cmd.history.next,
+    ["<cr>"] = cmd.accept,
+    ["<esc>"] = cmd.cancel,
+    ["<c-c>"] = cmd.cancel,
+    [":"] = cmd.reset,
+  },
+})
+
+
+-- removes all "press enter to continue"
+MiniDeps.add("jake-stewart/auto-cmdheight.nvim")
+require("auto-cmdheight").setup()
+
+-- add a scroll bar
+MiniDeps.add("petertriho/nvim-scrollbar")
+require("scrollbar").setup({
+  marks = {
+    Cursor = {
+      text = " ", -- Remove cursor indicator
+    },
+  },
+})
+-- https://github.com/kevinhwang91/nvim-hlslens
+
+-- better python movements and text objects
+MiniDeps.add("jeetsukumaran/vim-pythonsense")
+vim.g.is_pythonsense_suppress_object_keymaps = 1
+
+
+
+-- refactoring library
+MiniDeps.add("ThePrimeagen/refactoring.nvim")
+local refactoring = require("refactoring")
+refactoring.setup({})
+vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
+  refactoring.select_refactor()
+end)
+vim.keymap.set({ "n", "x" }, "<leader>iv", function()
+  refactoring.refactor("Inline Variable")
+end)
+vim.keymap.set({ "n", "x" }, "<leader>if", function()
+  refactoring.refactor("Inline Function")
+end)
+vim.keymap.set({ "n", "x" }, "<leader>ev", function()
+  refactoring.refactor("Extract Variable")
+end)
+vim.keymap.set({ "n", "x" }, "<leader>ef", function()
+  refactoring.refactor("Extract Function")
+end)
+vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
+vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
+vim.api.nvim_create_user_command("RefactorClean", function()
+  refactoring.debug.cleanup({})
+end, { nargs = "*" })
+
+
+-- Generic log highlighting
+MiniDeps.add("fei6409/log-highlight.nvim")
+require("log-highlight").setup({
+  extension = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
+  filename = {},
+  pattern = {
+    "/var/log/.*",
+  },
+}
+)
+
+-- Vim open file including line number, including gF
+-- $ vim file.py:10
+MiniDeps.add("wsdjeg/vim-fetch")
+
+
+-- code action previewer
+MiniDeps.add("nvim-telescope/telescope-ui-select.nvim")
+require("telescope").load_extension("ui-select")
+MiniDeps.add("aznhe21/actions-preview.nvim")
+
+local actions_preview = require("actions-preview")
+actions_preview.setup({
+  telescope = {
+    sorting_strategy = "ascending",
+    layout_strategy = "vertical",
+    layout_config = {
+      width = 0.8,
+      height = 0.9,
+      prompt_position = "top",
+      preview_cutoff = 20,
+      preview_height = function(_, _, max_lines)
+        return max_lines - 15
+      end,
+    },
+  },
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
+  callback = function(ev)
+    local opts = { buffer = ev.buf }
+    vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
+  end,
+})
+
+
+-- ChatGPT plugin
+MiniDeps.add("echasnovski/mini.diff")
+MiniDeps.add("olimorris/codecompanion.nvim")
+local diff = require("mini.diff")
+diff.setup({
+  -- Disabled by default
+  source = diff.gen_source.none(),
+})
+require("codecompanion").setup({
+  adapters = {
+    openai = function()
+      -- extend the built‑in adapter to use your API key
+      return require("codecompanion.adapters").extend("openai", {
+        env = {
+          api_key = os.getenv("OPEN_API_KEY"),
+        },
+      })
+    end,
+  },
+  strategies = {
+    chat = { adapter = "openai" },
+    inline = { adapter = "openai" },
+    agent = { adapter = "openai" },
+  },
+})
+
+-- Pure lua replacement for github/copilot. Has more features and is more efficient.
+MiniDeps.add("zbirenbaum/copilot.lua")
+require("copilot").setup({
+  suggesion = {
+    keymap = {
+      accept = "<Right>",
+      next = "<C-X><C-E>",
+    },
+  },
+})
+vim.keymap.set("i", "<C-X><C-e>", function()
+  require("copilot.suggestion").next()
+end)
+vim.keymap.set("i", "<Right>", function()
+  require("copilot.suggestion").accept()
+end)
+
+-- end plugins
+
 
 require("project").setup({})
 
@@ -1620,4 +1589,5 @@ vim.api.nvim_create_autocmd({ "FocusLost" }, {
 -- (call
 --   function: (identifier) @func_name  (#eq? @func_name "HTMLResponse")
 --   arguments: (argument_list (string) @content)
+
 -- ) @template_call
