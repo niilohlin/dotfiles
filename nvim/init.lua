@@ -1368,7 +1368,6 @@ diff.setup({
 require("codecompanion").setup({
   adapters = {
     openai = function()
-      -- extend the built‑in adapter to use your API key
       return require("codecompanion.adapters").extend("openai", {
         env = {
           api_key = os.getenv("OPEN_API_KEY"),
