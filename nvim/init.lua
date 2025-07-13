@@ -1383,21 +1383,21 @@ require("codecompanion").setup({
 })
 
 -- Pure lua replacement for github/copilot. Has more features and is more efficient.
-MiniDeps.add("zbirenbaum/copilot.lua")
-require("copilot").setup({
-  suggesion = {
-    keymap = {
-      accept = "<Right>",
-      next = "<C-X><C-E>",
-    },
-  },
-})
-vim.keymap.set("i", "<C-X><C-e>", function()
-  require("copilot.suggestion").next()
-end)
-vim.keymap.set("i", "<Right>", function()
-  require("copilot.suggestion").accept()
-end)
+-- MiniDeps.add("zbirenbaum/copilot.lua")
+-- require("copilot").setup({
+--   suggesion = {
+--     keymap = {
+--       accept = "<Right>",
+--       next = "<C-X><C-E>",
+--     },
+--   },
+-- })
+-- vim.keymap.set("i", "<C-X><C-e>", function()
+--   require("copilot.suggestion").next()
+-- end)
+-- vim.keymap.set("i", "<Right>", function()
+--   require("copilot.suggestion").accept()
+-- end)
 
 -- end plugins
 
