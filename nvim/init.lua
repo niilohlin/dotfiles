@@ -575,6 +575,7 @@ vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
 -- Disable netrw. We don't need it if we use oil
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+MiniDeps.add("benomahony/oil-git.nvim")
 
 -- Snippets collection
 MiniDeps.add("rafamadriz/friendly-snippets")
@@ -1358,6 +1359,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
 
 -- ChatGPT plugin
+MiniDeps.add("MeanderingProgrammer/render-markdown.nvim")
 MiniDeps.add("echasnovski/mini.diff")
 MiniDeps.add("olimorris/codecompanion.nvim")
 local diff = require("mini.diff")
@@ -1381,6 +1383,10 @@ require("codecompanion").setup({
     agent = { adapter = "openai" },
   },
 })
+
+vim.keymap.set({ "i", "v" }, "<C-X><C-E>", function()
+  vim.cmd("CodeCompanion")
+end)
 
 -- Pure lua replacement for github/copilot. Has more features and is more efficient.
 -- MiniDeps.add("zbirenbaum/copilot.lua")
