@@ -14,6 +14,7 @@ end)
 
 vim.keymap.set("v", "<D-c>", function()
   vim.cmd('normal "+y')
+  print("copied to clipboard!")
 end)
 
 vim.keymap.set({ "n", "v" }, "<D-+>", function()

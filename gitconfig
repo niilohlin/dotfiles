@@ -25,13 +25,9 @@
 	autoStash = true
 	updateRefs = true
 [alias]
-	; co = checkout
-	;    go = checkout -b
 	tags = for-each-ref --sort=taggerdate --format '%(refname)' refs/tags
 	branches = !git for-each-ref --sort=committerdate --format=\"%(refname:short) | %(authorname) | %(committerdate:short)\" refs/heads/ | column -t -s \"|\"
-    publish = "!git push -u origin $(git branch-name)"
     autocommit = !llm_commit > /tmp/COMMIT_EDITMSG && git commit -e -t /tmp/COMMIT_EDITMSG
-    prdiff = !git diff origin/main...$(git rev-parse --abbrev-ref HEAD)
     next = "!git log --reverse --pretty=%H main | grep -A 1 $(git rev-parse HEAD) | tail -n1 | xargs git checkout"
     prev = "!git checkout HEAD^1"
     patch = !git --no-pager diff --no-color

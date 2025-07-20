@@ -251,6 +251,7 @@ vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
+-- vim.cmd([[set virtualedit="block"]])
 
 -- Remove annoying auto inserting comment string
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -450,84 +451,89 @@ MiniDeps.add("tpope/vim-unimpaired")
 
 -- Semantic syntax highlighting
 MiniDeps.add("nvim-treesitter/nvim-treesitter")
-local configs = require("nvim-treesitter.configs")
-configs.setup({
-  ensure_installed = {
-    "bash",
-    "c",
-    "cpp",
-    "css",
-    "javascript",
-    "json",
-    "lua",
-    "python",
-    "regex",
-    "rust",
-    "toml",
-    "yaml",
-    "swift",
-    "haskell",
-    "html",
-  },
+vim.api.nvim_create_autocmd("BufReadPre", {
+  once = true,
+  callback = function()
+    local configs = require("nvim-treesitter.configs")
+    configs.setup({
+      ensure_installed = {
+        "bash",
+        "c",
+        "cpp",
+        "css",
+        "javascript",
+        "json",
+        "lua",
+        "python",
+        "regex",
+        "rust",
+        "toml",
+        "yaml",
+        "swift",
+        "haskell",
+        "html",
+      },
 
-  sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
+      sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-  ignore_install = {},  -- List of parsers to ignore installing
+      ignore_install = {},  -- List of parsers to ignore installing
 
-  auto_install = false, -- Automatically install missing parsers when entering buffer
+      auto_install = false, -- Automatically install missing parsers when entering buffer
 
-  highlight = {
-    enable = true, -- `false` will disable the whole extension
-    disable = {},  -- list of language that will be disabled
-    additional_vim_regex_highlighting = false,
-  },
-  textobjects = {
-    select = {
-      enable = true,
-      lookahead = true,
-      keymaps = {
-        ["af"] = "@function.outer",
-        ["if"] = "@function.inner",
-        ["ak"] = "@class.outer",
-        ["aa"] = "@parameter.outer",
-        ["ia"] = "@parameter.inner",
+      highlight = {
+        enable = true, -- `false` will disable the whole extension
+        disable = {},  -- list of language that will be disabled
+        additional_vim_regex_highlighting = false,
       },
-      include_surrounding_whitespace = true,
-    },
-    move = {
-      enable = true,
-      set_jumps = true,
-      goto_next_start = {
-        ["]m"] = "@function.outer",
-        ["]k"] = "@class.outer",
+      textobjects = {
+        select = {
+          enable = true,
+          lookahead = true,
+          keymaps = {
+            ["af"] = "@function.outer",
+            ["if"] = "@function.inner",
+            ["ak"] = "@class.outer",
+            ["aa"] = "@parameter.outer",
+            ["ia"] = "@parameter.inner",
+          },
+          include_surrounding_whitespace = true,
+        },
+        move = {
+          enable = true,
+          set_jumps = true,
+          goto_next_start = {
+            ["]m"] = "@function.outer",
+            ["]k"] = "@class.outer",
+          },
+          goto_previous_start = {
+            ["[m"] = "@function.outer",
+            ["[k"] = "@class.outer",
+          },
+        },
+        swap = {
+          enable = true,
+          swap_next = {
+            ["<leader>sa"] = "@parameter.inner",
+          },
+          swap_previous = {
+            ["<leader>sA"] = "@parameter.inner",
+          },
+        },
       },
-      goto_previous_start = {
-        ["[m"] = "@function.outer",
-        ["[k"] = "@class.outer",
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = "gV",
+          node_incremental = "+",
+          scope_incremental = "g+",
+          node_decremental = "-",
+        },
       },
-    },
-    swap = {
-      enable = true,
-      swap_next = {
-        ["<leader>sa"] = "@parameter.inner",
+      indent = {
+        enable = true,
       },
-      swap_previous = {
-        ["<leader>sA"] = "@parameter.inner",
-      },
-    },
-  },
-  incremental_selection = {
-    enable = true,
-    keymaps = {
-      init_selection = "gV",
-      node_incremental = "+",
-      scope_incremental = "g+",
-      node_decremental = "-",
-    },
-  },
-  indent = {
-    enable = true,
-  },
+    })
+  end,
 })
 
 -- Tree sitter text objects
@@ -535,33 +541,48 @@ MiniDeps.add("nvim-treesitter/nvim-treesitter-textobjects")
 
 -- Text objects plugin
 MiniDeps.add({ source = "echasnovski/mini.ai", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } })
-require("mini.ai").setup()
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  once = true,
+  callback = function()
+    require("mini.ai").setup()
+  end,
+})
 
 -- Surround plugin, adds text objects like ci" and so on.
 MiniDeps.add("echasnovski/mini.surround")
-local surround = require("mini.surround")
-surround.setup({
-  mappings = {
-    add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-    delete = "ds",       -- Delete surrounding
-    replace = "cs",      -- Replace surrounding
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  once = true,
+  callback = function()
+    local surround = require("mini.surround")
+    surround.setup({
+      mappings = {
+        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds",       -- Delete surrounding
+        replace = "cs",      -- Replace surrounding
 
-    find = "",           -- Find surrounding (to the right)
-    find_left = "",      -- Find surrounding (to the left)
-    highlight = "",      -- Highlight surrounding
-    update_n_lines = "", -- Update `n_lines`
-    suffix_last = "",    -- Suffix to search with "prev" method
-    suffix_next = "",    -- Suffix to search with "next" method
-  },
+        find = "",           -- Find surrounding (to the right)
+        find_left = "",      -- Find surrounding (to the left)
+        highlight = "",      -- Highlight surrounding
+        update_n_lines = "", -- Update `n_lines`
+        suffix_last = "",    -- Suffix to search with "prev" method
+        suffix_next = "",    -- Suffix to search with "next" method
+      },
+    })
+    vim.keymap.set("v", "C", function() -- C for "call"
+      vim.cmd('normal "vc()"vPg;h')
+      vim.cmd("startinsert")
+    end)
+  end,
 })
-vim.keymap.set("v", "C", function() -- C for "call"
-  vim.cmd('normal "vc()"vPg;h')
-  vim.cmd("startinsert")
-end)
 
 -- indentation text objects and jumps
 MiniDeps.add("niilohlin/neoindent")
-require("neoindent").setup({})
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  once = true,
+  callback = function()
+    require("neoindent").setup({})
+  end,
+})
 
 
 -- Nerd Icons (for example in oil buffers)
@@ -570,12 +591,19 @@ require("mini.icons").setup()
 
 -- File explorer
 MiniDeps.add({ source = "stevearc/oil.nvim", dependencies = { "echasnovski/mini.icons" } })
-require("oil").setup()
-vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
--- Disable netrw. We don't need it if we use oil
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-MiniDeps.add("benomahony/oil-git.nvim")
+vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+  once = true,
+  callback = function()
+    require("oil").setup()
+    vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
+    -- Disable netrw. We don't need it if we use oil
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+    -- MiniDeps.add("benomahony/oil-git.nvim")
+  end
+})
+
+
 
 -- Snippets collection
 MiniDeps.add("rafamadriz/friendly-snippets")
@@ -590,401 +618,424 @@ MiniDeps.add({
   }
 })
 
-
 -- nvim development utils
 MiniDeps.add("folke/lazydev.nvim")
--- ft = "lua", -- only load on lua files
-require("lazydev").setup({
-  library = {
-    -- See the configuration section for more details
-    -- Load luvit types when the `vim.uv` word is found
-    "$VIMRUNTIME",
-    { path = "${HOME}/.local/share/nvim/lazy" },
-    { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
-  },
-})
-
-require("blink.cmp").setup({
-  keymap = {
-    preset = "default",
-    ["<C-l>"] = { "snippet_forward", "fallback" },
-    ["<C-h>"] = { "snippet_backward", "fallback" },
-    ["<C-k>"] = { "show_documentation", "fallback" },
-    ["<C-c>"] = { "cancel", "fallback" },
-  },
-  appearance = {
-    use_nvim_cmp_as_default = true,
-  },
-
-  sources = {
-    default = { "lazydev", "lsp", "path", "snippets", "buffer" },
-    providers = {
-      lazydev = {
-        name = "LazyDev",
-        module = "lazydev.integrations.blink",
-        score_offset = 100,
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "lua",
+  once = true,
+  callback = function()
+    require("lazydev").setup({
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        "$VIMRUNTIME",
+        { path = "${HOME}/.local/share/nvim/lazy" },
+        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
       },
-    },
-  },
-  completion = {
-    -- Some LSPs might add brackets themselves anyways
-    accept = { auto_brackets = { enabled = false } },
-    documentation = {
-      auto_show = true,
-      auto_show_delay_ms = 0,
-    },
-    -- signature = { enabled = true }
-  },
+    })
+  end,
 })
--- ?? idk where this is going
--- opts_extend = { "sources.default" },
+
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+  once = true,
+  callback = function()
+    require("blink.cmp").setup({
+      keymap = {
+        preset = "default",
+        ["<C-l>"] = { "snippet_forward", "fallback" },
+        ["<C-h>"] = { "snippet_backward", "fallback" },
+        ["<C-k>"] = { "show_documentation", "fallback" },
+        ["<C-c>"] = { "cancel", "fallback" },
+      },
+      appearance = {
+        use_nvim_cmp_as_default = true,
+      },
+
+      sources = {
+        default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+        providers = {
+          lazydev = {
+            name = "LazyDev",
+            module = "lazydev.integrations.blink",
+            score_offset = 100,
+          },
+        },
+      },
+      completion = {
+        -- Some LSPs might add brackets themselves anyways
+        accept = { auto_brackets = { enabled = false } },
+        documentation = {
+          auto_show = true,
+          auto_show_delay_ms = 0,
+        },
+        -- signature = { enabled = true }
+      },
+    })
+    -- ?? idk where this is going
+    -- opts_extend = { "sources.default" },
+  end
+})
 
 -- LSP server Installer/manager
 MiniDeps.add("mason-org/mason.nvim")
-require("mason").setup()
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+  once = true,
+  callback = function()
+    require("mason").setup()
+  end
+})
 
 -- LSP setup
 MiniDeps.add("neovim/nvim-lspconfig")
-local lspconfig = require("lspconfig")
-local capabilities = require("blink.cmp").get_lsp_capabilities()
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+  once = true,
+  callback = function()
+    local lspconfig = require("lspconfig")
+    local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-local vim_runtime_paths = {
-  vim.fn.expand("$VIMRUNTIME/lua"),
-  vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
-  vim.fn.expand("$VIMRUNTIME/lua/vim"),
-}
-local rest = vim.api.nvim_list_runtime_paths()
-table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
+    local vim_runtime_paths = {
+      vim.fn.expand("$VIMRUNTIME/lua"),
+      vim.fn.expand("$VIMRUNTIME/lua/vim/lsp"),
+      vim.fn.expand("$VIMRUNTIME/lua/vim"),
+    }
+    local rest = vim.api.nvim_list_runtime_paths()
+    table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
 
-lspconfig.lua_ls.setup({
-  capabilities = capabilities,
-  settings = {
-    Lua = {
-      runtime = { version = "LuaJIT" },
-      diagnostics = {},
-      workspace = {
-        checkThirdParty = false,
-        library = vim_runtime_paths,
+    lspconfig.lua_ls.setup({
+      capabilities = capabilities,
+      settings = {
+        Lua = {
+          runtime = { version = "LuaJIT" },
+          diagnostics = {},
+          workspace = {
+            checkThirdParty = false,
+            library = vim_runtime_paths,
+          },
+          completion = {
+            callSnippet = "Replace",
+          },
+        },
       },
-      completion = {
-        callSnippet = "Replace",
-      },
-    },
-  },
-})
-vim.lsp.config("lua_ls", lspconfig.lua_ls)
+    })
+    vim.lsp.config("lua_ls", lspconfig.lua_ls)
 
-lspconfig.ts_ls.setup({
-  capabilities = capabilities,
-})
-vim.lsp.config("ts_ls", lspconfig.ts_ls)
+    lspconfig.ts_ls.setup({
+      capabilities = capabilities,
+    })
+    vim.lsp.config("ts_ls", lspconfig.ts_ls)
 
-lspconfig.rust_analyzer.setup({
-  capabilities = capabilities,
-})
-vim.lsp.config("rust_analyzer", lspconfig.rust_analyzer)
+    lspconfig.rust_analyzer.setup({
+      capabilities = capabilities,
+    })
+    vim.lsp.config("rust_analyzer", lspconfig.rust_analyzer)
 
-lspconfig.eslint.setup({
-  on_attach = function(client, bufnr)
-    -- Enable formatting capability for ESLint
-    client.server_capabilities.documentFormattingProvider = true
+    lspconfig.eslint.setup({
+      on_attach = function(client, bufnr)
+        -- Enable formatting capability for ESLint
+        client.server_capabilities.documentFormattingProvider = true
 
-    -- Auto-format on save
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      buffer = bufnr,
-      callback = function()
-        vim.lsp.buf.format({ bufnr = bufnr })
+        -- Auto-format on save
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({ bufnr = bufnr })
+          end,
+        })
       end,
     })
-  end,
-})
-vim.lsp.config("eslint", lspconfig.eslint)
+    vim.lsp.config("eslint", lspconfig.eslint)
 
--- ruff = {
---   capabilities = capabilities,
---   on_attach = function(client, bufnr)
---     if client.supports_method("textDocument/formatting") then
---       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
---       vim.api.nvim_create_autocmd("BufWritePre", {
---         group = augroup,
---         buffer = bufnr,
---         callback = function()
---           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
---         end,
---       })
---     end
---   end,
--- },
+    -- ruff = {
+    --   capabilities = capabilities,
+    --   on_attach = function(client, bufnr)
+    --     if client.supports_method("textDocument/formatting") then
+    --       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+    --       vim.api.nvim_create_autocmd("BufWritePre", {
+    --         group = augroup,
+    --         buffer = bufnr,
+    --         callback = function()
+    --           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+    --         end,
+    --       })
+    --     end
+    --   end,
+    -- },
 
-lspconfig.jedi_language_server.setup({
-  init_options = {
-    codeAction = {
-      nameExtractVariable = "jls_extract_var",
-      nameExtractFunction = "jls_extract_def",
-    },
-    completion = {
-      -- LSP snippets turned out to insisting on inserting parens everywhere
-      disableSnippets = true,
-    },
-    -- disable workspace symbols
-  },
-  capabilities = capabilities,
-  on_init = function()
-    -- client.server_capabilities.workspaceSymbolProvider = false
-  end,
-})
-vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
-
--- Global mappings.
-vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
-
--- Use LspAttach autocommand to only map the following keys
--- after the language server attaches to the current buffer
-vim.api.nvim_create_autocmd("LspAttach", {
-  group = vim.api.nvim_create_augroup("UserLspConfig", {}),
-  callback = function(ev)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-    -- Buffer local mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local opts = { buffer = ev.buf }
-    local builtin = require("telescope.builtin")
-    local client = vim.lsp.get_client_by_id(ev.data.client_id)
-
-    -- Do not override the keymap if the lsp server does not support the method.
-    local function declare_method_if_supported(method, command, fn)
-      if client == nil then
-        return
-      end
-      if client:supports_method(method) then
-        vim.keymap.set("n", command, fn, opts)
-      end
-    end
-
-    declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
-    declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
-    declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
-    declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
-    declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
-  end,
-})
-
--- local pwd = vim.loop.cwd()
--- vim.api.nvim_create_autocmd("FileType", {
---   pattern = "python",
---   callback = function()
---     vim.lsp.start({
---       name = "Omnisearch LSP",
---       filetypes = { "python" },
---       root_dir = pwd,
---       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
---       cmd = function(dispatchers)
---       end,
---     })
---   end,
--- })
-
-vim.filetype.add({
-  extension = {
-    jinja = "jinja",
-    jinja2 = "jinja",
-    j2 = "jinja",
-  },
-})
-
-local lsp_configs = require("lspconfig.configs")
-
-if not lsp_configs.jinja_lsp then
-  lsp_configs.jinja_lsp = {
-    default_config = {
-      name = "jinja-lsp",
-      cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
-      filetypes = { "jinja", "html", "htmldjango" },
-      root_dir = function(fname)
-        return "."
-        --return nvim_lsp.util.find_git_ancestor(fname)
-      end,
+    lspconfig.jedi_language_server.setup({
       init_options = {
-        templates = "./templates",
-        backend = { "./src" },
-        lang = "python",
+        codeAction = {
+          nameExtractVariable = "jls_extract_var",
+          nameExtractFunction = "jls_extract_def",
+        },
+        completion = {
+          -- LSP snippets turned out to insisting on inserting parens everywhere
+          disableSnippets = true,
+        },
+        -- disable workspace symbols
       },
-    },
-  }
-end
-lspconfig.jinja_lsp.setup({
-  capabilities = capabilities,
-})
+      capabilities = capabilities,
+      on_init = function()
+        -- client.server_capabilities.workspaceSymbolProvider = false
+      end,
+    })
+    vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
 
+    -- Global mappings.
+    vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
+
+    -- Use LspAttach autocommand to only map the following keys
+    -- after the language server attaches to the current buffer
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+      callback = function(ev)
+        -- Enable completion triggered by <c-x><c-o>
+        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+
+        -- Buffer local mappings.
+        -- See `:help vim.lsp.*` for documentation on any of the below functions
+        local opts = { buffer = ev.buf }
+        local builtin = require("telescope.builtin")
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+        -- Do not override the keymap if the lsp server does not support the method.
+        local function declare_method_if_supported(method, command, fn)
+          if client == nil then
+            return
+          end
+          if client:supports_method(method) then
+            vim.keymap.set("n", command, fn, opts)
+          end
+        end
+
+        declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
+        declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
+        declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
+        declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
+        declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
+      end,
+    })
+
+    -- local pwd = vim.loop.cwd()
+    -- vim.api.nvim_create_autocmd("FileType", {
+    --   pattern = "python",
+    --   callback = function()
+    --     vim.lsp.start({
+    --       name = "Omnisearch LSP",
+    --       filetypes = { "python" },
+    --       root_dir = pwd,
+    --       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
+    --       cmd = function(dispatchers)
+    --       end,
+    --     })
+    --   end,
+    -- })
+
+    vim.filetype.add({
+      extension = {
+        jinja = "jinja",
+        jinja2 = "jinja",
+        j2 = "jinja",
+      },
+    })
+
+    local lsp_configs = require("lspconfig.configs")
+
+    if not lsp_configs.jinja_lsp then
+      lsp_configs.jinja_lsp = {
+        default_config = {
+          name = "jinja-lsp",
+          cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
+          filetypes = { "jinja", "html", "htmldjango" },
+          root_dir = function(fname)
+            return "."
+            --return nvim_lsp.util.find_git_ancestor(fname)
+          end,
+          init_options = {
+            templates = "./templates",
+            backend = { "./src" },
+            lang = "python",
+          },
+        },
+      }
+    end
+    lspconfig.jinja_lsp.setup({
+      capabilities = capabilities,
+    })
+  end
+})
 
 -- Make anything into an lsp, like linter output etc.
 MiniDeps.add("nvimtools/none-ls.nvim")
-local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+  once = true,
+  callback = function()
+    local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
 
-local null_ls = require("null-ls")
-local rope = require("rope")
-null_ls.register(rope.auto_import)
--- null_ls.register(rope.completion)
-vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
+    local null_ls = require("null-ls")
+    local rope = require("rope")
+    null_ls.register(rope.auto_import)
+    -- null_ls.register(rope.completion)
+    vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
 
-local tailwind = require("tailwind")
-null_ls.register(tailwind.completion)
+    local tailwind = require("tailwind")
+    null_ls.register(tailwind.completion)
 
-local pylint_disable = {
-  method = null_ls.methods.CODE_ACTION,
-  filetypes = { "python" },
-  generator = {
-    fn = function(params)
-      local actions = {}
-      for _, diag in ipairs(params.lsp_params.context.diagnostics) do
-        if diag.source == "pylint" then
-          table.insert(actions, {
-            title = "Disable pylint (" .. diag.code .. ")",
-            action = function()
-              local line = diag.range.start.line
-              local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-              local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
-              vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
-            end,
-          })
-        elseif diag.source == "mypy" then
-          table.insert(actions, {
-            title = "Disable mypy [" .. diag.code .. "]",
-            action = function()
-              local line = diag.range.start.line
-              local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-              local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
-              vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+    local pylint_disable = {
+      method = null_ls.methods.CODE_ACTION,
+      filetypes = { "python" },
+      generator = {
+        fn = function(params)
+          local actions = {}
+          for _, diag in ipairs(params.lsp_params.context.diagnostics) do
+            if diag.source == "pylint" then
+              table.insert(actions, {
+                title = "Disable pylint (" .. diag.code .. ")",
+                action = function()
+                  local line = diag.range.start.line
+                  local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                  local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
+                  vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                end,
+              })
+            elseif diag.source == "mypy" then
+              table.insert(actions, {
+                title = "Disable mypy [" .. diag.code .. "]",
+                action = function()
+                  local line = diag.range.start.line
+                  local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
+                  local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
+                  vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
+                end,
+              })
+            end
+          end
+          return actions
+        end,
+      },
+    }
+
+    null_ls.register(pylint_disable)
+
+    local generic_assignment = {
+      method = null_ls.methods.COMPLETION,
+      filetypes = { "python", "lua" },
+      generator = {
+        fn = function(params)
+          local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
+          if not snake_case_word then
+            return {}
+          end
+          local words = {}
+          for word in snake_case_word:gmatch("[^_]+") do
+            table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
+          end
+          local camel_case_word = table.concat(words)
+          return {
+            {
+              items = {
+                {
+                  label = camel_case_word,
+                  insertText = camel_case_word,
+                  documentation = "CamelCase",
+                },
+              },
+              isIncomplete = true,
+            },
+          }
+        end,
+      },
+    }
+
+    null_ls.register(generic_assignment)
+    null_ls.register({
+      name = "autoflake8_custom",
+      method = null_ls.methods.FORMATTING,
+      filetypes = { "python" },
+      generator = null_ls.formatter({
+        command = "autoflake8",
+        args = {
+          "$FILENAME",
+        },
+      }),
+      to_stderr = true,
+      to_stdout = true,
+    })
+
+    null_ls.setup({
+      sources = {
+        null_ls.builtins.diagnostics.checkmake,
+        null_ls.builtins.formatting.stylua.with({
+          extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
+        }),
+        null_ls.builtins.formatting.black.with({
+          condition = function()
+            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
+          end,
+          timeout = 10 * 1000,
+          prefer_local = "venv/bin",
+          env = function(params)
+            return { PYTHONPATH = params.root }
+          end,
+        }),
+        null_ls.builtins.formatting.isort.with({
+          condition = function()
+            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/isort") ~= 0
+          end,
+          timeout = 10 * 1000,
+          prefer_local = "venv/bin",
+          env = function(params)
+            return { PYTHONPATH = params.root }
+          end,
+        }),
+        null_ls.builtins.diagnostics.pylint.with({
+          condition = function()
+            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
+          end,
+          timeout = 10 * 1000,
+          prefer_local = "venv/bin",
+          env = function(params)
+            return { PYTHONPATH = params.root }
+          end,
+        }),
+        null_ls.builtins.diagnostics.mypy.with({
+          timeout = 10 * 1000,
+          prefer_local = ".venv/bin",
+          extra_args = {},
+          env = function(params)
+            return { PYTHONPATH = params.root }
+          end,
+        }),
+        null_ls.builtins.formatting.prettier.with({
+          prefer_local = "./node_modules/prettier/bin/",
+          filetypes = {
+            "css",
+            "html",
+            "htmldjango",
+          },
+          extra_args = { "--write" },
+        }),
+      },
+      on_attach = function(client, bufnr)
+        if client.supports_method("textDocument/formatting") then
+          vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            group = augroup,
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
             end,
           })
         end
-      end
-      return actions
-    end,
-  },
-}
-
-null_ls.register(pylint_disable)
-
-local generic_assignment = {
-  method = null_ls.methods.COMPLETION,
-  filetypes = { "python", "lua" },
-  generator = {
-    fn = function(params)
-      local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
-      if not snake_case_word then
-        return {}
-      end
-      local words = {}
-      for word in snake_case_word:gmatch("[^_]+") do
-        table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
-      end
-      local camel_case_word = table.concat(words)
-      return {
-        {
-          items = {
-            {
-              label = camel_case_word,
-              insertText = camel_case_word,
-              documentation = "CamelCase",
-            },
-          },
-          isIncomplete = true,
-        },
-      }
-    end,
-  },
-}
-
-null_ls.register(generic_assignment)
-null_ls.register({
-  name = "autoflake8_custom",
-  method = null_ls.methods.FORMATTING,
-  filetypes = { "python" },
-  generator = null_ls.formatter({
-    command = "autoflake8",
-    args = {
-      "$FILENAME",
-    },
-  }),
-  to_stderr = true,
-  to_stdout = true,
-})
-
-null_ls.setup({
-  sources = {
-    null_ls.builtins.diagnostics.checkmake,
-    null_ls.builtins.formatting.stylua.with({
-      extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
-    }),
-    null_ls.builtins.formatting.black.with({
-      condition = function()
-        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
-      end,
-      timeout = 10 * 1000,
-      prefer_local = "venv/bin",
-      env = function(params)
-        return { PYTHONPATH = params.root }
-      end,
-    }),
-    null_ls.builtins.formatting.isort.with({
-      condition = function()
-        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/isort") ~= 0
-      end,
-      timeout = 10 * 1000,
-      prefer_local = "venv/bin",
-      env = function(params)
-        return { PYTHONPATH = params.root }
-      end,
-    }),
-    null_ls.builtins.diagnostics.pylint.with({
-      condition = function()
-        return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
-      end,
-      timeout = 10 * 1000,
-      prefer_local = "venv/bin",
-      env = function(params)
-        return { PYTHONPATH = params.root }
-      end,
-    }),
-    null_ls.builtins.diagnostics.mypy.with({
-      timeout = 10 * 1000,
-      prefer_local = ".venv/bin",
-      extra_args = {},
-      env = function(params)
-        return { PYTHONPATH = params.root }
-      end,
-    }),
-    null_ls.builtins.formatting.prettier.with({
-      prefer_local = "./node_modules/prettier/bin/",
-      filetypes = {
-        "css",
-        "html",
-        "htmldjango",
-      },
-      extra_args = { "--write" },
-    }),
-  },
-  on_attach = function(client, bufnr)
-    if client.supports_method("textDocument/formatting") then
-      vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-      vim.api.nvim_create_autocmd("BufWritePre", {
-        group = augroup,
-        buffer = bufnr,
-        callback = function()
-          vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
-        end,
-      })
-    end
-    vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*.html",
-      callback = function()
-        print("formatting")
-        vim.lsp.buf.format({ async = false })
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          pattern = "*.html",
+          callback = function()
+            print("formatting")
+            vim.lsp.buf.format({ async = false })
+          end,
+        })
       end,
     })
-  end,
+  end
 })
 
 -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
@@ -1053,142 +1104,155 @@ MiniDeps.add({
 
 -- Debug support
 MiniDeps.add("mfussenegger/nvim-dap")
-require("dap.ext.vscode").json_decode = require("json5").parse
-local dap = require("dap")
-vim.keymap.set("n", "<leader>dc", function()
-  dap.continue()
-end)
-vim.keymap.set("n", "<leader>b", function()
-  dap.toggle_breakpoint()
-end)
-vim.keymap.set("n", "<leader>dr", function()
-  dap.repl.open()
-end)
-vim.keymap.set("n", "<leader>dt", function()
-  dap.terminate()
-end)
-vim.keymap.set("n", "<leader>dn", function()
-  dap.continue({ new = true })
-end)
-vim.keymap.set("n", "<leader>ds", function()
-  dap.step_over()
-end)
-vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
-
-
 MiniDeps.add("mfussenegger/nvim-dap-python")
-require("dap-python").setup("./venv/bin/python")
-vim.env.GEVENT_SUPPORT = "True"
-table.insert(dap.configurations.python, {
-  type = "python",
-  request = "launch",
-  name = "dap Django",
-  program = vim.fn.getcwd() .. "/quickbit/manage.py", -- NOTE: Adapt path to manage.py as needed
-  args = { "runserver", "--noreload" },
-})
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    require("dap.ext.vscode").json_decode = require("json5").parse
+    local dap = require("dap")
+    vim.keymap.set("n", "<leader>dc", function()
+      dap.continue()
+    end)
+    vim.keymap.set("n", "<leader>b", function()
+      dap.toggle_breakpoint()
+    end)
+    vim.keymap.set("n", "<leader>dr", function()
+      dap.repl.open()
+    end)
+    vim.keymap.set("n", "<leader>dt", function()
+      dap.terminate()
+    end)
+    vim.keymap.set("n", "<leader>dn", function()
+      dap.continue({ new = true })
+    end)
+    vim.keymap.set("n", "<leader>ds", function()
+      dap.step_over()
+    end)
+    vim.fn.sign_define("DapBreakpoint", { text = "🛑", texthl = "", linehl = "", numhl = "" })
 
-MiniDeps.add("theHamsta/nvim-dap-virtual-text")
-require("nvim-dap-virtual-text").setup({ virt_text_pos = "eol" })
+    require("dap-python").setup("./venv/bin/python")
+    vim.env.GEVENT_SUPPORT = "True"
+    table.insert(dap.configurations.python, {
+      type = "python",
+      request = "launch",
+      name = "dap Django",
+      program = vim.fn.getcwd() .. "/quickbit/manage.py", -- NOTE: Adapt path to manage.py as needed
+      args = { "runserver", "--noreload" },
+    })
+
+    MiniDeps.add("theHamsta/nvim-dap-virtual-text")
+    require("nvim-dap-virtual-text").setup({ virt_text_pos = "eol" })
+  end
+})
 
 MiniDeps.add("nvim-neotest/nvim-nio")
 
 MiniDeps.add("nvim-neotest/neotest")
 MiniDeps.add("nvim-neotest/neotest-python")
----@module "neotest"
-local neotest = require("neotest")
-neotest.setup({
-  summary = {
-    mappings = {
-      help = "g?", -- change "?" to "g?" so that you can search backwards.
-    },
-  },
-  adapters = {
-    require("neotest-python")({
-      dap = { justMyCode = false },
-      args = { "-vv" },
-      -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
-    }),
-  },
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    ---@module "neotest"
+    local neotest = require("neotest")
+    neotest.setup({
+      summary = {
+        mappings = {
+          help = "g?", -- change "?" to "g?" so that you can search backwards.
+        },
+      },
+      adapters = {
+        require("neotest-python")({
+          dap = { justMyCode = false },
+          args = { "-vv" },
+          -- args = { "--disable-warnings", "-n 10", "-m 'not slow'" },
+        }),
+      },
+    })
+
+    vim.keymap.set("n", "<leader>tr", neotest.run.run)
+    vim.keymap.set("n", "<leader>td", function()
+      neotest.run.run({ strategy = "dap" })
+    end)
+
+    vim.keymap.set("n", "<leader>ts", neotest.summary.open)
+    vim.api.nvim_create_user_command("NeotestStopTest", neotest.run.stop, { nargs = "*" })
+    vim.keymap.set("n", "<c-w>t", neotest.output.open)
+    vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
+    vim.keymap.set("n", "]j", function()
+      neotest.jump.next({ status = "failed" })
+    end)
+    vim.keymap.set("n", "[j", function()
+      neotest.jump.prev({ status = "failed" })
+    end)
+
+    vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
+    vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
+  end
 })
-
-vim.keymap.set("n", "<leader>tr", neotest.run.run)
-vim.keymap.set("n", "<leader>td", function()
-  neotest.run.run({ strategy = "dap" })
-end)
-
-vim.keymap.set("n", "<leader>ts", neotest.summary.open)
-vim.api.nvim_create_user_command("NeotestStopTest", neotest.run.stop, { nargs = "*" })
-vim.keymap.set("n", "<c-w>t", neotest.output.open)
-vim.keymap.set("n", "<c-w><c-t>", neotest.output.open)
-vim.keymap.set("n", "]j", function()
-  neotest.jump.next({ status = "failed" })
-end)
-vim.keymap.set("n", "[j", function()
-  neotest.jump.prev({ status = "failed" })
-end)
-
-vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
-vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
 
 
 -- nicer status line
 MiniDeps.add("nvim-lualine/lualine.nvim")
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    local custom_gruvbox = require("lualine.themes.gruvbox")
+    -- Remove the constant changing of colors while changing modes
+    custom_gruvbox.insert = custom_gruvbox.normal
+    custom_gruvbox.visual = custom_gruvbox.normal
+    custom_gruvbox.replace = custom_gruvbox.normal
+    custom_gruvbox.command = custom_gruvbox.normal
+    custom_gruvbox.inactive = custom_gruvbox.normal
 
-local custom_gruvbox = require("lualine.themes.gruvbox")
--- Remove the constant changing of colors while changing modes
-custom_gruvbox.insert = custom_gruvbox.normal
-custom_gruvbox.visual = custom_gruvbox.normal
-custom_gruvbox.replace = custom_gruvbox.normal
-custom_gruvbox.command = custom_gruvbox.normal
-custom_gruvbox.inactive = custom_gruvbox.normal
-
-require("lualine").setup({
-  options = {
-    theme = custom_gruvbox,
-    component_separators = { left = "", right = "" },
-    section_separators = { left = "", right = "" },
-  },
-  sections = {
-    lualine_a = { "branch" },
-    -- lualine_a = { "branch", "gitstatus" },
-    lualine_b = {
-      "diff",
-      function()
-        return "|"
-      end,
-      "diagnostics",
-    },
-    lualine_x = {},
-    lualine_y = {
-      function()
-        local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
-        if #attached_clients == 0 then
-          return ""
-        end
-        local names = vim
-            .iter(attached_clients)
-            :map(function(client)
-              local name = client.name:gsub("language.server", "ls")
-              return name
-            end)
-            :totable()
-        return table.concat(names, " ")
-      end,
-    },
-    lualine_z = { "filetype" },
-  },
-  inactive_sections = {
-    lualine_a = { "filename" },
-    lualine_b = {},
-    lualine_c = {},
-    lualine_x = {},
-    lualine_y = {},
-    lualine_z = {},
-  },
-  tabline = {},
-  winbar = {},
-  inactive_winbar = {},
-  extensions = {},
+    require("lualine").setup({
+      options = {
+        theme = custom_gruvbox,
+        component_separators = { left = "", right = "" },
+        section_separators = { left = "", right = "" },
+      },
+      sections = {
+        lualine_a = { "branch" },
+        -- lualine_a = { "branch", "gitstatus" },
+        lualine_b = {
+          "diff",
+          function()
+            return "|"
+          end,
+          "diagnostics",
+        },
+        lualine_x = {},
+        lualine_y = {
+          function()
+            local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
+            if #attached_clients == 0 then
+              return ""
+            end
+            local names = vim
+                .iter(attached_clients)
+                :map(function(client)
+                  local name = client.name:gsub("language.server", "ls")
+                  return name
+                end)
+                :totable()
+            return table.concat(names, " ")
+          end,
+        },
+        lualine_z = { "filetype" },
+      },
+      inactive_sections = {
+        lualine_a = { "filename" },
+        lualine_b = {},
+        lualine_c = {},
+        lualine_x = {},
+        lualine_y = {},
+        lualine_z = {},
+      },
+      tabline = {},
+      winbar = {},
+      inactive_winbar = {},
+      extensions = {},
+    })
+  end
 })
 
 
@@ -1198,84 +1262,110 @@ MiniDeps.add("plasticboy/vim-markdown")
 
 -- quickfix improvement
 MiniDeps.add("stevearc/quicker.nvim")
-require("quicker").setup({})
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  pattern = "qf",
+  once = true,
+  callback = function()
+    require("quicker").setup({})
+  end
+})
 
 -- Disable search highlight after searching.
 MiniDeps.add("romainl/vim-cool")
 
 -- multi cursor support
 MiniDeps.add("jake-stewart/multicursor.nvim")
-local mc = require("multicursor-nvim")
-mc.setup()
-vim.keymap.set("c", "<c-x>", function()
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
-  vim.defer_fn(function()
-    local start_pos = vim.api.nvim_win_get_cursor(0)
-    local start_line = start_pos[1]
-    local start_col = start_pos[2]
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    local mc = require("multicursor-nvim")
+    mc.setup()
+    vim.keymap.set("c", "<c-x>", function()
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<CR>", true, false, true), "n", false)
+      vim.defer_fn(function()
+        local start_pos = vim.api.nvim_win_get_cursor(0)
+        local start_line = start_pos[1]
+        local start_col = start_pos[2]
 
-    local current_line = nil
-    local current_col = nil
+        local current_line = nil
+        local current_col = nil
 
-    local max_matches = 100
+        local max_matches = 100
 
-    while not (start_line == current_line and start_col == current_col) and max_matches do
-      mc.toggleCursor()
-      vim.cmd("normal n")
-      local current_pos = vim.api.nvim_win_get_cursor(0)
-      current_line = current_pos[1]
-      current_col = current_pos[2]
-      max_matches = max_matches - 1
-    end
-    mc.enableCursors()
-  end, 0)
-end)
+        while not (start_line == current_line and start_col == current_col) and max_matches do
+          mc.toggleCursor()
+          vim.cmd("normal n")
+          local current_pos = vim.api.nvim_win_get_cursor(0)
+          current_line = current_pos[1]
+          current_col = current_pos[2]
+          max_matches = max_matches - 1
+        end
+        mc.enableCursors()
+      end, 0)
+    end)
 
-vim.keymap.set("v", "I", mc.insertVisual)
-vim.keymap.set("v", "A", mc.appendVisual)
+    vim.keymap.set("v", "I", mc.insertVisual)
+    vim.keymap.set("v", "A", mc.appendVisual)
 
-vim.keymap.set("n", "]<c-x>", mc.nextCursor)
-vim.keymap.set("n", "[<c-x>", mc.prevCursor)
-vim.keymap.set("n", "[<c-x>", mc.prevCursor)
-vim.keymap.set("n", "<leader><down>", function()
-  mc.lineAddCursor(1)
-end)
-vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
+    vim.keymap.set("n", "]<c-x>", mc.nextCursor)
+    vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+    vim.keymap.set("n", "[<c-x>", mc.prevCursor)
+    vim.keymap.set("n", "<leader><down>", function()
+      mc.lineAddCursor(1)
+    end)
+    vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
+  end
+})
 
 -- normal mode in the cmd line
 MiniDeps.add("jake-stewart/normal-cmdline.nvim")
--- make the cmdline insert mode a beam
-vim.opt.guicursor:append("ci:ver1,c:ver1")
-local cmd = require("normal-cmdline")
-cmd.setup({
-  -- key to hit within cmdline to enter normal mode:
-  key = "<esc>",
-  -- the cmdline text highlight when in normal mode:
-  hl = "Normal",
-  -- these mappings only apply to normal mode in cmdline:
-  mappings = {
-    ["k"] = cmd.history.prev,
-    ["j"] = cmd.history.next,
-    ["<cr>"] = cmd.accept,
-    ["<esc>"] = cmd.cancel,
-    ["<c-c>"] = cmd.cancel,
-    [":"] = cmd.reset,
-  },
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    -- make the cmdline insert mode a beam
+    vim.opt.guicursor:append("ci:ver1,c:ver1")
+    local cmd = require("normal-cmdline")
+    cmd.setup({
+      -- key to hit within cmdline to enter normal mode:
+      key = "<esc>",
+      -- the cmdline text highlight when in normal mode:
+      hl = "Normal",
+      -- these mappings only apply to normal mode in cmdline:
+      mappings = {
+        ["k"] = cmd.history.prev,
+        ["j"] = cmd.history.next,
+        ["<cr>"] = cmd.accept,
+        ["<esc>"] = cmd.cancel,
+        ["<c-c>"] = cmd.cancel,
+        [":"] = cmd.reset,
+      },
+    })
+  end
 })
 
 
 -- removes all "press enter to continue"
 MiniDeps.add("jake-stewart/auto-cmdheight.nvim")
-require("auto-cmdheight").setup()
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    require("auto-cmdheight").setup()
+  end
+})
 
 -- add a scroll bar
 MiniDeps.add("petertriho/nvim-scrollbar")
-require("scrollbar").setup({
-  marks = {
-    Cursor = {
-      text = " ", -- Remove cursor indicator
-    },
-  },
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    require("scrollbar").setup({
+      marks = {
+        Cursor = {
+          text = " ", -- Remove cursor indicator
+        },
+      },
+    })
+  end
 })
 -- https://github.com/kevinhwang91/nvim-hlslens
 
@@ -1284,31 +1374,35 @@ MiniDeps.add("jeetsukumaran/vim-pythonsense")
 vim.g.is_pythonsense_suppress_object_keymaps = 1
 
 
-
 -- refactoring library
 MiniDeps.add("ThePrimeagen/refactoring.nvim")
-local refactoring = require("refactoring")
-refactoring.setup({})
-vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
-  refactoring.select_refactor()
-end)
-vim.keymap.set({ "n", "x" }, "<leader>iv", function()
-  refactoring.refactor("Inline Variable")
-end)
-vim.keymap.set({ "n", "x" }, "<leader>if", function()
-  refactoring.refactor("Inline Function")
-end)
-vim.keymap.set({ "n", "x" }, "<leader>ev", function()
-  refactoring.refactor("Extract Variable")
-end)
-vim.keymap.set({ "n", "x" }, "<leader>ef", function()
-  refactoring.refactor("Extract Function")
-end)
-vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
-vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
-vim.api.nvim_create_user_command("RefactorClean", function()
-  refactoring.debug.cleanup({})
-end, { nargs = "*" })
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    local refactoring = require("refactoring")
+    refactoring.setup({})
+    vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
+      refactoring.select_refactor()
+    end)
+    vim.keymap.set({ "n", "x" }, "<leader>iv", function()
+      refactoring.refactor("Inline Variable")
+    end)
+    vim.keymap.set({ "n", "x" }, "<leader>if", function()
+      refactoring.refactor("Inline Function")
+    end)
+    vim.keymap.set({ "n", "x" }, "<leader>ev", function()
+      refactoring.refactor("Extract Variable")
+    end)
+    vim.keymap.set({ "n", "x" }, "<leader>ef", function()
+      refactoring.refactor("Extract Function")
+    end)
+    vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
+    vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
+    vim.api.nvim_create_user_command("RefactorClean", function()
+      refactoring.debug.cleanup({})
+    end, { nargs = "*" })
+  end
+})
 
 
 -- Generic log highlighting
@@ -1319,8 +1413,7 @@ require("log-highlight").setup({
   pattern = {
     "/var/log/.*",
   },
-}
-)
+})
 
 -- Vim open file including line number, including gF
 -- $ vim file.py:10
@@ -1329,32 +1422,36 @@ MiniDeps.add("wsdjeg/vim-fetch")
 
 -- code action previewer
 MiniDeps.add("nvim-telescope/telescope-ui-select.nvim")
+
 require("telescope").load_extension("ui-select")
 MiniDeps.add("aznhe21/actions-preview.nvim")
-
-local actions_preview = require("actions-preview")
-actions_preview.setup({
-  telescope = {
-    sorting_strategy = "ascending",
-    layout_strategy = "vertical",
-    layout_config = {
-      width = 0.8,
-      height = 0.9,
-      prompt_position = "top",
-      preview_cutoff = 20,
-      preview_height = function(_, _, max_lines)
-        return max_lines - 15
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    local actions_preview = require("actions-preview")
+    actions_preview.setup({
+      telescope = {
+        sorting_strategy = "ascending",
+        layout_strategy = "vertical",
+        layout_config = {
+          width = 0.8,
+          height = 0.9,
+          prompt_position = "top",
+          preview_cutoff = 20,
+          preview_height = function(_, _, max_lines)
+            return max_lines - 15
+          end,
+        },
+      },
+    })
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
+      callback = function(ev)
+        local opts = { buffer = ev.buf }
+        vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
       end,
-    },
-  },
-})
-
-vim.api.nvim_create_autocmd("LspAttach", {
-  group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
-  callback = function(ev)
-    local opts = { buffer = ev.buf }
-    vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
-  end,
+    })
+  end
 })
 
 
@@ -1362,31 +1459,41 @@ vim.api.nvim_create_autocmd("LspAttach", {
 MiniDeps.add("MeanderingProgrammer/render-markdown.nvim")
 MiniDeps.add("echasnovski/mini.diff")
 MiniDeps.add("olimorris/codecompanion.nvim")
-local diff = require("mini.diff")
-diff.setup({
-  -- Disabled by default
-  source = diff.gen_source.none(),
-})
-require("codecompanion").setup({
-  adapters = {
-    openai = function()
-      return require("codecompanion.adapters").extend("openai", {
-        env = {
-          api_key = os.getenv("OPEN_API_KEY"),
-        },
-      })
-    end,
-  },
-  strategies = {
-    chat = { adapter = "openai" },
-    inline = { adapter = "openai" },
-    agent = { adapter = "openai" },
-  },
-})
+vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  once = true,
+  callback = function()
+    local diff = require("mini.diff")
+    diff.setup({
+      -- Disabled by default
+      source = diff.gen_source.none(),
+    })
+    require("codecompanion").setup({
+      adapters = {
+        openai = function()
+          return require("codecompanion.adapters").extend("openai", {
+            env = {
+              api_key = os.getenv("OPEN_API_KEY"),
+            },
+          })
+        end,
+      },
+      strategies = {
+        chat = { adapter = "openai" },
+        inline = { adapter = "openai" },
+        agent = { adapter = "openai" },
+      },
+    })
 
-vim.keymap.set({ "i", "v" }, "<C-X><C-E>", function()
-  vim.cmd("CodeCompanion")
-end)
+    vim.keymap.set({ "i", "v" }, "<C-X><C-E>", function()
+      vim.cmd("CodeCompanion")
+    end)
+    -- vim.keymap.set("<D-C>")
+
+    vim.keymap.set({ "n", "v" }, "<leader>cp", function()
+      vim.cmd("CodeCompanionChat")
+    end)
+  end
+})
 
 -- Pure lua replacement for github/copilot. Has more features and is more efficient.
 -- MiniDeps.add("zbirenbaum/copilot.lua")
