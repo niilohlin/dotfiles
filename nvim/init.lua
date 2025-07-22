@@ -1,20 +1,23 @@
 ---@diagnostic disable: missing-fields
 -- Clone 'mini.nvim' manually in a way that it gets managed by 'mini.deps'
-local path_package = vim.fn.stdpath('data') .. '/site/'
-local mini_path = path_package .. 'pack/deps/start/mini.nvim'
+local path_package = vim.fn.stdpath("data") .. "/site/"
+local mini_path = path_package .. "pack/deps/start/mini.nvim"
 if not vim.loop.fs_stat(mini_path) then
   vim.cmd('echo "Installing `mini.nvim`" | redraw')
   local clone_cmd = {
-    'git', 'clone', '--filter=blob:none',
-    'https://github.com/echasnovski/mini.nvim', mini_path
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/echasnovski/mini.nvim",
+    mini_path,
   }
   vim.fn.system(clone_cmd)
-  vim.cmd('packadd mini.nvim | helptags ALL')
+  vim.cmd("packadd mini.nvim | helptags ALL")
   vim.cmd('echo "Installed `mini.nvim`" | redraw')
 end
 
 -- Set up 'mini.deps' (customize to your liking)
-require('mini.deps').setup({ path = { package = path_package } })
+require("mini.deps").setup({ path = { package = path_package } })
 
 function SetTabLength(tab_length)
   vim.opt.tabstop = tab_length
@@ -137,7 +140,6 @@ vim.api.nvim_create_autocmd("FileType", {
     -- override treesitter keymap
     vim.keymap.set({ "x", "o" }, "am", "<Plug>(PythonsenseOuterFunctionTextObject)")
 
-
     -- Always use make. When entering `test_*.py` nvim automatically sets the makeprg to pytest.
     -- But I use neotest to run individual tests.
     vim.opt_local.makeprg = "make"
@@ -233,23 +235,23 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 })
 
 -- options
-vim.opt.showcmd = true        -- Show the current command in the bottom right
-vim.opt.incsearch = true      -- Incremental search
-vim.opt.showmatch = true      -- Highlight search match
-vim.opt.ignorecase = true     -- Ignore search casing
-vim.opt.smartcase = true      -- But not when searching with uppercase letters
-vim.opt.smartindent = true    -- Language-aware indent
-vim.opt.autowrite = true      -- Automatically write on :n and :p
-vim.opt.autoread = true       -- Automatically read file from disk on change
-vim.opt.number = true         -- Set line numbers
+vim.opt.showcmd = true -- Show the current command in the bottom right
+vim.opt.incsearch = true -- Incremental search
+vim.opt.showmatch = true -- Highlight search match
+vim.opt.ignorecase = true -- Ignore search casing
+vim.opt.smartcase = true -- But not when searching with uppercase letters
+vim.opt.smartindent = true -- Language-aware indent
+vim.opt.autowrite = true -- Automatically write on :n and :p
+vim.opt.autoread = true -- Automatically read file from disk on change
+vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2"       -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true          -- Show cursor col and row position
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
-vim.opt.modifiable = true     -- Make buffers modifiable.
-vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
-vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
+vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
+vim.opt.ruler = true -- Show cursor col and row position
+vim.opt.colorcolumn = "120" -- Show max column highlight.
+vim.opt.modifiable = true -- Make buffers modifiable.
+vim.opt.cursorline = true -- Show a horizontal line where the cursor is
+vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
+vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
 -- vim.cmd([[set virtualedit="block"]])
 
@@ -353,17 +355,16 @@ MiniDeps.add({
   source = "nvim-telescope/telescope-fzf-native.nvim",
   hooks = {
     post_install = function()
-      vim.fn.system(
-        "make")
-    end
-  }
+      vim.fn.system("make")
+    end,
+  },
 })
 
 MiniDeps.add({
   source = "nvim-telescope/telescope.nvim",
   dependencies = {
     "nvim-lua/plenary.nvim",
-  }
+  },
 })
 local builtin = require("telescope.builtin")
 local actions = require("telescope.actions")
@@ -392,7 +393,7 @@ vim.keymap.set("v", "<leader>sf", function()
   local selected_text = vim.fn.getreg("v")
   builtin.find_files({ default_text = selected_text })
 end)
-vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last telescope search
+vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
 vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
 vim.keymap.set("v", "<leader>sg", function()
   vim.cmd('normal! "vy')
@@ -401,11 +402,11 @@ vim.keymap.set("v", "<leader>sg", function()
 end)
 vim.keymap.set("n", "<leader>sf", function()
   builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
-end, {})                                                                 -- live find files (including hidden files)
-vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
-vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols)          -- live find symbols
-vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
-vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+end, {}) -- live find files (including hidden files)
+vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
+vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
 vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
 vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
@@ -476,13 +477,13 @@ vim.api.nvim_create_autocmd("BufReadPre", {
 
       sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
 
-      ignore_install = {},  -- List of parsers to ignore installing
+      ignore_install = {}, -- List of parsers to ignore installing
 
       auto_install = false, -- Automatically install missing parsers when entering buffer
 
       highlight = {
         enable = true, -- `false` will disable the whole extension
-        disable = {},  -- list of language that will be disabled
+        disable = {}, -- list of language that will be disabled
         additional_vim_regex_highlighting = false,
       },
       textobjects = {
@@ -556,16 +557,16 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
     local surround = require("mini.surround")
     surround.setup({
       mappings = {
-        add = "gs",          -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
-        delete = "ds",       -- Delete surrounding
-        replace = "cs",      -- Replace surrounding
+        add = "gs", -- Add surrounding in Normal and Visual modes, overrides "sleep" mapping
+        delete = "ds", -- Delete surrounding
+        replace = "cs", -- Replace surrounding
 
-        find = "",           -- Find surrounding (to the right)
-        find_left = "",      -- Find surrounding (to the left)
-        highlight = "",      -- Highlight surrounding
+        find = "", -- Find surrounding (to the right)
+        find_left = "", -- Find surrounding (to the left)
+        highlight = "", -- Highlight surrounding
         update_n_lines = "", -- Update `n_lines`
-        suffix_last = "",    -- Suffix to search with "prev" method
-        suffix_next = "",    -- Suffix to search with "next" method
+        suffix_last = "", -- Suffix to search with "prev" method
+        suffix_next = "", -- Suffix to search with "next" method
       },
     })
     vim.keymap.set("v", "C", function() -- C for "call"
@@ -584,7 +585,6 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   end,
 })
 
-
 -- Nerd Icons (for example in oil buffers)
 MiniDeps.add("echasnovski/mini.icons")
 require("mini.icons").setup()
@@ -600,10 +600,8 @@ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
     -- MiniDeps.add("benomahony/oil-git.nvim")
-  end
+  end,
 })
-
-
 
 -- Snippets collection
 MiniDeps.add("rafamadriz/friendly-snippets")
@@ -614,8 +612,8 @@ MiniDeps.add({
   hooks = {
     post_install = function()
       vim.fn.system("cd /Users/niilohlin/.local/share/nvim/site/pack/deps/opt/blink.cmp/ && cargo build --release")
-    end
-  }
+    end,
+  },
 })
 
 -- nvim development utils
@@ -630,7 +628,7 @@ vim.api.nvim_create_autocmd("FileType", {
         -- Load luvit types when the `vim.uv` word is found
         "$VIMRUNTIME",
         { path = "${HOME}/.local/share/nvim/lazy" },
-        { path = "${3rd}/luv/library",            words = { "vim%.uv" } },
+        { path = "${3rd}/luv/library", words = { "vim%.uv" } },
       },
     })
   end,
@@ -673,21 +671,21 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
     })
     -- ?? idk where this is going
     -- opts_extend = { "sources.default" },
-  end
+  end,
 })
 
 -- LSP server Installer/manager
 MiniDeps.add("mason-org/mason.nvim")
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   once = true,
   callback = function()
     require("mason").setup()
-  end
+  end,
 })
 
 -- LSP setup
 MiniDeps.add("neovim/nvim-lspconfig")
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   once = true,
   callback = function()
     local lspconfig = require("lspconfig")
@@ -861,7 +859,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
     lspconfig.jinja_lsp.setup({
       capabilities = capabilities,
     })
-  end
+  end,
 })
 
 -- Make anything into an lsp, like linter output etc.
@@ -1035,7 +1033,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
         })
       end,
     })
-  end
+  end,
 })
 
 -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
@@ -1098,8 +1096,8 @@ MiniDeps.add({
   hooks = {
     post_install = function()
       vim.fn.system("./install.sh")
-    end
-  }
+    end,
+  },
 })
 
 -- Debug support
@@ -1142,7 +1140,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
     MiniDeps.add("theHamsta/nvim-dap-virtual-text")
     require("nvim-dap-virtual-text").setup({ virt_text_pos = "eol" })
-  end
+  end,
 })
 
 MiniDeps.add("nvim-neotest/nvim-nio")
@@ -1187,9 +1185,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
     vim.api.nvim_create_user_command("NeotestOpenOutputPanel", neotest.output_panel.open, { nargs = "*" })
     vim.api.nvim_create_user_command("NeotestOpenSummary", neotest.summary.open, { nargs = "*" })
-  end
+  end,
 })
-
 
 -- nicer status line
 MiniDeps.add("nvim-lualine/lualine.nvim")
@@ -1228,12 +1225,12 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
               return ""
             end
             local names = vim
-                .iter(attached_clients)
-                :map(function(client)
-                  local name = client.name:gsub("language.server", "ls")
-                  return name
-                end)
-                :totable()
+              .iter(attached_clients)
+              :map(function(client)
+                local name = client.name:gsub("language.server", "ls")
+                return name
+              end)
+              :totable()
             return table.concat(names, " ")
           end,
         },
@@ -1252,13 +1249,11 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
       inactive_winbar = {},
       extensions = {},
     })
-  end
+  end,
 })
-
 
 -- Markdown utility, go to link and so on.
 MiniDeps.add("plasticboy/vim-markdown")
-
 
 -- quickfix improvement
 MiniDeps.add("stevearc/quicker.nvim")
@@ -1267,7 +1262,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   once = true,
   callback = function()
     require("quicker").setup({})
-  end
+  end,
 })
 
 -- Disable search highlight after searching.
@@ -1314,7 +1309,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
       mc.lineAddCursor(1)
     end)
     vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
-  end
+  end,
 })
 
 -- normal mode in the cmd line
@@ -1340,9 +1335,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
         [":"] = cmd.reset,
       },
     })
-  end
+  end,
 })
-
 
 -- removes all "press enter to continue"
 MiniDeps.add("jake-stewart/auto-cmdheight.nvim")
@@ -1350,7 +1344,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   once = true,
   callback = function()
     require("auto-cmdheight").setup()
-  end
+  end,
 })
 
 -- add a scroll bar
@@ -1365,14 +1359,13 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
         },
       },
     })
-  end
+  end,
 })
 -- https://github.com/kevinhwang91/nvim-hlslens
 
 -- better python movements and text objects
 MiniDeps.add("jeetsukumaran/vim-pythonsense")
 vim.g.is_pythonsense_suppress_object_keymaps = 1
-
 
 -- refactoring library
 MiniDeps.add("ThePrimeagen/refactoring.nvim")
@@ -1401,9 +1394,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     vim.api.nvim_create_user_command("RefactorClean", function()
       refactoring.debug.cleanup({})
     end, { nargs = "*" })
-  end
+  end,
 })
-
 
 -- Generic log highlighting
 MiniDeps.add("fei6409/log-highlight.nvim")
@@ -1418,7 +1410,6 @@ require("log-highlight").setup({
 -- Vim open file including line number, including gF
 -- $ vim file.py:10
 MiniDeps.add("wsdjeg/vim-fetch")
-
 
 -- code action previewer
 MiniDeps.add("nvim-telescope/telescope-ui-select.nvim")
@@ -1451,9 +1442,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
         vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
       end,
     })
-  end
+  end,
 })
-
 
 -- ChatGPT plugin
 MiniDeps.add("MeanderingProgrammer/render-markdown.nvim")
@@ -1492,7 +1482,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     vim.keymap.set({ "n", "v" }, "<leader>cp", function()
       vim.cmd("CodeCompanionChat")
     end)
-  end
+  end,
 })
 
 -- Pure lua replacement for github/copilot. Has more features and is more efficient.
@@ -1513,7 +1503,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- end)
 
 -- end plugins
-
 
 require("project").setup({})
 
@@ -1558,8 +1547,8 @@ vim.keymap.set("n", "p", "p=`]") -- paste and reindent
 vim.keymap.set("n", "P", "P=`]") -- paste and reindent above
 
 -- Normal remaps
-vim.keymap.set("n", "<C-U>", "<C-U>zz")      -- Move cursor to middle of screen
-vim.keymap.set("n", "<C-D>", "<C-D>zz")      -- Move cursor to middle of screen
+-- vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
+-- vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')
