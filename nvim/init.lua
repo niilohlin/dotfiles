@@ -49,6 +49,13 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
+-- for my custom git interactive stage files
+vim.filetype.add({
+  extension = {
+    interactive_stage = 'interactive_stage'
+  }
+})
+
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "lua",
   callback = function()
@@ -686,6 +693,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 -- LSP setup
 MiniDeps.add("neovim/nvim-lspconfig")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
+  pattern = "*",
   once = true,
   callback = function()
     local lspconfig = require("lspconfig")
@@ -874,6 +882,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
     null_ls.register(rope.auto_import)
     -- null_ls.register(rope.completion)
     vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
+    -- vim.api.nvim_create_user_command("RopeAutoImport", rope.auto_import, { nargs = "*" })
 
     local tailwind = require("tailwind")
     null_ls.register(tailwind.completion)
