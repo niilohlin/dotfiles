@@ -641,7 +641,7 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter" }, {
+vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   once = true,
   callback = function()
     require("blink.cmp").setup({
@@ -1510,6 +1510,9 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- vim.keymap.set("i", "<Right>", function()
 --   require("copilot.suggestion").accept()
 -- end)
+
+MiniDeps.add("NeogitOrg/neogit")
+
 
 -- end plugins
 
