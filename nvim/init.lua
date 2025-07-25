@@ -49,13 +49,6 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
--- for my custom git interactive stage files
-vim.filetype.add({
-  extension = {
-    interactive_stage = 'interactive_stage'
-  }
-})
-
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "lua",
   callback = function()
@@ -450,6 +443,10 @@ vim.keymap.set("n", "z=", builtin.spell_suggest)
 
 -- Git plugin, provides :Git add, :Git blame etc.
 MiniDeps.add("tpope/vim-fugitive")
+
+-- adds interactive git status page
+MiniDeps.add("NeogitOrg/neogit")
+vim.keymap.set("n", "<leader>ng", ":Neogit<CR>")
 
 -- async Make, Dispatch (run), and more, integrates with tmux
 MiniDeps.add("tpope/vim-dispatch")
@@ -1510,10 +1507,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- vim.keymap.set("i", "<Right>", function()
 --   require("copilot.suggestion").accept()
 -- end)
-
-MiniDeps.add("NeogitOrg/neogit")
-vim.keymap.set("n", "<leader>ng", ":Neogit<CR>")
-
 
 -- end plugins
 
