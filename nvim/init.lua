@@ -1512,6 +1512,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- end)
 
 MiniDeps.add("NeogitOrg/neogit")
+vim.keymap.set("n", "<leader>ng", ":Neogit<CR>")
 
 
 -- end plugins
