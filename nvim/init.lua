@@ -444,10 +444,6 @@ vim.keymap.set("n", "z=", builtin.spell_suggest)
 -- Git plugin, provides :Git add, :Git blame etc.
 MiniDeps.add("tpope/vim-fugitive")
 
--- adds interactive git status page
-MiniDeps.add("NeogitOrg/neogit")
-vim.keymap.set("n", "<leader>ng", ":Neogit<CR>")
-
 -- async Make, Dispatch (run), and more, integrates with tmux
 MiniDeps.add("tpope/vim-dispatch")
 
