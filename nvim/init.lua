@@ -253,6 +253,8 @@ vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 vim.opt.wildmenu = true       -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
+vim.opt.swapfile = false      -- Disable swapfile
+vim.opt.signcolumn = "yes"    -- Always show sign column to avoid indenting and jumping
 -- vim.cmd([[set virtualedit="block"]])
 
 -- Remove annoying auto inserting comment string
