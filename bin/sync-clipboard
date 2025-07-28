@@ -1,6 +1,0 @@
-#!/usr/bin/env zsh
-
-
-client_ip=$(echo $SSH_CONNECTION | awk '{print $1}')
-
-pbpaste | ssh $(whoami)@$client_ip -o RemoteCommand="pbcopy"

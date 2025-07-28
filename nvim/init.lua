@@ -1256,9 +1256,33 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
---
+-- Improved tabs
 MiniDeps.add("nanozuki/tabby.nvim")
-require("tabby").setup()
+local custom_fill = { fg = "#7c6f64", bg = "#504945", style = "italic" }
+require("tabby").setup({
+  line = function(line)
+    return {
+      {
+        { hl = "TabLine" },
+        line.sep(" ", "TabLine", custom_fill),
+      },
+      line.tabs().foreach(function(tab)
+        local hl = tab.is_current() and "TabLineSel" or "TabLine"
+        return {
+          line.sep(" ", hl, custom_fill),
+          tab.number() - 1,
+          tab.name(),
+          line.sep("", hl, custom_fill),
+          hl = hl,
+          margin = " ",
+        }
+      end),
+      line.spacer(),
+      hl = custom_fill,
+    }
+  end,
+  -- option = {}, -- setup modules' option,
+})
 
 -- Markdown utility, go to link and so on.
 MiniDeps.add("plasticboy/vim-markdown")
@@ -1644,20 +1668,6 @@ vim.keymap.set("x", "ae", function()
   vim.cmd("normal! ggVG")
 end)
 
--- check if running via ssh
-if os.getenv("SSH_CLIENT") then
-  vim.keymap.set("v", '"*y', function()
-    -- copy to system clipboard
-    vim.cmd('normal! "+y')
-    -- run sync-clipboard terminal program
-    vim.fn.jobstart("sync-clipboard", {
-      on_exit = function(_, _, _)
-        print("Synced to client clipboard")
-      end,
-    })
-  end)
-end
-
 vim.api.nvim_create_autocmd("Filetype", {
   pattern = "sql",
   callback = function()
@@ -1667,29 +1677,6 @@ vim.api.nvim_create_autocmd("Filetype", {
 })
 require("gui")
 
-local yank_path = vim.fn.stdpath("state") .. "/yank"
-local augroup = vim.api.nvim_create_augroup("shared_yank_register", { clear = true })
-
-vim.api.nvim_create_autocmd({ "FocusGained" }, {
-  callback = function()
-    if vim.fn.filereadable(yank_path) == 1 then
-      vim.fn.setreg('"', vim.fn.readfile(yank_path))
-    end
-  end,
-  group = augroup,
-})
-
-vim.api.nvim_create_autocmd({ "FocusLost" }, {
-  callback = function()
-    local file = io.open(yank_path, "w")
-    if file ~= nil then
-      io.output(file)
-      io.write(vim.fn.getreg('"'))
-      io.close(file)
-    end
-  end,
-  group = augroup,
-})
 -- (call
 --   function: (identifier) @func_name  (#eq? @func_name "Template")
 --   arguments: (argument_list (string) @content)
