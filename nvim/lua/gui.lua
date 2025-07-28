@@ -14,7 +14,6 @@ end)
 
 vim.keymap.set("v", "<D-c>", function()
   vim.cmd('normal "+y')
-  print("copied to clipboard!")
 end)
 
 vim.keymap.set({ "n", "v" }, "<D-+>", function()
@@ -35,13 +34,13 @@ vim.keymap.set("c", "<D-v>", function()
 end)
 
 -- speedup neovide animation
-vim.g.neovide_position_animation_length = 0.05
-vim.g.neovide_cursor_animation_length = 0.05
+vim.g.neovide_position_animation_length = 0
+vim.g.neovide_cursor_animation_length = 0
 vim.g.neovide_cursor_trail_size = 0
 vim.g.neovide_cursor_animate_in_insert_mode = false
 vim.g.neovide_cursor_animate_command_line = false
--- vim.g.neovide_scroll_animation_far_lines = 0
-vim.g.neovide_scroll_animation_length = 0.1
+vim.g.neovide_scroll_animation_far_lines = 1
+vim.g.neovide_scroll_animation_length = 0.03
 
 local last_project_path = vim.fn.stdpath("data") .. "/last_project"
 vim.keymap.set({ "n", "t" }, "<c-b>h", function()
