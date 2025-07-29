@@ -29,7 +29,7 @@ end
 -- Set cursor position to old spot
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
   callback = function()
-    vim.cmd([[ if line("'\"") > 1 && line("'\"") <= line("$") | exe  "normal! g'\"" | endif ]])
+    vim.cmd([[ if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif ]])
   end,
 })
 
@@ -270,7 +270,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
 -- vim.opt.cmdheight = 2 -- handled by auto-cmdheight
--- opt.cmdheight = 0          -- Hide the command line when not needed.
+-- opt.cmdheight = 0     -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
 SetTabLength(4)
@@ -706,6 +706,13 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       capabilities = capabilities,
       settings = {
         Lua = {
+          format = {
+            enable = true,
+            defaultConfig = {
+              indent_style = "space",
+              indent_size = 2,
+            },
+          },
           runtime = { version = "LuaJIT" },
           diagnostics = {},
           workspace = {
@@ -747,19 +754,19 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     vim.lsp.config("eslint", lspconfig.eslint)
 
     -- ruff = {
-    --   capabilities = capabilities,
-    --   on_attach = function(client, bufnr)
-    --     if client.supports_method("textDocument/formatting") then
-    --       vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-    --       vim.api.nvim_create_autocmd("BufWritePre", {
-    --         group = augroup,
-    --         buffer = bufnr,
-    --         callback = function()
-    --           vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
-    --         end,
-    --       })
-    --     end
-    --   end,
+    --  capabilities = capabilities,
+    --  on_attach = function(client, bufnr)
+    --   if client.supports_method("textDocument/formatting") then
+    --    vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+    --    vim.api.nvim_create_autocmd("BufWritePre", {
+    --     group = augroup,
+    --     buffer = bufnr,
+    --     callback = function()
+    --      vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+    --     end,
+    --    })
+    --   end
+    --  end,
     -- },
 
     lspconfig.jedi_language_server.setup({
@@ -818,17 +825,17 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 
     -- local pwd = vim.loop.cwd()
     -- vim.api.nvim_create_autocmd("FileType", {
-    --   pattern = "python",
-    --   callback = function()
-    --     vim.lsp.start({
-    --       name = "Omnisearch LSP",
-    --       filetypes = { "python" },
-    --       root_dir = pwd,
-    --       --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
-    --       cmd = function(dispatchers)
-    --       end,
-    --     })
-    --   end,
+    --  pattern = "python",
+    --  callback = function()
+    --   vim.lsp.start({
+    --    name = "Omnisearch LSP",
+    --    filetypes = { "python" },
+    --    root_dir = pwd,
+    --    --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
+    --    cmd = function(dispatchers)
+    --    end,
+    --   })
+    --  end,
     -- })
 
     vim.filetype.add({
@@ -879,9 +886,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
     -- vim.api.nvim_create_user_command("RopeAutoImport", rope.auto_import, { nargs = "*" })
 
-    local tailwind = require("tailwind")
-    null_ls.register(tailwind.completion)
-
     local pylint_disable = {
       method = null_ls.methods.CODE_ACTION,
       filetypes = { "python" },
@@ -895,7 +899,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
                 action = function()
                   local line = diag.range.start.line
                   local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                  local line_text_with_disable = line_text .. "  # pylint: disable=" .. diag.code
+                  local line_text_with_disable = line_text .. " # pylint: disable=" .. diag.code
                   vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
                 end,
               })
@@ -905,7 +909,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
                 action = function()
                   local line = diag.range.start.line
                   local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                  local line_text_with_disable = line_text .. "  # type: ignore[" .. diag.code .. "]"
+                  local line_text_with_disable = line_text .. " # type: ignore[" .. diag.code .. "]"
                   vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
                 end,
               })
@@ -966,9 +970,9 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     null_ls.setup({
       sources = {
         null_ls.builtins.diagnostics.checkmake,
-        null_ls.builtins.formatting.stylua.with({
-          extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
-        }),
+        -- null_ls.builtins.formatting.stylua.with({
+        --  extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
+        -- }),
         null_ls.builtins.formatting.black.with({
           condition = function()
             return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
@@ -1256,6 +1260,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
+local terminals = {}
 -- Improved tabs
 MiniDeps.add("nanozuki/tabby.nvim")
 local custom_fill = { fg = "#7c6f64", bg = "#504945", style = "italic" }
@@ -1270,7 +1275,7 @@ require("tabby").setup({
         local hl = tab.is_current() and "TabLineSel" or "TabLine"
         return {
           line.sep(" ", hl, custom_fill),
-          tab.number() - 1,
+          tab.number(),
           tab.name(),
           line.sep("", hl, custom_fill),
           hl = hl,
@@ -1282,6 +1287,17 @@ require("tabby").setup({
     }
   end,
   -- option = {}, -- setup modules' option,
+})
+
+vim.api.nvim_create_autocmd("TermOpen", {
+  callback = function(ev)
+    local buf = ev.buf
+    vim.api.nvim_buf_attach(buf, false, {
+      on_lines = function()
+        terminals[buf] = true
+      end,
+    })
+  end,
 })
 
 -- Markdown utility, go to link and so on.
@@ -1517,26 +1533,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
--- Pure lua replacement for github/copilot. Has more features and is more efficient.
--- MiniDeps.add("zbirenbaum/copilot.lua")
--- require("copilot").setup({
---   suggesion = {
---     keymap = {
---       accept = "<Right>",
---       next = "<C-X><C-E>",
---     },
---   },
--- })
--- vim.keymap.set("i", "<C-X><C-e>", function()
---   require("copilot.suggestion").next()
--- end)
--- vim.keymap.set("i", "<Right>", function()
---   require("copilot.suggestion").accept()
--- end)
-
 -- end plugins
-
-require("project").setup({})
 
 vim.keymap.set({ "s" }, "<c-e>", function()
   if vim.snippet then
@@ -1569,18 +1566,11 @@ vim.api.nvim_create_user_command("Translate", function()
   vim.fn.setline(start_pos[2], lines)
 end, { range = true })
 
-local bullseye = require("bullseye")
-vim.keymap.set("n", "<leader>ma", bullseye.toggle_current_loc_to_loclist)
-
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
 
 vim.keymap.set("n", "p", "p=`]") -- paste and reindent
 vim.keymap.set("n", "P", "P=`]") -- paste and reindent above
-
--- Normal remaps
--- vim.keymap.set("n", "<C-U>", "<C-U>zz") -- Move cursor to middle of screen
--- vim.keymap.set("n", "<C-D>", "<C-D>zz") -- Move cursor to middle of screen
 
 vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
   vim.cmd('normal "vy')
@@ -1617,13 +1607,13 @@ vim.api.nvim_create_user_command("PrettyPrint", function(input)
     if openers[c] then
       indentation = indentation + 1
       result[#result] = result[#result] .. c
-      result[#result + 1] = string.rep("    ", indentation)
+      result[#result + 1] = string.rep("  ", indentation)
     elseif closers[c] then
       indentation = indentation - 1
-      result[#result + 1] = string.rep("    ", indentation) .. c
+      result[#result + 1] = string.rep("  ", indentation) .. c
     elseif c == "," then
       result[#result] = result[#result] .. c
-      result[#result + 1] = string.rep("    ", indentation)
+      result[#result + 1] = string.rep("  ", indentation)
     else
       result[#result] = result[#result] .. c
     end
@@ -1631,6 +1621,32 @@ vim.api.nvim_create_user_command("PrettyPrint", function(input)
   -- write result
   vim.api.nvim_buf_set_lines(0, input.line1 - 1, input.line2, true, result)
 end, { nargs = "*", range = true })
+
+vim.api.nvim_create_user_command("LoadVscodeEnv", function()
+  local file = vim.api.nvim_buf_get_name(0)
+  local dir = file ~= "" and vim.fn.fnamemodify(file, ":p:h") or vim.loop.cwd()
+
+  local envfile = dir .. "/.vscodeenv"
+
+  local f = io.open(envfile, "r")
+  if not f then
+    -- vim.notify(".vscodeenv not found in " .. dir, vim.log.levels.WARN)
+    return
+  end
+
+  for line in f:lines() do
+    local k, v = line:match("^(%w+)[ ]*=[ ]*(.+)$")
+    if k and v then
+      vim.env[k] = v
+    end
+  end
+  f:close()
+  vim.notify("Loaded .vscodeenv from " .. envfile, vim.log.levels.INFO)
+end, { nargs = "*" })
+
+vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter" }, {
+  command = "LoadVscodeEnv",
+})
 
 -- Last paste object
 vim.keymap.set({ "o" }, "iP", function()
@@ -1668,24 +1684,5 @@ vim.keymap.set("x", "ae", function()
   vim.cmd("normal! ggVG")
 end)
 
-vim.api.nvim_create_autocmd("Filetype", {
-  pattern = "sql",
-  callback = function()
-    vim.keymap.del("i", "<left>", { buffer = true })
-    vim.keymap.del("i", "<right>", { buffer = true })
-  end,
-})
 require("gui")
-
--- (call
---   function: (identifier) @func_name  (#eq? @func_name "Template")
---   arguments: (argument_list (string) @content)
--- ) @template_call
---
--- (call
---   function: (identifier) @func_name  (#eq? @func_name "HTMLResponse")
---   arguments: (argument_list (string) @content)
-
--- ) @template_call
-
 require("python_tmux_output")

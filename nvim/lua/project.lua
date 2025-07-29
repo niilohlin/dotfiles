@@ -1,82 +1,57 @@
-local M = {}
-
--- project file located at ~/.local/share/nvim/projects.lua
-
----@return table
-function M.all_projects()
-  local project_file = vim.fn.stdpath("data") .. "/projects.lua"
-  -- create file if not exist
-  if vim.fn.filereadable(project_file) == 0 then
-    vim.fn.writefile({ "local M = {}; return M" }, project_file)
-  end
-
-  return dofile(project_file)
-end
-
----@param path string
----@return string|nil
-function M.find_project_file(path)
-  local projects = M.all_projects()
-  for project in pairs(projects) do
-    if vim.fn.expand(projects[project].path) == vim.fn.expand(path) then
-      return project
-    end
-  end
-  return nil
-end
-
-function M.load(name, project)
-  local full_path = vim.fn.expand(project.path)
-  if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
-    if not vim.env.VIRTUAL_ENV then
-      vim.env.PYTHONPATH = full_path
-      vim.env.VIRTUAL_ENV = full_path .. "/venv"
-      vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
-    end
-    vim.fn.system("pip install rope debugpy bpython")
-  end
-
-  if vim.fn.isdirectory(vim.fn.expand(project.path .. "/.venv")) == 1 then
-    if not vim.env.VIRTUAL_ENV then
-      vim.env.PYTHONPATH = full_path
-      vim.env.VIRTUAL_ENV = full_path .. "/.venv"
-      vim.env.PATH = full_path .. "/.venv/bin:" .. vim.env.PATH
-    end
-    vim.fn.system("uv pip install rope debugpy bpython")
-  end
-
-  -- load vscode env if exists
-  local vscodeenv = vim.fn.glob(vim.fn.expand(full_path) .. "/.vscodeenv", true, true)
-  if #vscodeenv > 0 then
-    for _, line in ipairs(vim.fn.readfile(vscodeenv[1])) do
-      local key, value = line:match("([^=]+)=(.*)")
-      if key and value then
-        vim.env[key] = value
-      end
-    end
-  end
-
-  if project["setup"] then
-    project.setup()
-  end
-  vim.o.titlestring = name
-end
-
-function M.setup(opts)
-  local augroup = vim.api.nvim_create_augroup("nvimproj", { clear = true })
-
-  vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
-    callback = function()
-      local project_name = M.find_project_file(vim.fn.getcwd())
-      local projects = M.all_projects()
-
-      if project_name and projects[project_name] and vim.o.titlestring ~= project_name then
-        M.load(project_name, projects[project_name])
-      else
-      end
-    end,
-    group = augroup,
-  })
-end
-
-return M
+-- local M = {}
+--
+-- function M.load(name, project)
+--   local full_path = vim.fn.expand(project.path)
+--   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
+--     if not vim.env.VIRTUAL_ENV then
+--       vim.env.PYTHONPATH = full_path
+--       vim.env.VIRTUAL_ENV = full_path .. "/venv"
+--       vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
+--     end
+--     vim.fn.system("pip install rope debugpy bpython")
+--   end
+--
+--   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/.venv")) == 1 then
+--     if not vim.env.VIRTUAL_ENV then
+--       vim.env.PYTHONPATH = full_path
+--       vim.env.VIRTUAL_ENV = full_path .. "/.venv"
+--       vim.env.PATH = full_path .. "/.venv/bin:" .. vim.env.PATH
+--     end
+--     vim.fn.system("uv pip install rope debugpy bpython")
+--   end
+--
+--   -- load vscode env if exists
+--   local vscodeenv = vim.fn.glob(vim.fn.expand(full_path) .. "/.vscodeenv", true, true)
+--   if #vscodeenv > 0 then
+--     for _, line in ipairs(vim.fn.readfile(vscodeenv[1])) do
+--       local key, value = line:match("([^=]+)=(.*)")
+--       if key and value then
+--         vim.env[key] = value
+--       end
+--     end
+--   end
+--
+--   if project["setup"] then
+--     project.setup()
+--   end
+--   vim.o.titlestring = name
+-- end
+--
+-- function M.setup(opts)
+--   local augroup = vim.api.nvim_create_augroup("nvimproj", { clear = true })
+--
+--   vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
+--     callback = function()
+--       local project_name = M.find_project_file(vim.fn.getcwd())
+--       local projects = M.all_projects()
+--
+--       if project_name and projects[project_name] and vim.o.titlestring ~= project_name then
+--         M.load(project_name, projects[project_name])
+--       else
+--       end
+--     end,
+--     group = augroup,
+--   })
+-- end
+--
+-- return M
