@@ -8,7 +8,11 @@ vim.keymap.set("n", "<D-z>", function()
   vim.cmd("undo")
 end)
 
-vim.keymap.set({ "n", "i" }, "<D-v>", function()
+vim.keymap.set("i", "<D-v>", function()
+  vim.cmd('normal "+Pl')
+end)
+
+vim.keymap.set("n", "<D-v>", function()
   vim.cmd('normal "+p')
 end)
 

@@ -43,14 +43,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx", "html", "htmldjango" },
-  callback = function()
-    SetTabLength(2)
-  end,
-})
-
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = "lua",
+  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx", "html", "htmldjango", "lua", "yaml", "yml" },
   callback = function()
     SetTabLength(2)
   end,
@@ -157,13 +150,6 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = { "yaml", "yml" },
-  callback = function()
-    SetTabLength(2)
-  end,
-})
-
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.html.j2" },
   command = "set filetype=htmldjango",
 })
@@ -192,22 +178,6 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   pattern = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
   callback = function()
     vim.cmd([[ set ft=log ]])
-
-    local output_file = os.getenv("NVIM_OUTPUT_FILE")
-    if output_file then
-      vim.keymap.set("v", "<leader>v", function()
-        vim.cmd('normal! "vy')
-        local selected_text = vim.fn.getreg("v")
-        local file = io.open(output_file, "a")
-        if file == nil then
-          print("Could not open file: " .. output_file)
-          return
-        end
-        file:write(selected_text)
-        file:close()
-        vim.cmd("q")
-      end)
-    end
   end,
 })
 
@@ -236,7 +206,6 @@ vim.api.nvim_create_autocmd({ "CursorHold" }, {
 
 -- options
 vim.opt.showcmd = false -- Don't show the current command in the bottom right, annoying
-vim.opt.incsearch = true -- Incremental search
 vim.opt.showmatch = true -- Highlight search match
 vim.opt.ignorecase = true -- Ignore search casing
 vim.opt.smartcase = true -- But not when searching with uppercase letters
@@ -245,13 +214,9 @@ vim.opt.autowrite = true -- Automatically write on :n and :p
 vim.opt.autoread = true -- Automatically read file from disk on change
 vim.opt.number = true -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.backspace = "2" -- Make backspace work as expected in insert mode.
-vim.opt.ruler = true -- Show cursor col and row position
 vim.opt.colorcolumn = "120" -- Show max column highlight.
-vim.opt.modifiable = true -- Make buffers modifiable.
 vim.opt.cursorline = true -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true -- Show the preview window (code documentation) to the bottom of the screen.
-vim.opt.wildmenu = true -- Show a menu when using tab completion in command mode.
 vim.opt.wildmode = { "longest", "full" }
 vim.opt.swapfile = false -- Disable swapfile
 vim.opt.signcolumn = "yes" -- Always show sign column to avoid indenting and jumping
@@ -406,6 +371,8 @@ vim.keymap.set("n", "<leader>sf", function()
   builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
 end, {}) -- live find files (including hidden files)
 vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+vim.keymap.set("n", "<leader>sj", builtin.jumplist) -- Open jumplist
+vim.keymap.set("n", "<leader>sm", builtin.marks) -- Open marks
 vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
 vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
 vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
@@ -874,7 +841,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 
 -- Make anything into an lsp, like linter output etc.
 MiniDeps.add("nvimtools/none-ls.nvim")
-vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
+vim.api.nvim_create_autocmd({ "FileType" }, {
   once = true,
   callback = function()
     local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -888,6 +855,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 
     local pylint_disable = {
       method = null_ls.methods.CODE_ACTION,
+      name = "pylint_disable",
       filetypes = { "python" },
       generator = {
         fn = function(params)
@@ -924,6 +892,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 
     local generic_assignment = {
       method = null_ls.methods.COMPLETION,
+      name = "generic_assignment",
       filetypes = { "python", "lua" },
       generator = {
         fn = function(params)
@@ -966,82 +935,111 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       to_stderr = true,
       to_stdout = true,
     })
-
-    null_ls.setup({
-      sources = {
-        null_ls.builtins.diagnostics.checkmake,
-        -- null_ls.builtins.formatting.stylua.with({
-        --  extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
-        -- }),
-        null_ls.builtins.formatting.black.with({
-          condition = function()
-            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/black") ~= 0
-          end,
-          timeout = 10 * 1000,
-          prefer_local = "venv/bin",
-          env = function(params)
-            return { PYTHONPATH = params.root }
-          end,
-        }),
-        null_ls.builtins.formatting.isort.with({
-          condition = function()
-            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/isort") ~= 0
-          end,
-          timeout = 10 * 1000,
-          prefer_local = "venv/bin",
-          env = function(params)
-            return { PYTHONPATH = params.root }
-          end,
-        }),
-        null_ls.builtins.diagnostics.pylint.with({
-          condition = function()
-            return vim.fn.filereadable(vim.loop.cwd() .. "/venv/bin/pylint") ~= 0
-          end,
-          timeout = 10 * 1000,
-          prefer_local = "venv/bin",
-          env = function(params)
-            return { PYTHONPATH = params.root }
-          end,
-        }),
-        null_ls.builtins.diagnostics.mypy.with({
-          timeout = 10 * 1000,
-          prefer_local = ".venv/bin",
-          extra_args = {},
-          env = function(params)
-            return { PYTHONPATH = params.root }
-          end,
-        }),
-        null_ls.builtins.formatting.prettier.with({
-          prefer_local = "./node_modules/prettier/bin/",
-          filetypes = {
-            "css",
-            "html",
-            "htmldjango",
-          },
-          extra_args = { "--write" },
-        }),
-      },
-      on_attach = function(client, bufnr)
-        if client.supports_method("textDocument/formatting") then
-          vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+    vim.api.nvim_create_user_command("NullLsRestart", function ()
+      null_ls.setup({
+        debug = true,
+        sources = {
+          null_ls.builtins.diagnostics.checkmake,
+          -- null_ls.builtins.formatting.stylua.with({
+          --  extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
+          -- }),
+          null_ls.builtins.formatting.black.with({
+            condition = function()
+              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/black") ~= 0
+            end,
+            timeout = 10 * 1000,
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
+          null_ls.builtins.formatting.isort.with({
+            condition = function()
+              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/isort") ~= 0
+            end,
+            timeout = 10 * 1000,
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
+          null_ls.builtins.diagnostics.pylint.with({
+            condition = function()
+              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/pylint") ~= 0
+            end,
+            timeout = 10 * 1000,
+            prefer_local = "venv/bin",
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
+          null_ls.builtins.diagnostics.mypy.with({
+            timeout = 10 * 1000,
+            prefer_local = ".venv/bin",
+            extra_args = {},
+            env = function(params)
+              return { PYTHONPATH = params.root }
+            end,
+          }),
+          null_ls.builtins.formatting.prettier.with({
+            prefer_local = "./node_modules/prettier/bin/",
+            filetypes = {
+              "css",
+              "html",
+              "htmldjango",
+            },
+            extra_args = { "--write" },
+          }),
+        },
+        on_attach = function(client, bufnr)
+          if client.supports_method("textDocument/formatting") then
+            vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+            vim.api.nvim_create_autocmd("BufWritePre", {
+              group = augroup,
+              buffer = bufnr,
+              callback = function()
+                vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+              end,
+            })
+          end
           vim.api.nvim_create_autocmd("BufWritePre", {
-            group = augroup,
-            buffer = bufnr,
+            pattern = "*.html",
             callback = function()
-              vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
+              print("formatting")
+              vim.lsp.buf.format({ async = false })
             end,
           })
-        end
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          pattern = "*.html",
-          callback = function()
-            print("formatting")
-            vim.lsp.buf.format({ async = false })
-          end,
-        })
-      end,
-    })
+        end,
+      })
+    end, { nargs = "*" })
+    vim.cmd("NullLsRestart")
   end,
+})
+
+VenvPath = nil
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    local found_root = vim.fs.root(0, {"venv"})
+    if found_root then
+      found_root = found_root .. "/venv/bin"
+      if VenvPath ~= nil and VenvPath ~= found_root then
+        vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
+        vim.env.PATH = vim.env.PATH .. ":" .. found_root
+        VenvPath = found_root
+        print("chaning path ", found_root)
+      elseif VenvPath == nil then
+        vim.env.PATH = vim.env.PATH .. ":" .. found_root
+        VenvPath = found_root
+        print("appengind path ", found_root)
+      end
+    else
+      if VenvPath ~= nil then
+        vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
+        VenvPath = nil
+        print("clearing path")
+      end
+    end
+  end
 })
 
 -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
@@ -1225,7 +1223,16 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
           end,
           "diagnostics",
         },
-        lualine_x = {},
+        lualine_x = {
+          function()
+            local names = {}
+            local sources = require("null-ls.sources").get_available(vim.api.nvim_get_option_value("filetype", { buf = 0 }))
+            for _, source in ipairs(sources) do
+              table.insert(names, source.name)
+            end
+            return table.concat(names, " ")
+          end
+        },
         lualine_y = {
           function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1264,6 +1271,7 @@ local terminals = {}
 -- Improved tabs
 MiniDeps.add("nanozuki/tabby.nvim")
 local custom_fill = { fg = "#7c6f64", bg = "#504945", style = "italic" }
+local tab_api = require("tabby.module.api")
 require("tabby").setup({
   line = function(line)
     return {
@@ -1273,6 +1281,7 @@ require("tabby").setup({
       },
       line.tabs().foreach(function(tab)
         local hl = tab.is_current() and "TabLineSel" or "TabLine"
+        local windows = tab_api.get_tab_wins(tab.id)
         return {
           line.sep(" ", hl, custom_fill),
           tab.number(),
@@ -1546,26 +1555,6 @@ vim.api.nvim_create_user_command("SnippetStop", function()
   end
 end, { nargs = "*" })
 
-vim.api.nvim_create_user_command("Translate", function()
-  local start_pos = vim.fn.getpos("'<")
-  local end_pos = vim.fn.getpos("'>")
-  local lines = vim.fn.getline(start_pos[2], end_pos[2])
-
-  if #lines == 1 then
-    local line = lines[1]
-    local start_col = start_pos[3]
-    local end_col = end_pos[3]
-    local selected = line:sub(start_col, end_col)
-    lines[1] = line:sub(1, start_col - 1) .. '{{ _("' .. selected .. '") }}' .. line:sub(end_col + 1)
-  else
-    print("Multiline selection is not supported yet.")
-    return
-  end
-
-  -- Replace lines
-  vim.fn.setline(start_pos[2], lines)
-end, { range = true })
-
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
 
@@ -1686,3 +1675,5 @@ end)
 
 require("gui")
 require("python_tmux_output")
+
+vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
