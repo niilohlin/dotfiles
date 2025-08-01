@@ -26,8 +26,11 @@ function SetTabLength(tab_length)
   vim.opt.expandtab = true
 end
 
+local initgroup = vim.api.nvim_create_augroup("Initlua", { clear = true })
+
 -- Set cursor position to old spot
 vim.api.nvim_create_autocmd({ "BufReadPost" }, {
+  group = initgroup,
   callback = function()
     vim.cmd([[ if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif ]])
   end,
@@ -35,6 +38,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost" }, {
 
 -- Remove blank space, and put the cursor back where it was
 vim.api.nvim_create_autocmd({ "BufWritePre" }, {
+  group = initgroup,
   callback = function()
     vim.cmd([[ normal mi ]])
     vim.cmd([[ :%s/\s\+$//e ]])
@@ -43,15 +47,21 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 })
 
 vim.api.nvim_create_autocmd("FileType", {
+  group = initgroup,
   pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx", "html", "htmldjango", "lua", "yaml", "yml" },
   callback = function()
     SetTabLength(2)
   end,
 })
 
-vim.api.nvim_create_autocmd("FileType", { pattern = "markdown", command = "set spell nofoldenable" })
+vim.api.nvim_create_autocmd("FileType", {
+  group = initgroup,
+  pattern = "markdown",
+  command = "set spell nofoldenable"
+})
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = initgroup,
   pattern = ".env.local",
   callback = function()
     vim.cmd([[ set filetype=sh ]])
@@ -102,6 +112,7 @@ local function find_file_using_rg(file, find_files)
 end
 
 vim.api.nvim_create_autocmd("FileType", {
+  group = initgroup,
   pattern = "python",
   callback = function()
     --
@@ -139,22 +150,14 @@ vim.api.nvim_create_autocmd("FileType", {
   end,
 })
 
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  pattern = "swift",
-  callback = function()
-    vim.cmd([[ call clearmatches() ]])
-    vim.cmd([[ call matchadd('ColorColumn', '\%121v', 100) ]])
-    vim.cmd([[ setlocal textwidth=120 ]])
-    vim.opt.commentstring = "// %s"
-  end,
-})
-
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = initgroup,
   pattern = { "*.html.j2" },
   command = "set filetype=htmldjango",
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = initgroup,
   pattern = {
     "Fastfile",
     "Appfile",
@@ -175,6 +178,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  group = initgroup,
   pattern = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
   callback = function()
     vim.cmd([[ set ft=log ]])
@@ -183,6 +187,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 
 -- Open diagnostics on hover
 vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+  group = initgroup,
   pattern = "*",
   callback = function()
     vim.diagnostic.open_float(nil, { focus = false })
@@ -191,6 +196,7 @@ vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
 
 -- automatically load the file if it has changed from an external source
 vim.api.nvim_create_autocmd({ "CursorHold" }, {
+  group = initgroup,
   callback = function()
     if vim.fn.mode() == "i" then
       return
@@ -224,6 +230,7 @@ vim.opt.signcolumn = "yes" -- Always show sign column to avoid indenting and jum
 
 -- Remove annoying auto inserting comment string
 vim.api.nvim_create_autocmd("BufEnter", {
+  group = initgroup,
   callback = function()
     -- o means auto insert comment string only when hitting o in normal mode
     -- r means auto insert comment string only when hitting enter
@@ -422,6 +429,7 @@ MiniDeps.add("tpope/vim-unimpaired")
 -- Semantic syntax highlighting
 MiniDeps.add("nvim-treesitter/nvim-treesitter")
 vim.api.nvim_create_autocmd("BufReadPre", {
+  group = initgroup,
   once = true,
   callback = function()
     local configs = require("nvim-treesitter.configs")
@@ -512,6 +520,7 @@ MiniDeps.add("nvim-treesitter/nvim-treesitter-textobjects")
 -- Text objects plugin
 MiniDeps.add({ source = "echasnovski/mini.ai", dependencies = { "nvim-treesitter/nvim-treesitter-textobjects" } })
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("mini.ai").setup()
@@ -521,6 +530,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 -- Surround plugin, adds text objects like ci" and so on.
 MiniDeps.add("echasnovski/mini.surround")
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local surround = require("mini.surround")
@@ -548,6 +558,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 -- indentation text objects and jumps
 MiniDeps.add("niilohlin/neoindent")
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("neoindent").setup({})
@@ -561,6 +572,7 @@ require("mini.icons").setup()
 -- File explorer
 MiniDeps.add({ source = "stevearc/oil.nvim", dependencies = { "echasnovski/mini.icons" } })
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("oil").setup()
@@ -588,6 +600,7 @@ MiniDeps.add({
 -- nvim development utils
 MiniDeps.add("folke/lazydev.nvim")
 vim.api.nvim_create_autocmd("FileType", {
+  group = initgroup,
   pattern = "lua",
   once = true,
   callback = function()
@@ -604,6 +617,7 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("blink.cmp").setup({
@@ -646,6 +660,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 -- LSP server Installer/manager
 MiniDeps.add("mason-org/mason.nvim")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("mason").setup()
@@ -655,6 +670,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 -- LSP setup
 MiniDeps.add("neovim/nvim-lspconfig")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
+  group = initgroup,
   pattern = "*",
   once = true,
   callback = function()
@@ -708,9 +724,11 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       on_attach = function(client, bufnr)
         -- Enable formatting capability for ESLint
         client.server_capabilities.documentFormattingProvider = true
+        local lspformatgroup = vim.api.nvim_create_augroup("lspformatgroup", { clear = true })
 
         -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePre", {
+          group = lspformatgroup,
           buffer = bufnr,
           callback = function()
             vim.lsp.buf.format({ bufnr = bufnr })
@@ -761,7 +779,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     -- Use LspAttach autocommand to only map the following keys
     -- after the language server attaches to the current buffer
     vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+      group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
       callback = function(ev)
         -- Enable completion triggered by <c-x><c-o>
         vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
@@ -842,6 +860,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 -- Make anything into an lsp, like linter output etc.
 MiniDeps.add("nvimtools/none-ls.nvim")
 vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
@@ -976,6 +995,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
             })
           end
           vim.api.nvim_create_autocmd("BufWritePre", {
+            group = augroup,
             pattern = "*.html",
             callback = function()
               print("formatting")
@@ -991,6 +1011,7 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 
 VenvPath = nil
 vim.api.nvim_create_autocmd("BufEnter", {
+  group = initgroup,
   callback = function()
     local found_root = vim.fs.root(0, {"venv"})
     if found_root then
@@ -1080,6 +1101,7 @@ MiniDeps.add({
 MiniDeps.add("mfussenegger/nvim-dap")
 MiniDeps.add("mfussenegger/nvim-dap-python")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("dap.ext.vscode").json_decode = require("json5").parse
@@ -1124,6 +1146,7 @@ MiniDeps.add("nvim-neotest/nvim-nio")
 MiniDeps.add("nvim-neotest/neotest")
 MiniDeps.add("nvim-neotest/neotest-python")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     ---@module "neotest"
@@ -1167,6 +1190,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- nicer status line
 MiniDeps.add("nvim-lualine/lualine.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local custom_gruvbox = require("lualine.themes.gruvbox")
@@ -1269,6 +1293,7 @@ require("tabby").setup({
 })
 
 vim.api.nvim_create_autocmd("TermOpen", {
+  group = initgroup,
   callback = function(ev)
     local buf = ev.buf
     vim.api.nvim_buf_attach(buf, false, {
@@ -1285,6 +1310,7 @@ MiniDeps.add("plasticboy/vim-markdown")
 -- quickfix improvement
 MiniDeps.add("stevearc/quicker.nvim")
 vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = initgroup,
   pattern = "qf",
   once = true,
   callback = function()
@@ -1298,6 +1324,7 @@ MiniDeps.add("romainl/vim-cool")
 -- multi cursor support
 MiniDeps.add("jake-stewart/multicursor.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local mc = require("multicursor-nvim")
@@ -1342,6 +1369,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- removes all "press enter to continue"
 MiniDeps.add("jake-stewart/auto-cmdheight.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("auto-cmdheight").setup()
@@ -1351,6 +1379,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- add a scroll bar
 MiniDeps.add("petertriho/nvim-scrollbar")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     require("scrollbar").setup({
@@ -1371,6 +1400,7 @@ vim.g.is_pythonsense_suppress_object_keymaps = 1
 -- refactoring library
 MiniDeps.add("ThePrimeagen/refactoring.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local refactoring = require("refactoring")
@@ -1418,6 +1448,7 @@ MiniDeps.add("nvim-telescope/telescope-ui-select.nvim")
 require("telescope").load_extension("ui-select")
 MiniDeps.add("aznhe21/actions-preview.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local actions_preview = require("actions-preview")
@@ -1451,6 +1482,7 @@ MiniDeps.add("MeanderingProgrammer/render-markdown.nvim")
 MiniDeps.add("echasnovski/mini.diff")
 MiniDeps.add("olimorris/codecompanion.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
+  group = initgroup,
   once = true,
   callback = function()
     local diff = require("mini.diff")
@@ -1578,6 +1610,7 @@ vim.api.nvim_create_user_command("LoadVscodeEnv", function()
 end, { nargs = "*" })
 
 vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter" }, {
+  group = initgroup,
   command = "LoadVscodeEnv",
 })
 
@@ -1623,6 +1656,7 @@ require("python_tmux_output")
 vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
 
 vim.api.nvim_create_autocmd("BufEnter", {
+  group = initgroup,
   callback = function(ev)
     print(vim.fn.expand("%p"))
   end
@@ -1695,6 +1729,4 @@ function _G.project_picker()
   }):find()
 end
 
-
 vim.api.nvim_set_keymap('n', '<leader>sp', ':lua project_picker()<CR>', { noremap = true, silent = true })
-
