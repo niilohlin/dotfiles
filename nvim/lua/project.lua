@@ -1,57 +1,69 @@
--- local M = {}
---
--- function M.load(name, project)
---   local full_path = vim.fn.expand(project.path)
---   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/venv")) == 1 then
---     if not vim.env.VIRTUAL_ENV then
---       vim.env.PYTHONPATH = full_path
---       vim.env.VIRTUAL_ENV = full_path .. "/venv"
---       vim.env.PATH = full_path .. "/venv/bin:" .. vim.env.PATH
---     end
---     vim.fn.system("pip install rope debugpy bpython")
---   end
---
---   if vim.fn.isdirectory(vim.fn.expand(project.path .. "/.venv")) == 1 then
---     if not vim.env.VIRTUAL_ENV then
---       vim.env.PYTHONPATH = full_path
---       vim.env.VIRTUAL_ENV = full_path .. "/.venv"
---       vim.env.PATH = full_path .. "/.venv/bin:" .. vim.env.PATH
---     end
---     vim.fn.system("uv pip install rope debugpy bpython")
---   end
---
---   -- load vscode env if exists
---   local vscodeenv = vim.fn.glob(vim.fn.expand(full_path) .. "/.vscodeenv", true, true)
---   if #vscodeenv > 0 then
---     for _, line in ipairs(vim.fn.readfile(vscodeenv[1])) do
---       local key, value = line:match("([^=]+)=(.*)")
---       if key and value then
---         vim.env[key] = value
---       end
---     end
---   end
---
---   if project["setup"] then
---     project.setup()
---   end
---   vim.o.titlestring = name
--- end
---
--- function M.setup(opts)
---   local augroup = vim.api.nvim_create_augroup("nvimproj", { clear = true })
---
---   vim.api.nvim_create_autocmd({ "VimEnter", "DirChanged" }, {
---     callback = function()
---       local project_name = M.find_project_file(vim.fn.getcwd())
---       local projects = M.all_projects()
---
---       if project_name and projects[project_name] and vim.o.titlestring ~= project_name then
---         M.load(project_name, projects[project_name])
---       else
---       end
---     end,
---     group = augroup,
---   })
--- end
---
--- return M
+-- tmux sessionizer like search but in vim
+local pickers = require('telescope.pickers')
+local finders = require('telescope.finders')
+local action_state = require('telescope.actions.state')
+local conf = require('telescope.config').values
+
+-- helper: list subdirs of a given directory
+local function get_subdirs(dir)
+  local subdirs = {}
+  local handle = vim.loop.fs_scandir(dir)
+  if not handle then return subdirs end
+
+  while true do
+    local name, type = vim.loop.fs_scandir_next(handle)
+    if not name then break end
+    if type == "directory" then
+      table.insert(subdirs, {
+        path = dir .. "/" .. name,
+        name = name,
+      })
+    end
+  end
+  return subdirs
+end
+
+function _G.project_picker()
+  -- parent project dirs
+  local base_dirs = {
+    { path = vim.fn.expand('~/dotfiles'), name = 'dotfiles' },
+    { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
+  }
+
+  -- expand to include their subdirs too
+  local project_dirs = {}
+  for _, base in ipairs(base_dirs) do
+    -- include the base itself
+    table.insert(project_dirs, base)
+    -- include all its subdirectories
+    for _, sub in ipairs(get_subdirs(base.path)) do
+      table.insert(project_dirs, sub)
+    end
+  end
+
+  pickers.new({}, {
+    prompt_title = 'Projects',
+    finder = finders.new_table {
+      results = project_dirs,
+      entry_maker = function(entry)
+        return {
+          value = entry,
+          display = entry.name,
+          ordinal = entry.name,
+        }
+      end,
+    },
+    sorter = conf.generic_sorter({}),
+    attach_mappings = function(prompt_bufnr, map)
+      actions.select_default:replace(function()
+        local selection = action_state.get_selected_entry(prompt_bufnr).value
+        actions.close(prompt_bufnr)
+        vim.cmd('cd ' .. selection.path)
+        vim.cmd('e .')
+      end)
+      return true
+    end,
+  }):find()
+end
+
+vim.api.nvim_set_keymap('n', '<leader>sp', ':lua project_picker()<CR>', { noremap = true, silent = true })
