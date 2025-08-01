@@ -935,51 +935,24 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
       to_stderr = true,
       to_stdout = true,
     })
+    local mypy = require("mypy")
+    local pylint = require("pylint")
+
     vim.api.nvim_create_user_command("NullLsRestart", function ()
       null_ls.setup({
         debug = true,
         sources = {
+          mypy,
+          pylint,
           null_ls.builtins.diagnostics.checkmake,
           -- null_ls.builtins.formatting.stylua.with({
           --  extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
           -- }),
           null_ls.builtins.formatting.black.with({
-            condition = function()
-              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/black") ~= 0
-            end,
             timeout = 10 * 1000,
-            prefer_local = "venv/bin",
-            env = function(params)
-              return { PYTHONPATH = params.root }
-            end,
           }),
           null_ls.builtins.formatting.isort.with({
-            condition = function()
-              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/isort") ~= 0
-            end,
             timeout = 10 * 1000,
-            prefer_local = "venv/bin",
-            env = function(params)
-              return { PYTHONPATH = params.root }
-            end,
-          }),
-          null_ls.builtins.diagnostics.pylint.with({
-            condition = function()
-              return vim.fn.filereadable((vim.fs.root(0, {"venv"}) or vim.loop.cwd()) .. "/venv/bin/pylint") ~= 0
-            end,
-            timeout = 10 * 1000,
-            prefer_local = "venv/bin",
-            env = function(params)
-              return { PYTHONPATH = params.root }
-            end,
-          }),
-          null_ls.builtins.diagnostics.mypy.with({
-            timeout = 10 * 1000,
-            prefer_local = ".venv/bin",
-            extra_args = {},
-            env = function(params)
-              return { PYTHONPATH = params.root }
-            end,
           }),
           null_ls.builtins.formatting.prettier.with({
             prefer_local = "./node_modules/prettier/bin/",
@@ -1026,17 +999,14 @@ vim.api.nvim_create_autocmd("BufEnter", {
         vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
         vim.env.PATH = vim.env.PATH .. ":" .. found_root
         VenvPath = found_root
-        print("chaning path ", found_root)
       elseif VenvPath == nil then
         vim.env.PATH = vim.env.PATH .. ":" .. found_root
         VenvPath = found_root
-        print("appengind path ", found_root)
       end
     else
       if VenvPath ~= nil then
         vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
         VenvPath = nil
-        print("clearing path")
       end
     end
   end
@@ -1369,32 +1339,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
--- normal mode in the cmd line
-MiniDeps.add("jake-stewart/normal-cmdline.nvim")
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  once = true,
-  callback = function()
-    -- make the cmdline insert mode a beam
-    vim.opt.guicursor:append("ci:ver1,c:ver1")
-    local cmd = require("normal-cmdline")
-    cmd.setup({
-      -- key to hit within cmdline to enter normal mode:
-      key = "<esc>",
-      -- the cmdline text highlight when in normal mode:
-      hl = "Normal",
-      -- these mappings only apply to normal mode in cmdline:
-      mappings = {
-        ["k"] = cmd.history.prev,
-        ["j"] = cmd.history.next,
-        ["<cr>"] = cmd.accept,
-        ["<esc>"] = cmd.cancel,
-        ["<c-c>"] = cmd.cancel,
-        [":"] = cmd.reset,
-      },
-    })
-  end,
-})
-
 -- removes all "press enter to continue"
 MiniDeps.add("jake-stewart/auto-cmdheight.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
@@ -1677,3 +1621,10 @@ require("gui")
 require("python_tmux_output")
 
 vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function(ev)
+    vim.cmd("normal! <C-G>")
+  end
+})
+
