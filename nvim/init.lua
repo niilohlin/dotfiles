@@ -1276,6 +1276,23 @@ require("tabby").setup({
       line.tabs().foreach(function(tab)
         local hl = tab.is_current() and "TabLineSel" or "TabLine"
         local windows = tab_api.get_tab_wins(tab.id)
+        for _, window_id in ipairs(windows) do
+          local buf_id = vim.api.nvim_win_get_buf(window_id)
+          if tab.is_current() then
+            terminals[buf_id] = nil
+          end
+          if terminals[buf_id] ~= nil then
+            return {
+              line.sep(" ", hl, custom_fill),
+              tab.number(),
+              tab.name(),
+              "󰋼",
+              line.sep("", hl, custom_fill),
+              hl = hl,
+              margin = " ",
+            }
+          end
+        end
         return {
           line.sep(" ", hl, custom_fill),
           tab.number(),
@@ -1298,6 +1315,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
     local buf = ev.buf
     vim.api.nvim_buf_attach(buf, false, {
       on_lines = function()
+        -- read the buf here and determine if it was an error or not?
         terminals[buf] = true
       end,
     })

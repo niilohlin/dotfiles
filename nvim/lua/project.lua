@@ -1,4 +1,5 @@
 -- tmux sessionizer like search but in vim
+local actions = require('telescope.actions')
 local pickers = require('telescope.pickers')
 local finders = require('telescope.finders')
 local action_state = require('telescope.actions.state')
