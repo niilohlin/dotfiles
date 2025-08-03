@@ -1262,6 +1262,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 local terminals = {}
+local term_info = 0
+local term_error = 1
 -- Improved tabs
 MiniDeps.add("nanozuki/tabby.nvim")
 local custom_fill = { fg = "#7c6f64", bg = "#504945", style = "italic" }
@@ -1281,12 +1283,22 @@ require("tabby").setup({
           if tab.is_current() then
             terminals[buf_id] = nil
           end
-          if terminals[buf_id] ~= nil then
+          if terminals[buf_id] == term_info then
             return {
               line.sep(" ", hl, custom_fill),
               tab.number(),
               tab.name(),
               "󰋼",
+              line.sep("", hl, custom_fill),
+              hl = hl,
+              margin = " ",
+            }
+          elseif terminals[buf_id] == term_error then
+            return {
+              line.sep(" ", hl, custom_fill),
+              tab.number(),
+              tab.name(),
+              "",
               line.sep("", hl, custom_fill),
               hl = hl,
               margin = " ",
@@ -1314,9 +1326,16 @@ vim.api.nvim_create_autocmd("TermOpen", {
   callback = function(ev)
     local buf = ev.buf
     vim.api.nvim_buf_attach(buf, false, {
-      on_lines = function()
-        -- read the buf here and determine if it was an error or not?
-        terminals[buf] = true
+      on_lines = function(_, bufnr, _, _, last, new_last)
+        terminals[buf] = math.max(term_info, terminals[buf] or 0)
+        local lines = vim.api.nvim_buf_get_lines(bufnr, last - 1, new_last, false)
+        for _, line in ipairs(lines) do
+          local lower_line = line:lower()
+          if lower_line:find("error") or lower_line:find("fail") or lower_line:find("exception") or lower_line:find("traceback") then
+            terminals[buf] = term_error
+            break
+          end
+        end
       end,
     })
   end,
