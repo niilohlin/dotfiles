@@ -958,6 +958,15 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
     local pylint = require("pylint")
 
     vim.api.nvim_create_user_command("NullLsRestart", function ()
+      local sources = require("null-ls.sources").get_available(vim.api.nvim_get_option_value("filetype", { buf = 0 }))
+      local names = {}
+      for _, source in ipairs(sources) do
+        null_ls.disable(source.name)
+        names[source.name] = true
+      end
+      for _, name in ipairs(names) do
+        null_ls.enable(name)
+      end
       null_ls.setup({
         debug = true,
         sources = {
@@ -1554,6 +1563,9 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     end)
   end,
 })
+
+-- Do not nest vim sessions
+MiniDeps.add("brianhuster/unnest.nvim")
 
 -- end plugins
 
