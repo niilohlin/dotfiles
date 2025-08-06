@@ -1,9 +1,16 @@
 -- tmux sessionizer like search but in vim
-local actions = require('telescope.actions')
-local pickers = require('telescope.pickers')
-local finders = require('telescope.finders')
-local action_state = require('telescope.actions.state')
-local conf = require('telescope.config').values
+
+-- close all windows when changing directory. The diagnostics windows can sometimes get stuck.
+vim.api.nvim_create_autocmd({ "DirChanged" }, {
+  group = vim.api.nvim_create_augroup("DirChangedWindows", { clear = true }),
+  callback = function(ev)
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+      if vim.api.nvim_win_get_config(win).relative == "win" then
+        vim.api.nvim_win_close(win, false)
+      end
+    end
+  end
+})
 
 -- helper: list subdirs of a given directory
 local function get_subdirs(dir)
@@ -24,6 +31,7 @@ local function get_subdirs(dir)
   return subdirs
 end
 
+
 function _G.project_picker()
   -- parent project dirs
   local base_dirs = {
@@ -40,47 +48,52 @@ function _G.project_picker()
     end
   end
 
-  pickers.new({}, {
-    prompt_title = 'Projects',
-    finder = finders.new_table {
-      results = project_dirs,
-      entry_maker = function(entry)
-        return {
-          value = entry,
-          display = entry.name,
-          ordinal = entry.name,
-        }
-      end,
-    },
-    sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr, map)
-      actions.select_default:replace(function()
-        local selection = action_state.get_selected_entry(prompt_bufnr).value
-        actions.close(prompt_bufnr)
-        vim.cmd('cd ' .. selection.path)
-        -- If the current buffer is already in the selection path, don't search the jumplist
-        if vim.fn.expand("%p"):find(selection.path, 1, true) then
-          return true
-        end
-        local jumplist, idx = unpack(vim.fn.getjumplist())
-        local found = false
-        for pos = idx, 1, -1 do
-          local entry = jumplist[pos]
-          local bufnr = entry["bufnr"]
-          local filename = vim.api.nvim_buf_get_name(bufnr)
-          if filename:find(selection.path, 1, true) then
-            vim.cmd("e " .. filename)
-            found = true
-            break
-          end
-        end
-        if not found then
-          vim.cmd("e .")
-        end
-      end)
-      return true
+  local items = vim.tbl_map(function(entry)
+    return {
+      text = entry.name,
+      value = entry,
+      display = entry.name,
+      ordinal = entry.name,
+    }
+  end, project_dirs)
+
+  Snacks.picker.pick({
+    items = items,
+    format = function(item)
+      return {
+        { item.text },
+      }
     end,
-  }):find()
+    layout = { preset = "select", preview = nil },
+    confirm = function(picker, item)
+      picker:close()
+      local selection = item.value
+      vim.cmd('cd ' .. selection.path)
+
+      local current = vim.fn.expand('%:p')
+      if current:find(selection.path, 1, true) then
+        return
+      end
+
+      local jumplist, idx = unpack(vim.fn.getjumplist())
+      local found = false
+      for pos = idx, 1, -1 do
+        local ent = jumplist[pos]
+        local bufnr = ent.bufnr
+        local fname = vim.api.nvim_buf_get_name(bufnr)
+        if fname:find(selection.path, 1, true) then
+          vim.cmd('e ' .. fname)
+          found = true
+          break
+        end
+      end
+
+      if not found then
+        vim.cmd('e .')
+      end
+    end,
+  })
 end
 
-vim.api.nvim_set_keymap('n', '<leader>sp', ':lua project_picker()<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>sp', project_picker, { noremap = true, silent = true, desc = 'Pick Project (Snacks)' })
+

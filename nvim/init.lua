@@ -120,11 +120,10 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.include = ""
 
     -- search for the current line
-    local builtin = require("telescope.builtin")
     vim.keymap.set("n", "gi", function()
       vim.cmd('normal! "vyiw')
       local selected_text = "def " .. vim.fn.getreg("v") .. "\\("
-      builtin.live_grep({ default_text = selected_text })
+      Snacks.picker.grep({ search = selected_text })
     end)
 
     -- Go to the associated implementation file
@@ -138,7 +137,7 @@ vim.api.nvim_create_autocmd("FileType", {
         file_to_edit = "i_" .. current_file_name
       end
 
-      find_file_using_rg(file_to_edit, builtin.find_files)
+      find_file_using_rg(file_to_edit, Snacks.picker.files)
     end)
 
     -- override treesitter keymap
@@ -323,73 +322,32 @@ vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 -- project wide search, requires ripgrep
 MiniDeps.add("nvim-lua/plenary.nvim")
 
--- fzf native plugin, make it possible to fuzzy search in telescope
--- Provides `load_extension("fzf")`
-MiniDeps.add({
-  source = "nvim-telescope/telescope-fzf-native.nvim",
-  hooks = {
-    post_install = function()
-      vim.fn.system("make")
-    end,
-  },
-})
 
-MiniDeps.add({
-  source = "nvim-telescope/telescope.nvim",
-  dependencies = {
-    "nvim-lua/plenary.nvim",
-  },
-})
-local builtin = require("telescope.builtin")
-local actions = require("telescope.actions")
+MiniDeps.add("folke/snacks.nvim")
 
-require("telescope").setup({
-  defaults = {
-    prompt_prefix = "",
-  },
-  pickers = {
-    find_files = {
-      mappings = {
-        i = {
-          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-        },
-        n = {
-          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-        },
-      },
-    },
-  },
-})
-require("telescope").load_extension("fzf")
-vim.keymap.set("n", "<leader>sF", builtin.find_files, {}) -- find files
+vim.keymap.set("n", "<leader>sF", Snacks.picker.files, {}) -- find files
 vim.keymap.set("v", "<leader>sf", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  builtin.find_files({ default_text = selected_text })
+  Snacks.picker.files({ search = selected_text })
 end)
-vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last telescope search
-vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
+vim.keymap.set("n", "<leader>sr", Snacks.picker.resume, {}) -- Resume last search
+vim.keymap.set("n", "<leader>sg", Snacks.picker.grep, {}) -- live grep
 vim.keymap.set("v", "<leader>sg", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  builtin.live_grep({ default_text = selected_text })
+  Snacks.picker.grep({ search = selected_text })
 end)
 vim.keymap.set("n", "<leader>sf", function()
-  builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
+  Snacks.picker.git_files({ hidden = true })
 end, {}) -- live find files (including hidden files)
-vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
-vim.keymap.set("n", "<leader>sj", builtin.jumplist) -- Open jumplist
-vim.keymap.set("n", "<leader>sm", builtin.marks) -- Open marks
-vim.keymap.set("n", "<leader>ds", builtin.lsp_document_symbols) -- live find symbols
-vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
-vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
-vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
-
-vim.api.nvim_command("command! Commits lua require('telescope.builtin').git_commits()")
-vim.api.nvim_command("command! BCommits lua require('telescope.builtin').git_bcommits()")
-vim.api.nvim_command("command! Status lua require('telescope.builtin').git_status()")
-vim.api.nvim_command("command! Stash lua require('telescope.builtin').git_stash()")
-vim.api.nvim_command("command! Branches lua require('telescope.builtin').git_branches()")
+vim.keymap.set("n", "<leader>so", Snacks.picker.recent) -- Open old files
+vim.keymap.set("n", "<leader>sj", Snacks.picker.jumps) -- Open jumplist
+vim.keymap.set("n", "<leader>sm", Snacks.picker.marks) -- Open marks
+vim.keymap.set("n", "<leader>ds", Snacks.picker.lsp_symbols) -- live find symbols
+vim.keymap.set("n", "<leader>sb", Snacks.picker.buffers, {}) -- Open buffers
+-- vim.keymap.set("n", "<leader>st", Snacks.picker.tags) -- live find symbols
+vim.keymap.set("n", "<leader>ws", Snacks.picker.lsp_workspace_symbols) -- live find workspace symbols
 
 local function has_workspace_symbols()
   if not vim.lsp.get_clients() then
@@ -405,17 +363,9 @@ local function has_workspace_symbols()
   return false
 end
 
-vim.keymap.set("n", "<leader>o", function()
-  if has_workspace_symbols() then
-    builtin.lsp_dynamic_workspace_symbols()
-  elseif vim.fn.filereadable("tags") then
-    builtin.tags()
-  else
-    builtin.live_grep()
-  end
-end, {}) -- Search for tags or lsp workspace symbols
+vim.keymap.set("n", "<leader>o", Snacks.picker.smart, {})
 
-vim.keymap.set("n", "z=", builtin.spell_suggest)
+vim.keymap.set("n", "z=", Snacks.picker.spelling)
 
 -- Git plugin, provides :Git add, :Git blame etc.
 MiniDeps.add("tpope/vim-fugitive")
@@ -820,11 +770,11 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           end
         end
 
-        declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
-        declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
-        declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
-        declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
-        declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
+        declare_method_if_supported("textDocument/definition", "gd", Snacks.picker.lsp_definitions)
+        declare_method_if_supported("textDocument/implementation", "gri", Snacks.picker.lsp_implementations)
+        declare_method_if_supported("textDocument/references", "grr", Snacks.picker.lsp_references)
+        declare_method_if_supported("textDocument/documentSymbol", "gO", Snacks.picker.lsp_symbols)
+        declare_method_if_supported("workspace/symbol", "<leader>ws", Snacks.picker.lsp_workspace_symbols)
       end,
     })
     vim.api.nvim_create_autocmd("DirChanged", {
@@ -1024,7 +974,6 @@ vim.api.nvim_create_autocmd("BufEnter", {
 -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
 MiniDeps.add("johmsalas/text-case.nvim")
 require("textcase").setup({})
-require("telescope").load_extension("textcase")
 
 vim.api.nvim_create_user_command("TrainAbolish", function()
   math.randomseed(os.time())
@@ -1467,40 +1416,6 @@ require("log-highlight").setup({
 -- $ vim file.py:10
 MiniDeps.add("wsdjeg/vim-fetch")
 
--- code action previewer
-MiniDeps.add("nvim-telescope/telescope-ui-select.nvim")
-
-require("telescope").load_extension("ui-select")
-MiniDeps.add("aznhe21/actions-preview.nvim")
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  group = initgroup,
-  once = true,
-  callback = function()
-    local actions_preview = require("actions-preview")
-    actions_preview.setup({
-      telescope = {
-        sorting_strategy = "ascending",
-        layout_strategy = "vertical",
-        layout_config = {
-          width = 0.8,
-          height = 0.9,
-          prompt_position = "top",
-          preview_cutoff = 20,
-          preview_height = function(_, _, max_lines)
-            return max_lines - 15
-          end,
-        },
-      },
-    })
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfigActionsPreview", {}),
-      callback = function(ev)
-        local opts = { buffer = ev.buf }
-        vim.keymap.set({ "v", "n" }, "gra", actions_preview.code_actions, opts)
-      end,
-    })
-  end,
-})
 
 -- ChatGPT plugin
 MiniDeps.add("MeanderingProgrammer/render-markdown.nvim")
