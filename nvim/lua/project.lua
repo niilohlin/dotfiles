@@ -16,7 +16,7 @@ local function get_subdirs(dir)
     if not name then break end
     if type == "directory" then
       table.insert(subdirs, {
-        path = dir .. "/" .. name,
+        path = dir .. name,
         name = name,
       })
     end
@@ -27,16 +27,14 @@ end
 function _G.project_picker()
   -- parent project dirs
   local base_dirs = {
-    { path = vim.fn.expand('~/dotfiles'), name = 'dotfiles' },
+    { path = vim.fn.expand('~/dotfiles/'), name = 'dotfiles' },
     { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
   }
 
   -- expand to include their subdirs too
   local project_dirs = {}
   for _, base in ipairs(base_dirs) do
-    -- include the base itself
     table.insert(project_dirs, base)
-    -- include all its subdirectories
     for _, sub in ipairs(get_subdirs(base.path)) do
       table.insert(project_dirs, sub)
     end
@@ -60,7 +58,25 @@ function _G.project_picker()
         local selection = action_state.get_selected_entry(prompt_bufnr).value
         actions.close(prompt_bufnr)
         vim.cmd('cd ' .. selection.path)
-        vim.cmd('e .')
+        -- If the current buffer is already in the selection path, don't search the jumplist
+        if vim.fn.expand("%p"):find(selection.path, 1, true) then
+          return true
+        end
+        local jumplist, idx = unpack(vim.fn.getjumplist())
+        local found = false
+        for pos = idx, 1, -1 do
+          local entry = jumplist[pos]
+          local bufnr = entry["bufnr"]
+          local filename = vim.api.nvim_buf_get_name(bufnr)
+          if filename:find(selection.path, 1, true) then
+            vim.cmd("e " .. filename)
+            found = true
+            break
+          end
+        end
+        if not found then
+          vim.cmd("e .")
+        end
       end)
       return true
     end,
