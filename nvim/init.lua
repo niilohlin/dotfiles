@@ -671,7 +671,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 MiniDeps.add("neovim/nvim-lspconfig")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   group = initgroup,
-  pattern = "*",
   once = true,
   callback = function()
     local lspconfig = require("lspconfig")
@@ -715,11 +714,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     })
     vim.lsp.config("ts_ls", lspconfig.ts_ls)
 
-    lspconfig.rust_analyzer.setup({
-      capabilities = capabilities,
-    })
-    vim.lsp.config("rust_analyzer", lspconfig.rust_analyzer)
-
     lspconfig.eslint.setup({
       on_attach = function(client, bufnr)
         -- Enable formatting capability for ESLint
@@ -738,22 +732,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     })
     vim.lsp.config("eslint", lspconfig.eslint)
 
-    -- ruff = {
-    --  capabilities = capabilities,
-    --  on_attach = function(client, bufnr)
-    --   if client.supports_method("textDocument/formatting") then
-    --    vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-    --    vim.api.nvim_create_autocmd("BufWritePre", {
-    --     group = augroup,
-    --     buffer = bufnr,
-    --     callback = function()
-    --      vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
-    --     end,
-    --    })
-    --   end
-    --  end,
-    -- },
-
     lspconfig.jedi_language_server.setup({
       init_options = {
         codeAction = {
@@ -764,49 +742,13 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           -- LSP snippets turned out to insisting on inserting parens everywhere
           disableSnippets = true,
         },
-        -- disable workspace symbols
       },
       capabilities = capabilities,
-      on_init = function()
-        -- client.server_capabilities.workspaceSymbolProvider = false
-      end,
     })
     vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
 
     -- Global mappings.
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
-
-    -- Use LspAttach autocommand to only map the following keys
-    -- after the language server attaches to the current buffer
-    vim.api.nvim_create_autocmd("LspAttach", {
-      group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
-      callback = function(ev)
-        -- Enable completion triggered by <c-x><c-o>
-        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
-
-        -- Buffer local mappings.
-        -- See `:help vim.lsp.*` for documentation on any of the below functions
-        local opts = { buffer = ev.buf }
-        local builtin = require("telescope.builtin")
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
-
-        -- Do not override the keymap if the lsp server does not support the method.
-        local function declare_method_if_supported(method, command, fn)
-          if client == nil then
-            return
-          end
-          if client:supports_method(method) then
-            vim.keymap.set("n", command, fn, opts)
-          end
-        end
-
-        declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
-        declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
-        declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
-        declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
-        declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
-      end,
-    })
 
     -- local pwd = vim.loop.cwd()
     -- vim.api.nvim_create_autocmd("FileType", {
@@ -853,6 +795,43 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     end
     lspconfig.jinja_lsp.setup({
       capabilities = capabilities,
+    })
+
+    -- Use LspAttach autocommand to only map the following keys
+    -- after the language server attaches to the current buffer
+    vim.api.nvim_create_autocmd("LspAttach", {
+      group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
+      callback = function(ev)
+        -- Enable completion triggered by <c-x><c-o>
+        vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
+
+        -- Buffer local mappings.
+        -- See `:help vim.lsp.*` for documentation on any of the below functions
+        local opts = { buffer = ev.buf }
+        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+        -- Do not override the keymap if the lsp server does not support the method.
+        local function declare_method_if_supported(method, command, fn)
+          if client == nil then
+            return
+          end
+          if client:supports_method(method) then
+            vim.keymap.set("n", command, fn, opts)
+          end
+        end
+
+        declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
+        declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
+        declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
+        declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
+        declare_method_if_supported("workspace/symbol", "<leader>ws", builtin.lsp_workspace_symbols)
+      end,
+    })
+    vim.api.nvim_create_autocmd("DirChanged", {
+      group = vim.api.nvim_create_augroup("ReloadLSPGroup", { clear = true }),
+      callback = function(ev)
+        vim.cmd("LspRestart")
+      end
     })
   end,
 })
