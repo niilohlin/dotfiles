@@ -1549,7 +1549,7 @@ vim.api.nvim_create_user_command("LoadVscodeEnv", function()
     end
   end
   f:close()
-  vim.notify("Loaded .vscodeenv from " .. envfile, vim.log.levels.INFO)
+  -- vim.notify("Loaded .vscodeenv from " .. envfile, vim.log.levels.INFO)
 end, { nargs = "*" })
 
 vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter" }, {
@@ -1602,6 +1602,8 @@ vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
 vim.api.nvim_create_autocmd("BufEnter", {
   group = initgroup,
   callback = function(ev)
-    print(vim.fn.expand("%p"))
+    if not vim.fn.expand("%p"):match("quickfix%-%d+") then
+      print(vim.fn.expand("%p"))
+    end
   end
 })
