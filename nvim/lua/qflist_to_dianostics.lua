@@ -48,7 +48,7 @@ vim.api.nvim_create_user_command("QFListDiagnostics", qflist_to_diagnostics, {})
 vim.api.nvim_create_autocmd({ "BufWritePost" }, {
   group = vim.api.nvim_create_augroup("format", { clear = true }),
   callback = function(ev)
-    local makefile = vim.fn.findfile("Makefile.private", ".;")
+    local makefile = vim.fn.findfile("Makefile.private", ".;") or ""
     if makefile == "" then
       return
     end
@@ -98,3 +98,61 @@ vim.api.nvim_create_autocmd({ "BufWritePost" }, {
   end,
 })
 
+
+vim.keymap.set("n", "<leader>tr", function()
+  local bufnr = 0
+  local file = vim.api.nvim_buf_get_name(bufnr)
+  if file == "" then
+    vim.notify("No file name for current buffer.", vim.log.levels.WARN)
+    return
+  end
+
+  local function extract_testname(line)
+    -- matches: def test_something(...):
+    return line:match("^%s*def%s+(test[%w_]+)%s*%(")
+  end
+
+  local row = vim.api.nvim_win_get_cursor(0)[1]
+  local line = vim.api.nvim_buf_get_lines(bufnr, row - 1, row, false)[1] or ""
+  local testname = extract_testname(line)
+
+  if not testname then
+    local max_up = 100
+    local top = math.max(1, row - max_up)
+    for r = row - 1, top, -1 do
+      local l = vim.api.nvim_buf_get_lines(bufnr, r - 1, r, false)[1] or ""
+      local name = extract_testname(l)
+      if name then
+        testname = name
+        break
+      end
+    end
+  end
+
+  if not testname then
+    testname = "test_"
+  end
+
+  local relfile = vim.fn.fnamemodify(file, ":.")
+
+  local makefile = vim.fn.findfile("Makefile.private", ".;") or ""
+  if makefile == "" then
+    vim.notify("no makefile found", vim.log.levels.WARN)
+    return
+  end
+
+  local has_test = false
+  for line in io.lines(makefile) do
+    if line:match("^test:") then
+      has_test = true
+      break
+    end
+  end
+
+  if has_test then
+    vim.cmd("Make -f Makefile.private test TEST=" .. testname .. " FILE=" .. relfile)
+  else
+    vim.notify("no test: found", vim.log.levels.WARN)
+  end
+
+end, { desc = "Run nearest pytest (current or up to 100 lines above)" })

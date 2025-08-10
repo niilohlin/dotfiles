@@ -1168,11 +1168,12 @@ end)
 
 vim.api.nvim_command("command W w") -- Remap :W to :w
 
-vim.api.nvim_create_user_command("ReplaceReturns", function()
-  vim.cmd("%s/\\\\n/\\r/g")
-end, { nargs = "*" })
-
 vim.api.nvim_create_user_command("PrettyPrint", function(input)
+  if input.bang then
+    vim.cmd("%s/\\\\n/\\r/g")
+    return
+  end
+
   local text_range = vim.fn.getline(input.line1, input.line2)
 
   local text = ""
