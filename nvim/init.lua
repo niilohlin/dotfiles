@@ -786,191 +786,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   end,
 })
 
--- Make anything into an lsp, like linter output etc.
-MiniDeps.add("nvimtools/none-ls.nvim")
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = initgroup,
-  once = true,
-  callback = function()
-    local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-
-    local null_ls = require("null-ls")
-    local rope = require("rope")
-    null_ls.register(rope.auto_import)
-    -- null_ls.register(rope.completion)
-    vim.api.nvim_create_user_command("RopeGenerateCache", rope.GenerateRopeCache, { nargs = "*" })
-    -- vim.api.nvim_create_user_command("RopeAutoImport", rope.auto_import, { nargs = "*" })
-
-    local pylint_disable = {
-      method = null_ls.methods.CODE_ACTION,
-      name = "pylint_disable",
-      filetypes = { "python" },
-      generator = {
-        fn = function(params)
-          local actions = {}
-          for _, diag in ipairs(params.lsp_params.context.diagnostics) do
-            if diag.source == "pylint" then
-              table.insert(actions, {
-                title = "Disable pylint (" .. diag.code .. ")",
-                action = function()
-                  local line = diag.range.start.line
-                  local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                  local line_text_with_disable = line_text .. " # pylint: disable=" .. diag.code
-                  vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
-                end,
-              })
-            elseif diag.source == "mypy" then
-              table.insert(actions, {
-                title = "Disable mypy [" .. diag.code .. "]",
-                action = function()
-                  local line = diag.range.start.line
-                  local line_text = vim.api.nvim_buf_get_lines(params.bufnr, line, line + 1, false)[1]
-                  local line_text_with_disable = line_text .. " # type: ignore[" .. diag.code .. "]"
-                  vim.api.nvim_buf_set_lines(params.bufnr, line, line + 1, false, { line_text_with_disable })
-                end,
-              })
-            end
-          end
-          return actions
-        end,
-      },
-    }
-
-    null_ls.register(pylint_disable)
-
-    local generic_assignment = {
-      method = null_ls.methods.COMPLETION,
-      name = "generic_assignment",
-      filetypes = { "python", "lua" },
-      generator = {
-        fn = function(params)
-          local snake_case_word = params.content[params.row]:match("([%w_]+)[ =:]")
-          if not snake_case_word then
-            return {}
-          end
-          local words = {}
-          for word in snake_case_word:gmatch("[^_]+") do
-            table.insert(words, word:sub(1, 1):upper() .. word:sub(2))
-          end
-          local camel_case_word = table.concat(words)
-          return {
-            {
-              items = {
-                {
-                  label = camel_case_word,
-                  insertText = camel_case_word,
-                  documentation = "CamelCase",
-                },
-              },
-              isIncomplete = true,
-            },
-          }
-        end,
-      },
-    }
-
-    null_ls.register(generic_assignment)
-    null_ls.register({
-      name = "autoflake8_custom",
-      method = null_ls.methods.FORMATTING,
-      filetypes = { "python" },
-      generator = null_ls.formatter({
-        command = "autoflake8",
-        args = {
-          "$FILENAME",
-        },
-      }),
-      to_stderr = true,
-      to_stdout = true,
-    })
-    local mypy = require("mypy")
-    local pylint = require("pylint")
-
-    vim.api.nvim_create_user_command("NullLsRestart", function ()
-      local sources = require("null-ls.sources").get_available(vim.api.nvim_get_option_value("filetype", { buf = 0 }))
-      local names = {}
-      for _, source in ipairs(sources) do
-        null_ls.disable(source.name)
-        names[source.name] = true
-      end
-      for _, name in ipairs(names) do
-        null_ls.enable(name)
-      end
-      null_ls.setup({
-        debug = true,
-        sources = {
-          mypy,
-          pylint,
-          null_ls.builtins.diagnostics.checkmake,
-          -- null_ls.builtins.formatting.stylua.with({
-          --  extra_args = { "--indent-type", "Spaces", "--indent-width", 2 },
-          -- }),
-          null_ls.builtins.formatting.black.with({
-            timeout = 10 * 1000,
-          }),
-          null_ls.builtins.formatting.isort.with({
-            timeout = 10 * 1000,
-          }),
-          null_ls.builtins.formatting.prettier.with({
-            prefer_local = "./node_modules/prettier/bin/",
-            filetypes = {
-              "css",
-              "html",
-              "htmldjango",
-            },
-            extra_args = { "--write" },
-          }),
-        },
-        on_attach = function(client, bufnr)
-          if client.supports_method("textDocument/formatting") then
-            vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              group = augroup,
-              buffer = bufnr,
-              callback = function()
-                vim.lsp.buf.format({ async = false, timeout_ms = 5000 })
-              end,
-            })
-          end
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            group = augroup,
-            pattern = "*.html",
-            callback = function()
-              print("formatting")
-              vim.lsp.buf.format({ async = false })
-            end,
-          })
-        end,
-      })
-    end, { nargs = "*" })
-    vim.cmd("NullLsRestart")
-  end,
-})
-
-VenvPath = nil
-vim.api.nvim_create_autocmd("BufEnter", {
-  group = initgroup,
-  callback = function()
-    local found_root = vim.fs.root(0, {"venv"})
-    if found_root then
-      found_root = found_root .. "/venv/bin"
-      if VenvPath ~= nil and VenvPath ~= found_root then
-        vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
-        vim.env.PATH = vim.env.PATH .. ":" .. found_root
-        VenvPath = found_root
-      elseif VenvPath == nil then
-        vim.env.PATH = vim.env.PATH .. ":" .. found_root
-        VenvPath = found_root
-      end
-    else
-      if VenvPath ~= nil then
-        vim.env.PATH = table.concat(vim.tbl_filter(function(p) return p ~= VenvPath end, vim.split(vim.env.PATH, ":", {plain=true})), ":")
-        VenvPath = nil
-      end
-    end
-  end
-})
-
 -- CamelCase to snake case (crc, crm, crs, cru), including :Sub command to substitute with smart casing
 MiniDeps.add("johmsalas/text-case.nvim")
 require("textcase").setup({})
@@ -1154,16 +969,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
           end,
           "diagnostics",
         },
-        lualine_x = {
-          function()
-            local names = {}
-            local sources = require("null-ls.sources").get_available(vim.api.nvim_get_option_value("filetype", { buf = 0 }))
-            for _, source in ipairs(sources) do
-              table.insert(names, source.name)
-            end
-            return table.concat(names, " ")
-          end
-        },
+        lualine_x = { },
         lualine_y = {
           function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1596,6 +1402,7 @@ end)
 require("gui")
 require("python_tmux_output")
 require("project")
+require("qflist_to_dianostics")
 
 vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
 

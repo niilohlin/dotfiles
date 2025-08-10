@@ -57,7 +57,7 @@ return h.make_builtin({
     }),
     cwd = h.cache.by_bufnr(function(params)
       return u.root_pattern(
-        -- https://pylint.readthedocs.io/en/latest/user_guide/usage/run.html#command-line-options
+      -- https://pylint.readthedocs.io/en/latest/user_guide/usage/run.html#command-line-options
         "pylintrc",
         ".pylintrc",
         "pyproject.toml",
