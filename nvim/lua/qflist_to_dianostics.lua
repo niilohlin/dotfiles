@@ -156,3 +156,13 @@ vim.keymap.set("n", "<leader>tr", function()
   end
 
 end, { desc = "Run nearest pytest (current or up to 100 lines above)" })
+
+
+vim.keymap.set("n", "[Q", function()
+  vim.cmd("colder")
+  qflist_to_diagnostics()
+end)
+vim.keymap.set("n", "]Q", function()
+  vim.cmd("cnewer")
+  qflist_to_diagnostics()
+end)
