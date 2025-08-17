@@ -240,6 +240,7 @@ vim.opt.wildignore:append("*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store,*/.vscode/*,*/.
 vim.opt.wildignore:append("*/venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist/*,*/.next/*,*/.cache/*")
 
 vim.g.markdown_enable_spell_checking = 0
+vim.g.python3_host_prog = os.getenv("HOME") .. "/.local/share/nvim/venv/bin/python"
 
 -- Set leader to <space>
 vim.g.mapleader = " "
@@ -303,6 +304,7 @@ vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
 
 
 vim.pack.add({ "https://github.com/folke/snacks.nvim" })
+require("snacks").setup({ picker = { enabled = true } }) -- enables vim.ui.select for snacks picker
 
 vim.keymap.set("n", "<leader>sF", Snacks.picker.files, {}) -- find files
 vim.keymap.set("v", "<leader>sf", function()
@@ -554,7 +556,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       },
 
       sources = {
-        default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+        default = { "lazydev", "lsp", "snippets" },
         providers = {
           lazydev = {
             name = "LazyDev",
@@ -955,7 +957,7 @@ vim.api.nvim_create_autocmd("TermOpen", {
   end,
 })
 
--- Markdown utility, go to link and so on.
+-- -- Markdown utility, go to link and so on.
 vim.pack.add({ "https://github.com/plasticboy/vim-markdown" })
 
 -- quickfix improvement
@@ -1094,7 +1096,6 @@ require("log-highlight").setup({
 vim.pack.add({ "https://github.com/wsdjeg/vim-fetch" })
 
 -- ChatGPT plugin
-vim.pack.add({ "https://github.com/MeanderingProgrammer/render-markdown.nvim" })
 vim.pack.add({ "https://github.com/echasnovski/mini.diff" })
 vim.pack.add({ "https://github.com/olimorris/codecompanion.nvim" })
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
@@ -1156,12 +1157,6 @@ vim.keymap.set("n", "Q", "<nop>")
 vim.keymap.set("n", "p", "p=`]")             -- paste and reindent
 vim.keymap.set("n", "P", "P=`]")             -- paste and reindent above
 
-vim.keymap.set("v", "<leader>cq", function() -- open selected in quickfix list
-  vim.cmd('normal "vy')
-  vim.cmd([[ cexpr split(@v, "\n") ]])
-  vim.cmd("copen")
-end)
-
 vim.keymap.set("i", "<C-X><C-G>", function()
   vim.api.nvim_put({ vim.fn.expand("%") }, "c", true, true)
 end)
@@ -1205,7 +1200,7 @@ vim.api.nvim_create_user_command("PrettyPrint", function(input)
   end
   -- write result
   vim.api.nvim_buf_set_lines(0, input.line1 - 1, input.line2, true, result)
-end, { nargs = "*", range = true })
+end, { nargs = "*", range = true, bang = true })
 
 vim.api.nvim_create_user_command("LoadVscodeEnv", function()
   local file = vim.api.nvim_buf_get_name(0)
@@ -1244,6 +1239,7 @@ vim.keymap.set("x", "iP", function()
 end)
 
 vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
+vim.keymap.set("c", "<C-e>", "<End>") -- Go to end of line
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 vim.keymap.set("o", "ic", require("vim._comment").textobject)
@@ -1270,11 +1266,6 @@ vim.keymap.set("x", "ae", function()
   vim.cmd("normal! ggVG")
 end)
 
-require("gui")
-require("python_tmux_output")
-require("project")
-require("qflist_to_dianostics")
-
 vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
 
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -1285,3 +1276,13 @@ vim.api.nvim_create_autocmd("BufEnter", {
     end
   end
 })
+
+vim.api.nvim_create_user_command("Vault", function()
+  vim.cmd("tabnew /Users/niilohlin/Vault/Permanent\\ Notes/Home.md")
+end, { nargs = "*" })
+
+require("gui")
+require("python_output")
+require("rope")
+require("project")
+require("qflist_to_dianostics")

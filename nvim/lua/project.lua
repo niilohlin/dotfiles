@@ -37,6 +37,7 @@ function _G.project_picker()
   local base_dirs = {
     { path = vim.fn.expand('~/dotfiles/'), name = 'dotfiles' },
     { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
+    { path = vim.fn.expand('~/personal/'), name = 'personal' },
   }
 
   -- expand to include their subdirs too

@@ -1,0 +1,17 @@
+
+# filetypes: .py
+
+.PHONY: mypy
+mypy:
+	venv/bin/mypy $(FILE)
+
+.PHONY: ruff
+ruff:
+	venv/bin/ruff check $(FILE) --fix
+
+.PHONY: lint
+lint: ruff mypy
+
+.PHONY: format
+format:
+	venv/bin/ruff format $(FILE)
