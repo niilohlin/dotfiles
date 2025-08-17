@@ -42,33 +42,22 @@ function _G.project_picker()
 
   -- expand to include their subdirs too
   local project_dirs = {}
+  local titles = {}
   for _, base in ipairs(base_dirs) do
     table.insert(project_dirs, base)
+    table.insert(titles, base.name)
     for _, sub in ipairs(get_subdirs(base.path)) do
       table.insert(project_dirs, sub)
+      table.insert(titles, sub.name)
     end
   end
 
-  local items = vim.tbl_map(function(entry)
-    return {
-      text = entry.name,
-      value = entry,
-      display = entry.name,
-      ordinal = entry.name,
-    }
-  end, project_dirs)
-
-  Snacks.picker.pick({
-    items = items,
-    format = function(item)
-      return {
-        { item.text },
-      }
-    end,
-    layout = { preset = "select", preview = nil },
-    confirm = function(picker, item)
-      picker:close()
-      local selection = item.value
+  vim.ui.select(titles, {prompt = "Select project"},
+    function(choice, project_index)
+      if choice == nil then
+        return
+      end
+      local selection = project_dirs[project_index]
       vim.cmd('cd ' .. selection.path)
 
       local current = vim.fn.expand('%:p')
@@ -92,8 +81,8 @@ function _G.project_picker()
       if not found then
         vim.cmd('e .')
       end
-    end,
-  })
+    end
+  )
 end
 
 vim.keymap.set('n', '<leader>sp', project_picker, { noremap = true, silent = true, desc = 'Pick Project (Snacks)' })
