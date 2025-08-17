@@ -35,9 +35,9 @@ end
 function _G.project_picker()
   -- parent project dirs
   local base_dirs = {
-    { path = vim.fn.expand('~/dotfiles/'), name = 'dotfiles' },
+    { path = vim.fn.expand('~/dotfiles/'),      name = 'dotfiles' },
     { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
-    { path = vim.fn.expand('~/personal/'), name = 'personal' },
+    { path = vim.fn.expand('~/personal/'),      name = 'personal' },
   }
 
   -- expand to include their subdirs too
@@ -52,7 +52,7 @@ function _G.project_picker()
     end
   end
 
-  vim.ui.select(titles, {prompt = "Select project"},
+  vim.ui.select(titles, { prompt = "Select project" },
     function(choice, project_index)
       if choice == nil then
         return
@@ -85,5 +85,4 @@ function _G.project_picker()
   )
 end
 
-vim.keymap.set('n', '<leader>sp', project_picker, { noremap = true, silent = true, desc = 'Pick Project (Snacks)' })
-
+vim.keymap.set('n', '<leader>sp', project_picker, { noremap = true, silent = true, desc = 'Pick Project' })

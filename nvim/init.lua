@@ -102,7 +102,10 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set("n", "gi", function()
       vim.cmd('normal! "vyiw')
       local selected_text = "def " .. vim.fn.getreg("v") .. "\\("
-      Snacks.picker.grep({ search = selected_text })
+      vim.schedule(function()
+        MiniPick.set_picker_query({selected_text})
+      end)
+      MiniPick.builtin.live_grep()
     end)
 
     -- Go to the associated implementation file
@@ -116,7 +119,7 @@ vim.api.nvim_create_autocmd("FileType", {
         file_to_edit = "i_" .. current_file_name
       end
 
-      find_file_using_rg(file_to_edit, Snacks.picker.files)
+      find_file_using_rg(file_to_edit, MiniPick.builtin.files)
     end)
 
     -- override treesitter keymap
@@ -303,50 +306,55 @@ vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
 
 
-vim.pack.add({ "https://github.com/folke/snacks.nvim" })
-require("snacks").setup({ picker = { enabled = true } }) -- enables vim.ui.select for snacks picker
+vim.pack.add({ "https://github.com/echasnovski/mini.pick" })
+vim.pack.add({ "https://github.com/echasnovski/mini.extra" })
+require('mini.pick').setup({
+  window = {
+    config = function()
+      local height = math.floor(0.618 * vim.o.lines)
+      local width = math.floor(0.618 * vim.o.columns)
+      return {
+        anchor = 'NW', height = height, width = width,
+        row = math.floor(0.5 * (vim.o.lines - height)),
+        col = math.floor(0.5 * (vim.o.columns - width)),
+      }
+    end
+  }
+})
+require('mini.extra').setup()
+vim.ui.select = require('mini.pick').ui_select
 
-vim.keymap.set("n", "<leader>sF", Snacks.picker.files, {}) -- find files
+vim.keymap.set("n", "<leader>sF", MiniPick.builtin.files, {}) -- find files
 vim.keymap.set("v", "<leader>sf", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  Snacks.picker.files({ search = selected_text })
+  vim.schedule(function()
+    MiniPick.set_picker_query({selected_text})
+  end)
+  MiniPick.builtin.files()
 end)
-vim.keymap.set("n", "<leader>sr", Snacks.picker.resume, {}) -- Resume last search
-vim.keymap.set("n", "<leader>sg", Snacks.picker.grep, {})   -- live grep
+vim.keymap.set("n", "<leader>sr", MiniPick.builtin.resume, {}) -- Resume last search
+vim.keymap.set("n", "<leader>sg", MiniPick.builtin.grep_live, {})   -- live grep
 vim.keymap.set("v", "<leader>sg", function()
-  vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  Snacks.picker.grep({ search = selected_text })
+  vim.schedule(function()
+    MiniPick.set_picker_query({selected_text})
+  end)
+  MiniPick.builtin.grep_live()
 end)
 vim.keymap.set("n", "<leader>sf", function()
-  Snacks.picker.git_files({ hidden = true })
+  MiniPick.builtin.files({
+    tool = 'git'
+  })
 end, {})                                                               -- live find files (including hidden files)
-vim.keymap.set("n", "<leader>so", Snacks.picker.recent)                -- Open old files
-vim.keymap.set("n", "<leader>sj", Snacks.picker.jumps)                 -- Open jumplist
-vim.keymap.set("n", "<leader>sm", Snacks.picker.marks)                 -- Open marks
-vim.keymap.set("n", "<leader>ds", Snacks.picker.lsp_symbols)           -- live find symbols
-vim.keymap.set("n", "<leader>sb", Snacks.picker.buffers, {})           -- Open buffers
--- vim.keymap.set("n", "<leader>st", Snacks.picker.tags) -- live find symbols
-vim.keymap.set("n", "<leader>ws", Snacks.picker.lsp_workspace_symbols) -- live find workspace symbols
+vim.keymap.set("n", "<leader>so", MiniExtra.pickers.oldfiles)                                        -- Open old files
+vim.keymap.set("n", "<leader>sj", function() MiniExtra.pickers.list({ scope = 'jumplist' }) end)     -- Open jumplist
+vim.keymap.set("n", "<leader>sm", MiniExtra.pickers.marks)                                           -- Open marks
+-- vim.keymap.set("n", "<leader>sb", Snacks.picker.buffers, {})                                         -- Open buffers
+-- vim.keymap.set("n", "<leader>st", MiniExtra.pickers.tags) -- live find symbols
+vim.keymap.set("n", "<leader>ws", function() MiniExtra.pickers.lsp({ scope = "workspace_symbols" }) end) -- live find workspace symbols
 
-local function has_workspace_symbols()
-  if not vim.lsp.get_clients() then
-    return false
-  end
-
-  for _, client in ipairs(vim.lsp.get_clients()) do
-    if client.server_capabilities.workspaceSymbolProvider then
-      return true
-    end
-  end
-
-  return false
-end
-
-vim.keymap.set("n", "<leader>o", Snacks.picker.smart, {})
-
-vim.keymap.set("n", "z=", Snacks.picker.spelling)
+vim.keymap.set("n", "z=", MiniExtra.pickers.spellsuggest)
 
 -- Git plugin, provides :Git add, :Git blame etc.
 vim.pack.add({ "https://github.com/tpope/vim-fugitive" })
@@ -743,11 +751,10 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           end
         end
 
-        declare_method_if_supported("textDocument/definition", "gd", Snacks.picker.lsp_definitions)
-        declare_method_if_supported("textDocument/implementation", "gri", Snacks.picker.lsp_implementations)
-        declare_method_if_supported("textDocument/references", "grr", Snacks.picker.lsp_references)
-        declare_method_if_supported("textDocument/documentSymbol", "gO", Snacks.picker.lsp_symbols)
-        declare_method_if_supported("workspace/symbol", "<leader>ws", Snacks.picker.lsp_workspace_symbols)
+        declare_method_if_supported("textDocument/definition", "gd", function() MiniExtra.pickers.lsp({ scope = "definition"}) end)
+        declare_method_if_supported("textDocument/implementation", "gri", function() MiniExtra.pickers.lsp({ scope = "implementation"}) end)
+        declare_method_if_supported("textDocument/references", "grr", function() MiniExtra.pickers.lsp({ scope = "references"}) end)
+        declare_method_if_supported("textDocument/documentSymbol", "gO", function() MiniExtra.pickers.lsp({ scope = "document_symbol"}) end)
       end,
     })
     vim.api.nvim_create_autocmd("DirChanged", {
