@@ -99,13 +99,11 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.include = ""
 
     -- search for the current line
+    local builtin = require("telescope.builtin")
     vim.keymap.set("n", "gi", function()
       vim.cmd('normal! "vyiw')
       local selected_text = "def " .. vim.fn.getreg("v") .. "\\("
-      vim.schedule(function()
-        MiniPick.set_picker_query({selected_text})
-      end)
-      MiniPick.builtin.grep_live()
+      builtin.live_grep({ default_text = selected_text })
     end)
 
     -- Go to the associated implementation file
@@ -119,7 +117,7 @@ vim.api.nvim_create_autocmd("FileType", {
         file_to_edit = "i_" .. current_file_name
       end
 
-      find_file_using_rg(file_to_edit, MiniPick.builtin.files)
+      find_file_using_rg(file_to_edit, builtin.find_files)
     end)
 
     -- override treesitter keymap
@@ -306,98 +304,53 @@ vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
 
 
-vim.pack.add({ "https://github.com/echasnovski/mini.pick" })
-vim.pack.add({ "https://github.com/echasnovski/mini.extra" })
-require('mini.pick').setup({
-  window = {
-    config = function()
-      local height = math.floor(0.618 * vim.o.lines)
-      local width = math.floor(0.618 * vim.o.columns)
-      return {
-        anchor = 'NW', height = height, width = width,
-        row = math.floor(0.5 * (vim.o.lines - height)),
-        col = math.floor(0.5 * (vim.o.columns - width)),
-      }
-    end
+vim.pack.add({ "https://github.com/nvim-telescope/telescope.nvim" })
+vim.pack.add({ "https://github.com/nvim-telescope/telescope-fzf-native.nvim" }) -- packadd make
+local actions = require("telescope.actions")
+require("telescope").setup({
+  defaults = {
+    prompt_prefix = "",
   },
-  mappings = {
-    -- Simple version: remap C-q to mark all and choose
-    mark_all_and_choose = {
-      char = '<C-q>',
-      func = function()
-        local matches = MiniPick.get_picker_matches()
-        if matches and matches.all_inds then
-          MiniPick.set_picker_match_inds(matches.all_inds, 'marked')
-          local marked_matches = MiniPick.get_picker_matches()
-          if marked_matches and marked_matches.marked then
-            local opts = MiniPick.get_picker_opts()
-            if opts and opts.source and opts.source.choose_marked then
-              local should_continue = opts.source.choose_marked(marked_matches.marked)
-              return not should_continue
-            end
-          end
-        end
-        return true
-      end,
+  pickers = {
+    find_files = {
+      mappings = {
+        i = {
+          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+        },
+        n = {
+          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+        },
+      },
     },
-    query_def = {
-      char = '<C-d>',
-      func = function()
-        local query = MiniPick.get_picker_query()
-        if query then
-          local query_string = table.concat(query, '')
-          local new_query = ""
-          if query_string:match("^def ") then
-            new_query = query_string:gsub("def ", "class ")
-          elseif query_string:match("^class ") then
-            new_query = query_string:gsub("class ", "")
-          else
-            new_query = "def " .. query_string
-          end
-          MiniPick.set_picker_query({string.match(new_query, string.rep("(.)", #new_query))})
-        end
-        return false
-      end,
-    },
-  }
+  },
 })
+require("telescope").load_extension("fzf")
+local builtin = require("telescope.builtin")
 
-require('mini.extra').setup()
-vim.ui.select = require('mini.pick').ui_select
-
-vim.keymap.set("n", "<leader>sF", MiniPick.builtin.files, {}) -- find files
+vim.keymap.set("n", "<leader>sF", builtin.find_files, {}) -- find files
 vim.keymap.set("v", "<leader>sf", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  vim.schedule(function()
-    MiniPick.set_picker_query({selected_text})
-  end)
-  MiniPick.builtin.files()
+  builtin.find_files({ default_text = selected_text })
 end)
-vim.keymap.set("n", "<leader>sr", MiniPick.builtin.resume, {}) -- Resume last search
-vim.keymap.set("n", "<leader>sg", MiniPick.builtin.grep_live, {})   -- live grep
+vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last search
+vim.keymap.set("n", "<leader>sg", builtin.live_grep, {})   -- live grep
 vim.keymap.set("v", "<leader>sg", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
-  vim.schedule(function()
-    MiniPick.set_picker_query({selected_text})
-  end)
-  MiniPick.builtin.grep_live()
+  builtin.live_grep({ default_text = selected_text })
 end)
 vim.keymap.set("n", "<leader>sf", function()
-  MiniPick.builtin.files({
-    tool = 'git'
-  })
+  builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
 end, {})                                                               -- live find files (including hidden files)
-vim.keymap.set("n", "<leader>sh", MiniPick.builtin.help)                                        -- Open help tags
-vim.keymap.set("n", "<leader>so", MiniExtra.pickers.oldfiles)                                        -- Open old files
-vim.keymap.set("n", "<leader>sj", function() MiniExtra.pickers.list({ scope = 'jumplist' }) end)     -- Open jumplist
-vim.keymap.set("n", "<leader>sm", MiniExtra.pickers.marks)                                           -- Open marks
--- vim.keymap.set("n", "<leader>sb", Snacks.picker.buffers, {})                                         -- Open buffers
--- vim.keymap.set("n", "<leader>st", MiniExtra.pickers.tags) -- live find symbols
-vim.keymap.set("n", "<leader>ws", function() MiniExtra.pickers.lsp({ scope = "workspace_symbols" }) end) -- live find workspace symbols
+vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
+vim.keymap.set("n", "<leader>sj", builtin.jumplist) -- Open jumplist
+vim.keymap.set("n", "<leader>sm", builtin.marks) -- Open marks
+vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
+vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
+vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
-vim.keymap.set("n", "z=", MiniExtra.pickers.spellsuggest)
+vim.keymap.set("n", "z=", builtin.spell_suggest)
 
 -- Git plugin, provides :Git add, :Git blame etc.
 vim.pack.add({ "https://github.com/tpope/vim-fugitive" })
@@ -801,21 +754,11 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           end
         end
 
-        -- Always chose 1 if there is only one result
-        vim.api.nvim_create_autocmd("User", {
-          pattern = "MiniPickStart",
-          group = vim.api.nvim_create_augroup("MiniPickStarted", { clear = true }),
-          callback = function()
-            if MiniPick.get_picker_items() ~= nil and #MiniPick.get_picker_items() == 1 then
-              vim.api.nvim_input(vim.api.nvim_replace_termcodes("<CR>", true, true, true))
-            end
-          end}
-        )
-
-        declare_method_if_supported("textDocument/definition", "gd", function() MiniExtra.pickers.lsp({ scope = "definition"}) end)
-        declare_method_if_supported("textDocument/implementation", "gri", function() MiniExtra.pickers.lsp({ scope = "implementation"}) end)
-        declare_method_if_supported("textDocument/references", "grr", function() MiniExtra.pickers.lsp({ scope = "references"}) end)
-        declare_method_if_supported("textDocument/documentSymbol", "gO", function() MiniExtra.pickers.lsp({ scope = "document_symbol"}) end)
+        declare_method_if_supported("textDocument/definition", "gd", builtin.lsp_definitions)
+        declare_method_if_supported("textDocument/implementation", "gri", builtin.lsp_implementations)
+        declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
+        declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
+        declare_method_if_supported("workspace/symbol", "<leader>o", builtin.lsp_workspace_symbols)
       end,
     })
     vim.api.nvim_create_autocmd("DirChanged", {
@@ -1308,110 +1251,3 @@ require("rope")
 require("project")
 require("qflist_to_dianostics")
 require("vault")
-
-
--- MiniPick highlight groups with Gruvbox colors
--- Gruvbox dark theme colors
-local gruvbox = {
-  bg0 = '#282828',      -- Main background
-  bg1 = '#3c3836',      -- Lighter background
-  bg2 = '#504945',      -- Even lighter background
-  bg3 = '#665c54',      -- Selection background
-  fg0 = '#fbf1c7',      -- Main foreground
-  fg1 = '#ebdbb2',      -- Secondary foreground
-  orange = '#fe8019',   -- Orange accent
-  yellow = '#fabd2f',   -- Yellow accent
-  green = '#b8bb26',    -- Green accent
-  red = '#fb4934',      -- Red accent
-  blue = '#83a598',     -- Blue accent
-  purple = '#d3869b',   -- Purple accent
-  gray = '#928374',     -- Gray text
-}
-
--- Set MiniPick highlight groups to match Gruvbox
-vim.api.nvim_set_hl(0, 'MiniPickBorder', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.bg3
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickBorderBusy', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.orange
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickBorderText', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.fg1
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickIconDirectory', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.blue
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickIconFile', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.fg1
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickHeader', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.yellow,
-  bold = true
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickMatchCurrent', {
-  bg = gruvbox.bg2,
-  fg = gruvbox.fg0,
-  bold = true
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickMatchMarked', {
-  bg = gruvbox.bg1,
-  fg = gruvbox.orange
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickNormal', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.fg1
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickPreviewLine', {
-  bg = gruvbox.bg1,
-  fg = gruvbox.fg1
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickPreviewRegion', {
-  bg = gruvbox.bg2,
-  fg = gruvbox.fg0
-})
-
-vim.api.nvim_set_hl(0, 'MiniPickPrompt', {
-  bg = gruvbox.bg0,
-  fg = gruvbox.green,
-  bold = true
-})
-
--- Optional: Make it persist across colorscheme changes
-vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = "*",
-  callback = function()
-    -- Re-apply the highlights if gruvbox is loaded
-    if vim.g.colors_name and vim.g.colors_name:match("gruvbox") then
-      -- Re-run the highlight commands above
-      vim.api.nvim_set_hl(0, 'MiniPickBorder', { bg = gruvbox.bg0, fg = gruvbox.bg3 })
-      vim.api.nvim_set_hl(0, 'MiniPickBorderBusy', { bg = gruvbox.bg0, fg = gruvbox.orange })
-      vim.api.nvim_set_hl(0, 'MiniPickBorderText', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
-      vim.api.nvim_set_hl(0, 'MiniPickIconDirectory', { bg = gruvbox.bg0, fg = gruvbox.blue })
-      vim.api.nvim_set_hl(0, 'MiniPickIconFile', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
-      vim.api.nvim_set_hl(0, 'MiniPickHeader', { bg = gruvbox.bg0, fg = gruvbox.yellow, bold = true })
-      vim.api.nvim_set_hl(0, 'MiniPickMatchCurrent', { bg = gruvbox.bg2, fg = gruvbox.fg0, bold = true })
-      vim.api.nvim_set_hl(0, 'MiniPickMatchMarked', { bg = gruvbox.bg1, fg = gruvbox.orange })
-      vim.api.nvim_set_hl(0, 'MiniPickNormal', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
-      vim.api.nvim_set_hl(0, 'MiniPickPreviewLine', { bg = gruvbox.bg1, fg = gruvbox.fg1 })
-      vim.api.nvim_set_hl(0, 'MiniPickPreviewRegion', { bg = gruvbox.bg2, fg = gruvbox.fg0 })
-      vim.api.nvim_set_hl(0, 'MiniPickPrompt', { bg = gruvbox.bg0, fg = gruvbox.green, bold = true })
-    end
-  end,
-})
-
