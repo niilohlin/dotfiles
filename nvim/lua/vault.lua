@@ -149,7 +149,8 @@ function ServeVault()
 
   vim.api.nvim_buf_set_lines(buf, -1, -1, false, {"", "# Found TODOS", ""})
 
-  require("web-server").init()
+  local ws = require("web-server")
+  ws.init()
   local templ_buf = vim.api.nvim_create_buf(false, true)
 
   vim.api.nvim_buf_set_lines(templ_buf, -1, -1, false, {
@@ -166,24 +167,24 @@ function ServeVault()
       "</body>",
       "</html>",
   })
-  vim.api.nvim_win_set_buf(0, templ_buf)
-  vim.cmd("WSSetBufferAsTemplate")
+  ws.WSSetBufferAsTemplate(templ_buf)
   for _, qf_item in ipairs(qf_items) do
     vim.api.nvim_buf_set_lines(buf, -1, -1, false, {("%s [%s](%s)"):format(qf_item.text, vim.fs.basename(qf_item.filename), vim.fs.basename(qf_item.filename))})
     local todo_buf = vim.api.nvim_create_buf(false, true)
+
     local lines = vim.fn.readfile(qf_item.filename)
     vim.api.nvim_buf_set_lines(todo_buf, -1, -1, false, lines)
     vim.api.nvim_buf_set_name(todo_buf, qf_item.filename)
-    vim.api.nvim_win_set_buf(0, todo_buf)
-    vim.cmd("WSAddBuffer /" .. vim.fs.basename(qf_item.filename):gsub(" ", "%%20"))
+
+    ws.WSAddBuffer("/" .. vim.fs.basename(qf_item.filename):gsub(" ", "%%20"), nil, todo_buf)
   end
 
   vim.cmd("wincmd j")
 
-  vim.api.nvim_win_set_buf(0, buf)
-  vim.cmd("WSAddBuffer /")
+  ws.WSAddBuffer("/", nil, buf)
 end
 
 vim.api.nvim_create_user_command("TODOs", TODOs, { nargs = "*" })
 vim.api.nvim_create_user_command("Vault", OpenVault, { nargs = "*" })
 vim.api.nvim_create_user_command("ServeVault", ServeVault, { nargs = "*" })
+

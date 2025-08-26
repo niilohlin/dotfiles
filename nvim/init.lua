@@ -105,7 +105,7 @@ vim.api.nvim_create_autocmd("FileType", {
       vim.schedule(function()
         MiniPick.set_picker_query({selected_text})
       end)
-      MiniPick.builtin.live_grep()
+      MiniPick.builtin.grep_live()
     end)
 
     -- Go to the associated implementation file
@@ -167,7 +167,7 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- Open diagnostics on hover
-vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+vim.api.nvim_create_autocmd({ "CursorHold" }, { --, "CursorHoldI" }, {
   group = initgroup,
   pattern = "*",
   callback = function()
@@ -319,8 +319,49 @@ require('mini.pick').setup({
         col = math.floor(0.5 * (vim.o.columns - width)),
       }
     end
+  },
+  mappings = {
+    -- Simple version: remap C-q to mark all and choose
+    mark_all_and_choose = {
+      char = '<C-q>',
+      func = function()
+        local matches = MiniPick.get_picker_matches()
+        if matches and matches.all_inds then
+          MiniPick.set_picker_match_inds(matches.all_inds, 'marked')
+          local marked_matches = MiniPick.get_picker_matches()
+          if marked_matches and marked_matches.marked then
+            local opts = MiniPick.get_picker_opts()
+            if opts and opts.source and opts.source.choose_marked then
+              local should_continue = opts.source.choose_marked(marked_matches.marked)
+              return not should_continue
+            end
+          end
+        end
+        return true
+      end,
+    },
+    query_def = {
+      char = '<C-d>',
+      func = function()
+        local query = MiniPick.get_picker_query()
+        if query then
+          local query_string = table.concat(query, '')
+          local new_query = ""
+          if query_string:match("^def ") then
+            new_query = query_string:gsub("def ", "class ")
+          elseif query_string:match("^class ") then
+            new_query = query_string:gsub("class ", "")
+          else
+            new_query = "def " .. query_string
+          end
+          MiniPick.set_picker_query({string.match(new_query, string.rep("(.)", #new_query))})
+        end
+        return false
+      end,
+    },
   }
 })
+
 require('mini.extra').setup()
 vim.ui.select = require('mini.pick').ui_select
 
@@ -336,6 +377,7 @@ end)
 vim.keymap.set("n", "<leader>sr", MiniPick.builtin.resume, {}) -- Resume last search
 vim.keymap.set("n", "<leader>sg", MiniPick.builtin.grep_live, {})   -- live grep
 vim.keymap.set("v", "<leader>sg", function()
+  vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
   vim.schedule(function()
     MiniPick.set_picker_query({selected_text})
@@ -758,6 +800,17 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
             vim.keymap.set("n", command, fn, opts)
           end
         end
+
+        -- Always chose 1 if there is only one result
+        vim.api.nvim_create_autocmd("User", {
+          pattern = "MiniPickStart",
+          group = vim.api.nvim_create_augroup("MiniPickStarted", { clear = true }),
+          callback = function()
+            if MiniPick.get_picker_items() ~= nil and #MiniPick.get_picker_items() == 1 then
+              vim.api.nvim_input(vim.api.nvim_replace_termcodes("<CR>", true, true, true))
+            end
+          end}
+        )
 
         declare_method_if_supported("textDocument/definition", "gd", function() MiniExtra.pickers.lsp({ scope = "definition"}) end)
         declare_method_if_supported("textDocument/implementation", "gri", function() MiniExtra.pickers.lsp({ scope = "implementation"}) end)
@@ -1215,6 +1268,11 @@ vim.keymap.set("x", "ic", function()
   require("vim._comment").textobject()
 end)
 
+-- enable extui nightly
+require('vim._extui').enable({
+  enable = true,
+})
+
 vim.keymap.set("o", "ie", function()
   vim.cmd("normal! ggVG")
 end)
@@ -1250,3 +1308,110 @@ require("rope")
 require("project")
 require("qflist_to_dianostics")
 require("vault")
+
+
+-- MiniPick highlight groups with Gruvbox colors
+-- Gruvbox dark theme colors
+local gruvbox = {
+  bg0 = '#282828',      -- Main background
+  bg1 = '#3c3836',      -- Lighter background
+  bg2 = '#504945',      -- Even lighter background
+  bg3 = '#665c54',      -- Selection background
+  fg0 = '#fbf1c7',      -- Main foreground
+  fg1 = '#ebdbb2',      -- Secondary foreground
+  orange = '#fe8019',   -- Orange accent
+  yellow = '#fabd2f',   -- Yellow accent
+  green = '#b8bb26',    -- Green accent
+  red = '#fb4934',      -- Red accent
+  blue = '#83a598',     -- Blue accent
+  purple = '#d3869b',   -- Purple accent
+  gray = '#928374',     -- Gray text
+}
+
+-- Set MiniPick highlight groups to match Gruvbox
+vim.api.nvim_set_hl(0, 'MiniPickBorder', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.bg3
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickBorderBusy', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.orange
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickBorderText', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.fg1
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickIconDirectory', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.blue
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickIconFile', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.fg1
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickHeader', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.yellow,
+  bold = true
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickMatchCurrent', {
+  bg = gruvbox.bg2,
+  fg = gruvbox.fg0,
+  bold = true
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickMatchMarked', {
+  bg = gruvbox.bg1,
+  fg = gruvbox.orange
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickNormal', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.fg1
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickPreviewLine', {
+  bg = gruvbox.bg1,
+  fg = gruvbox.fg1
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickPreviewRegion', {
+  bg = gruvbox.bg2,
+  fg = gruvbox.fg0
+})
+
+vim.api.nvim_set_hl(0, 'MiniPickPrompt', {
+  bg = gruvbox.bg0,
+  fg = gruvbox.green,
+  bold = true
+})
+
+-- Optional: Make it persist across colorscheme changes
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  callback = function()
+    -- Re-apply the highlights if gruvbox is loaded
+    if vim.g.colors_name and vim.g.colors_name:match("gruvbox") then
+      -- Re-run the highlight commands above
+      vim.api.nvim_set_hl(0, 'MiniPickBorder', { bg = gruvbox.bg0, fg = gruvbox.bg3 })
+      vim.api.nvim_set_hl(0, 'MiniPickBorderBusy', { bg = gruvbox.bg0, fg = gruvbox.orange })
+      vim.api.nvim_set_hl(0, 'MiniPickBorderText', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
+      vim.api.nvim_set_hl(0, 'MiniPickIconDirectory', { bg = gruvbox.bg0, fg = gruvbox.blue })
+      vim.api.nvim_set_hl(0, 'MiniPickIconFile', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
+      vim.api.nvim_set_hl(0, 'MiniPickHeader', { bg = gruvbox.bg0, fg = gruvbox.yellow, bold = true })
+      vim.api.nvim_set_hl(0, 'MiniPickMatchCurrent', { bg = gruvbox.bg2, fg = gruvbox.fg0, bold = true })
+      vim.api.nvim_set_hl(0, 'MiniPickMatchMarked', { bg = gruvbox.bg1, fg = gruvbox.orange })
+      vim.api.nvim_set_hl(0, 'MiniPickNormal', { bg = gruvbox.bg0, fg = gruvbox.fg1 })
+      vim.api.nvim_set_hl(0, 'MiniPickPreviewLine', { bg = gruvbox.bg1, fg = gruvbox.fg1 })
+      vim.api.nvim_set_hl(0, 'MiniPickPreviewRegion', { bg = gruvbox.bg2, fg = gruvbox.fg0 })
+      vim.api.nvim_set_hl(0, 'MiniPickPrompt', { bg = gruvbox.bg0, fg = gruvbox.green, bold = true })
+    end
+  end,
+})
+
