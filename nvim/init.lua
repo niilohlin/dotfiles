@@ -301,11 +301,14 @@ vim.api.nvim_set_hl(0, "IncSearch", { bg = "#af3a03", fg = "#fbf1c7" })
 vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 
 -- project wide search, requires ripgrep
-vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
-vim.pack.add({ "https://github.com/nvim-telescope/telescope.nvim" })
-vim.pack.add({ "https://github.com/nvim-telescope/telescope-fzf-native.nvim" }) -- packadd make
-vim.pack.add({ "https://github.com/nvim-telescope/telescope-ui-select.nvim" })
-local actions = require("telescope.actions")
+vim.pack.add({
+  "https://github.com/nvim-telescope/telescope.nvim",
+  "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
+  "https://github.com/nvim-telescope/telescope-ui-select.nvim",
+  "https://github.com/nvim-lua/plenary.nvim",
+})
+-- packadd make
+
 require("telescope").setup({
   defaults = {
     prompt_prefix = "",
@@ -314,10 +317,10 @@ require("telescope").setup({
     find_files = {
       mappings = {
         i = {
-          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist + require("telescope.actions").open_qflist,
         },
         n = {
-          ["<C-S-Q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist + require("telescope.actions").open_qflist,
         },
       },
     },
@@ -768,12 +771,15 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
         declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
         declare_method_if_supported("workspace/symbol", "<leader>o", builtin.lsp_workspace_symbols)
-        -- if client:supports_method("textDocument/formatting") then
-        --   vim.api.nvim_create_autocmd("BufWritePre", {
-        --     group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
-        --     callback = vim.lsp.buf.format
-        --   })
-        -- end
+        if client:supports_method("textDocument/formatting") then
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
+            buffer = ev.buf,
+            callback = function()
+              vim.lsp.buf.format({ bufnr = ev.buf })
+            end
+          })
+        end
       end,
     })
     vim.api.nvim_create_autocmd("DirChanged", {
@@ -878,7 +884,11 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   pattern = "qf",
   once = true,
   callback = function()
-    require("quicker").setup({})
+    require("quicker").setup({
+      on_qf = function(bufnr)
+        vim.opt_local.number = true
+      end
+    })
   end,
 })
 
@@ -1301,4 +1311,3 @@ require("rope")
 require("project")
 require("qflist_to_dianostics")
 require("vault")
-
