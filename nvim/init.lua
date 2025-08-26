@@ -1275,9 +1275,30 @@ vim.api.nvim_create_autocmd("BufEnter", {
   end
 })
 
+-- make it so that relativenumber and number is on when you exit terminal mode and enter normal mode
+local terminal_group = vim.api.nvim_create_augroup("TerminalSettings", { clear = true })
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = terminal_group,
+  pattern = "t:nt",
+  callback = function()
+    vim.opt_local.relativenumber = true
+    vim.opt_local.number = true
+  end
+})
+
+vim.api.nvim_create_autocmd("ModeChanged", {
+  group = terminal_group,
+  pattern = "*:t",
+  callback = function()
+    vim.opt_local.relativenumber = false
+    vim.opt_local.number = false
+  end
+})
+
 require("gui")
 require("python_output")
 require("rope")
 require("project")
 require("qflist_to_dianostics")
 require("vault")
+
