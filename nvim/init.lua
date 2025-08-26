@@ -302,8 +302,6 @@ vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 
 -- project wide search, requires ripgrep
 vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
-
-
 vim.pack.add({ "https://github.com/nvim-telescope/telescope.nvim" })
 vim.pack.add({ "https://github.com/nvim-telescope/telescope-fzf-native.nvim" }) -- packadd make
 vim.pack.add({ "https://github.com/nvim-telescope/telescope-ui-select.nvim" })
@@ -344,8 +342,8 @@ vim.keymap.set("v", "<leader>sf", function()
   local selected_text = vim.fn.getreg("v")
   builtin.find_files({ default_text = selected_text })
 end)
-vim.keymap.set("n", "<leader>sr", builtin.resume, {}) -- Resume last search
-vim.keymap.set("n", "<leader>sg", builtin.live_grep, {})   -- live grep
+vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last search
+vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
 vim.keymap.set("v", "<leader>sg", function()
   vim.cmd('normal! "vy')
   local selected_text = vim.fn.getreg("v")
@@ -353,13 +351,13 @@ vim.keymap.set("v", "<leader>sg", function()
 end)
 vim.keymap.set("n", "<leader>sf", function()
   builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
-end, {})                                                               -- live find files (including hidden files)
-vim.keymap.set("n", "<leader>so", builtin.oldfiles) -- Open old files
-vim.keymap.set("n", "<leader>sj", builtin.jumplist) -- Open jumplist
-vim.keymap.set("n", "<leader>sm", builtin.marks) -- Open marks
-vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
-vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
-vim.keymap.set("n", "<leader>sh", builtin.help_tags) -- help tags
+end, {})                                                                 -- live find files (including hidden files)
+vim.keymap.set("n", "<leader>so", builtin.oldfiles)                      -- Open old files
+vim.keymap.set("n", "<leader>sj", builtin.jumplist)                      -- Open jumplist
+vim.keymap.set("n", "<leader>sm", builtin.marks)                         -- Open marks
+vim.keymap.set("n", "<leader>sb", builtin.buffers, {})                   -- Open buffers
+vim.keymap.set("n", "<leader>st", builtin.tags)                          -- live find symbols
+vim.keymap.set("n", "<leader>sh", builtin.help_tags)                     -- help tags
 vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
 vim.keymap.set("n", "z=", builtin.spell_suggest)
@@ -664,11 +662,9 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       on_attach = function(client, bufnr)
         -- Enable formatting capability for ESLint
         client.server_capabilities.documentFormattingProvider = true
-        local lspformatgroup = vim.api.nvim_create_augroup("lspformatgroup", { clear = true })
-
         -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePre", {
-          group = lspformatgroup,
+          group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
           buffer = bufnr,
           callback = function()
             vim.lsp.buf.format({ bufnr = bufnr })
@@ -756,11 +752,12 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         local opts = { buffer = ev.buf }
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
+        if client == nil then
+          return
+        end
+
         -- Do not override the keymap if the lsp server does not support the method.
         local function declare_method_if_supported(method, command, fn)
-          if client == nil then
-            return
-          end
           if client:supports_method(method) then
             vim.keymap.set("n", command, fn, opts)
           end
@@ -771,6 +768,12 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
         declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
         declare_method_if_supported("workspace/symbol", "<leader>o", builtin.lsp_workspace_symbols)
+        -- if client:supports_method("textDocument/formatting") then
+        --   vim.api.nvim_create_autocmd("BufWritePre", {
+        --     group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
+        --     callback = vim.lsp.buf.format
+        --   })
+        -- end
       end,
     })
     vim.api.nvim_create_autocmd("DirChanged", {
@@ -781,6 +784,21 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     })
   end,
 })
+
+vim.pack.add({ "https://github.com/piersolenski/import.nvim" })
+require("import").setup({
+  picker = "telescope"
+})
+vim.keymap.set("n", "<leader>si", require("import").pick)
+vim.keymap.set("v", "<leader>si", function()
+  vim.cmd('normal! "vy')
+  local selected_text = vim.fn.getreg("v")
+  vim.schedule(function()
+    vim.fn.feedkeys(selected_text)
+  end)
+  require("import").pick()
+end)
+
 
 vim.pack.add({ "https://github.com/johmsalas/text-case.nvim" })
 require("textcase").setup({})
@@ -1129,8 +1147,8 @@ end, { nargs = "*" })
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
 
-vim.keymap.set("n", "p", "p=`]")             -- paste and reindent
-vim.keymap.set("n", "P", "P=`]")             -- paste and reindent above
+vim.keymap.set("n", "p", "p=`]") -- paste and reindent
+vim.keymap.set("n", "P", "P=`]") -- paste and reindent above
 
 vim.keymap.set("i", "<C-X><C-G>", function()
   vim.api.nvim_put({ vim.fn.expand("%") }, "c", true, true)
@@ -1214,7 +1232,7 @@ vim.keymap.set("x", "iP", function()
 end)
 
 vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
-vim.keymap.set("c", "<C-e>", "<End>") -- Go to end of line
+vim.keymap.set("c", "<C-e>", "<End>")  -- Go to end of line
 
 -- map textobject to select the continuous comment with vim._comment.textobject
 vim.keymap.set("o", "ic", require("vim._comment").textobject)
