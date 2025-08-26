@@ -306,6 +306,7 @@ vim.pack.add({ "https://github.com/nvim-lua/plenary.nvim" })
 
 vim.pack.add({ "https://github.com/nvim-telescope/telescope.nvim" })
 vim.pack.add({ "https://github.com/nvim-telescope/telescope-fzf-native.nvim" }) -- packadd make
+vim.pack.add({ "https://github.com/nvim-telescope/telescope-ui-select.nvim" })
 local actions = require("telescope.actions")
 require("telescope").setup({
   defaults = {
@@ -323,8 +324,18 @@ require("telescope").setup({
       },
     },
   },
+  extensions = {
+    ['ui-select'] = {
+      require('telescope.themes').get_dropdown {
+        -- You can customize the appearance here
+        -- width = 0.8,
+        -- previewer = false,
+      }
+    }
+  }
 })
 require("telescope").load_extension("fzf")
+require("telescope").load_extension("ui-select")
 local builtin = require("telescope.builtin")
 
 vim.keymap.set("n", "<leader>sF", builtin.find_files, {}) -- find files
@@ -348,6 +359,7 @@ vim.keymap.set("n", "<leader>sj", builtin.jumplist) -- Open jumplist
 vim.keymap.set("n", "<leader>sm", builtin.marks) -- Open marks
 vim.keymap.set("n", "<leader>sb", builtin.buffers, {}) -- Open buffers
 vim.keymap.set("n", "<leader>st", builtin.tags) -- live find symbols
+vim.keymap.set("n", "<leader>sh", builtin.help_tags) -- help tags
 vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live find workspace symbols
 
 vim.keymap.set("n", "z=", builtin.spell_suggest)
