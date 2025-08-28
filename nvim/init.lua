@@ -221,7 +221,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
 -- vim.opt.cmdheight = 2 -- handled by auto-cmdheight
--- opt.cmdheight = 0     -- Hide the command line when not needed.
+-- vim.opt.cmdheight = 0     -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
 SetTabLength(4)
@@ -691,6 +691,24 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
       capabilities = capabilities,
     })
     vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
+    local lsp_format_group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true })
+
+    lspconfig.ruff.setup({
+      on_attach = function(client, bufnr)
+        print("attaching ruff to buffer")
+        -- Disable hover in favor of jedi?
+        -- client.server_capabilities.hoverProvider = false
+        client.server_capabilities.documentFormattingProvider = true
+        vim.api.nvim_create_autocmd("BufWritePre", {
+          group = lsp_format_group,
+          callback = function()
+            vim.lsp.buf.format({ bufnr = bufnr })
+          end
+        })
+      end
+    })
+    vim.lsp.config("ruff", lspconfig.ruff)
+    vim.lsp.enable('ruff')
 
     -- Global mappings.
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
@@ -839,6 +857,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
           end,
           "diagnostics",
         },
+        lualine_c = { function() return vim.fn.expand("%p") end },
         lualine_x = {},
         lualine_y = {
           function()
@@ -859,7 +878,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
         lualine_z = { "filetype" },
       },
       inactive_sections = {
-        lualine_a = { "filename" },
+        lualine_a = {},
         lualine_b = {},
         lualine_c = {},
         lualine_x = {},
@@ -1276,15 +1295,6 @@ end)
 
 vim.keymap.set("n", "<leader>;", "A<C-c><C-\\><C-n>:q<CR>")
 
-vim.api.nvim_create_autocmd("BufEnter", {
-  group = initgroup,
-  callback = function(ev)
-    if not vim.fn.expand("%p"):match("quickfix%-%d+") then
-      print(vim.fn.expand("%p"))
-    end
-  end
-})
-
 -- make it so that relativenumber and number is on when you exit terminal mode and enter normal mode
 local terminal_group = vim.api.nvim_create_augroup("TerminalSettings", { clear = true })
 vim.api.nvim_create_autocmd("ModeChanged", {
@@ -1304,6 +1314,15 @@ vim.api.nvim_create_autocmd("ModeChanged", {
     vim.opt_local.number = false
   end
 })
+
+-- :Messages show :messages in buffer
+vim.api.nvim_create_user_command("Messages", function()
+  local lines = vim.api.nvim_exec2("messages", { output = true }).output
+  vim.cmd("new")
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
+  vim.cmd("setlocal buftype=nofile bufhidden=wipe nobuflisted")
+  vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>bd!<CR>", { noremap = true, silent = true })
+end, {})
 
 require("gui")
 require("python_output")

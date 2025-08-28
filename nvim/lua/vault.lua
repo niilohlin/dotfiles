@@ -22,7 +22,7 @@ function FindDueTasks()
 
     local year, month, day = title:match("📅 (%d%d%d%d)-(%d%d)-(%d%d)")
 
-    if os.time({ year = year, month = month, day = day, hour = 0, min = 0, sec = 0}) >= os.time() then
+    if os.time({ year = year, month = month, day = day, hour = 0, min = 0, sec = 0 }) >= os.time() then
       goto continue
     end
 
@@ -72,8 +72,9 @@ end
 
 function MarkAndUpdateTODO()
   local current_line_text = vim.api.nvim_get_current_line()
-  if current_line_text:find("✅") then
-    --vim.cmd((":silent edit %s | %ds/[x]/[ ]/ | write | bdelete"):format(file, row))
+  if not current_line_text:match("%s*- %[ %]") then
+    vim.cmd("s/^\\(\\s*\\)/\\1- [ ] /")
+  elseif current_line_text:find("✅") then
     print("todo: uncheck task")
   else
     vim.cmd("s/\\[ \\]/[x]/")
@@ -81,15 +82,14 @@ function MarkAndUpdateTODO()
 
     local parsed = parse_task(current_line_text)
     local recurring = parsed["🔁"]
-    local due_string = parsed["📅"]
-    local year, month, day = due_string:match("(%d+)-(%d+)-(%d+)")
-    local due_date = os.time({
-      year = tonumber(year),
-      month = tonumber(month),
-      day = tonumber(day)
-    })
-
     if recurring then
+      local due_string = parsed["📅"]
+      local year, month, day = due_string:match("(%d+)-(%d+)-(%d+)")
+      local due_date = os.time({
+        year = tonumber(year),
+        month = tonumber(month),
+        day = tonumber(day)
+      })
       local next = nil
       local reference_date = due_date
       if recurring:find("when done") then
@@ -129,7 +129,6 @@ function MarkAndUpdateTODO()
   end
 end
 
-
 function OpenVault()
   vim.cmd("tabnew")
   vim.cmd("lcd " .. vault_path)
@@ -147,29 +146,30 @@ function ServeVault()
   local lines = vim.fn.readfile(vault_path .. "/Home.md")
   vim.api.nvim_buf_set_lines(buf, -1, -1, false, lines)
 
-  vim.api.nvim_buf_set_lines(buf, -1, -1, false, {"", "# Found TODOS", ""})
+  vim.api.nvim_buf_set_lines(buf, -1, -1, false, { "", "# Found TODOS", "" })
 
   local ws = require("web-server")
   ws.init()
   local templ_buf = vim.api.nvim_create_buf(false, true)
 
   vim.api.nvim_buf_set_lines(templ_buf, -1, -1, false, {
-      "<!DOCTYPE html>",
-      "<html lang=\"en\">",
-      "<head>",
-      "<meta charset=\"UTF-8\">",
-      "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
-      "<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">",
-      "<title>{{ title }}</title>",
-      "</head>",
-      "<body>",
-      "{{ content }}",
-      "</body>",
-      "</html>",
+    "<!DOCTYPE html>",
+    "<html lang=\"en\">",
+    "<head>",
+    "<meta charset=\"UTF-8\">",
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+    "<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">",
+    "<title>{{ title }}</title>",
+    "</head>",
+    "<body>",
+    "{{ content }}",
+    "</body>",
+    "</html>",
   })
   ws.WSSetBufferAsTemplate(templ_buf)
   for _, qf_item in ipairs(qf_items) do
-    vim.api.nvim_buf_set_lines(buf, -1, -1, false, {("%s [%s](%s)"):format(qf_item.text, vim.fs.basename(qf_item.filename), vim.fs.basename(qf_item.filename))})
+    vim.api.nvim_buf_set_lines(buf, -1, -1, false,
+      { ("%s [%s](%s)"):format(qf_item.text, vim.fs.basename(qf_item.filename), vim.fs.basename(qf_item.filename)) })
     local todo_buf = vim.api.nvim_create_buf(false, true)
 
     local lines = vim.fn.readfile(qf_item.filename)
@@ -187,4 +187,3 @@ end
 vim.api.nvim_create_user_command("TODOs", TODOs, { nargs = "*" })
 vim.api.nvim_create_user_command("Vault", OpenVault, { nargs = "*" })
 vim.api.nvim_create_user_command("ServeVault", ServeVault, { nargs = "*" })
-

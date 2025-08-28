@@ -28,19 +28,19 @@
 local M = {}
 
 function M.new(raw)
-    local query_string = raw:match("?.*")
-    local normalized = raw:gsub("?.*", ""):gsub("/+", "/")
+  local query_string = raw:match("?.*")
+  local normalized = raw:gsub("?.*", ""):gsub("/+", "/")
 
-    if normalized ~= "/" then
-        normalized = normalized:gsub("/$", "")
-    end
+  if normalized ~= "/" then
+    normalized = normalized:gsub("/$", "")
+  end
 
-    return setmetatable({
-        value = normalized,
-        query_string = query_string
-    }, {
-        __index = M
-    })
+  return setmetatable({
+    value = normalized,
+    query_string = query_string
+  }, {
+    __index = M
+  })
 end
 
 return M
