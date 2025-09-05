@@ -221,7 +221,7 @@ vim.api.nvim_create_autocmd("BufEnter", {
 vim.opt.updatetime = 500
 -- -- Remove 'Press Enter to continue' message when type information is longer than one line.
 -- vim.opt.cmdheight = 2 -- handled by auto-cmdheight
--- vim.opt.cmdheight = 0     -- Hide the command line when not needed.
+-- vim.opt.cmdheight = 0   -- Hide the command line when not needed.
 
 -- Handle tabs, expand to 4 spaces.
 SetTabLength(4)
@@ -317,10 +317,12 @@ require("telescope").setup({
     find_files = {
       mappings = {
         i = {
-          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist + require("telescope.actions").open_qflist,
+          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist +
+              require("telescope.actions").open_qflist,
         },
         n = {
-          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist + require("telescope.actions").open_qflist,
+          ["<C-S-Q>"] = require("telescope.actions").send_selected_to_qflist +
+              require("telescope.actions").open_qflist,
         },
       },
     },
@@ -520,7 +522,7 @@ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
   once = true,
   callback = function()
     require("oil").setup()
-    vim.keymap.set("n", "<leader>j", ":Oil<CR>") -- Show current file in Oil
+    vim.keymap.set("n", "-", "<CMD>Oil<CR>") -- Show current file in Oil
     -- Disable netrw. We don't need it if we use oil
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
@@ -718,12 +720,12 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     --  pattern = "python",
     --  callback = function()
     --   vim.lsp.start({
-    --    name = "Omnisearch LSP",
-    --    filetypes = { "python" },
-    --    root_dir = pwd,
-    --    --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
-    --    cmd = function(dispatchers)
-    --    end,
+    --  name = "Omnisearch LSP",
+    --  filetypes = { "python" },
+    --  root_dir = pwd,
+    --  --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
+    --  cmd = function(dispatchers)
+    --  end,
     --   })
     --  end,
     -- })
@@ -857,8 +859,8 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
           end,
           "diagnostics",
         },
-        lualine_c = { function() return vim.fn.expand("%p") end },
-        lualine_x = {},
+        lualine_c = { function() return vim.uv.cwd() end },
+        lualine_x = { function() return vim.fn.expand("%p") end },
         lualine_y = {
           function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1324,9 +1326,14 @@ vim.api.nvim_create_user_command("Messages", function()
   vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>bd!<CR>", { noremap = true, silent = true })
 end, {})
 
+
+-- do not "go to next window"
+vim.api.nvim_set_keymap("n", "<C-W><C-W>", "<nop>", {})
+
 require("gui")
 require("python_output")
 require("rope")
 require("project")
 require("qflist_to_dianostics")
 require("vault")
+require("nvim-web-server")

@@ -26,13 +26,23 @@ function FindDueTasks()
       goto continue
     end
 
-    table.insert(qf_items, {
-      filename = file,
-      lnum = line,
-      col = 4,
-      text = title,
-      type = "W",
-    })
+    if os.time({ year = year, month = month, day = day, hour = 23, min = 59, sec = 59 }) >= os.time() then
+      table.insert(qf_items, {
+        filename = file,
+        lnum = line,
+        col = 4,
+        text = title,
+        type = "W",
+      })
+    else
+      table.insert(qf_items, 1, {
+        filename = file,
+        lnum = line,
+        col = 4,
+        text = title,
+        type = "E",
+      })
+    end
 
     ::continue::
   end
@@ -41,10 +51,15 @@ function FindDueTasks()
 end
 
 function TODOs()
+  local tasks = FindDueTasks()
   vim.fn.setqflist({}, "r", {
-    items = FindDueTasks(),
+    items = tasks,
   })
-  vim.cmd("copen")
+  if #tasks > 0 then
+    vim.cmd("copen | wincmd k")
+  else
+    vim.cmd("cclose")
+  end
 end
 
 local function parse_task(task)
@@ -131,12 +146,19 @@ end
 
 function OpenVault()
   vim.cmd("tabnew")
-  vim.cmd("lcd " .. vault_path)
+  vim.cmd("tcd " .. vault_path)
   vim.cmd("e Home.md")
-  vim.cmd("iabbrev due 📅")
-  vim.cmd("iabbrev recurring 🔁")
   TODOs()
   vim.keymap.set("n", "<leader>l", MarkAndUpdateTODO)
+  vim.snippet.add("markdown", {
+    trig = "tomorrow",
+    name = "Tomorrow's date",
+    dscr = "Insert tomorrow's date",
+  }, {
+    f(function()
+      return os.date("%Y-%m-%d", os.time() + 24 * 60 * 60)
+    end)
+  })
 end
 
 function ServeVault()

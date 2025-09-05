@@ -1,0 +1,12 @@
+{
+    "due": {
+        "prefix": "due",
+        "body": ["📅"],
+        "description": "📅"
+    },
+    "recurring": {
+        "prefix": "recur",
+        "body": ["🔁"],
+        "description": "🔁"
+    }
+}

@@ -38,6 +38,7 @@ function _G.project_picker()
     { path = vim.fn.expand('~/dotfiles/'),      name = 'dotfiles' },
     { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
     { path = vim.fn.expand('~/personal/'),      name = 'personal' },
+    { path = vim.fn.expand('/'),                name = 'root' },
   }
 
   -- expand to include their subdirs too

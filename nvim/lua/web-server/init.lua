@@ -9,7 +9,6 @@ local default_config = {
   port = 4999,
   log_filename = nil,
   log_each_request = false,
-  log_views_period = 0,
   log_resource_use_period = 0,
 
   -- NOTE Keep-alive means that we run out of sockets real quick under
@@ -34,7 +33,6 @@ local M = {}
 -- @field[opt] log_filename (string) file to save the server's log
 --   buffer
 -- @field log_each_request (boolean) include requests in the server log
--- @field log_views_period (integer) interval at which to log view
 --   counts for each path (in minutes)
 -- @field keep_alive (boolean) whether to support Connection: keep-alive
 -- @table config
@@ -589,92 +587,6 @@ local function truncate(str, max_len)
   return str
 end
 
---- Counts and logs views if a timer is running.
--- @field[opt] timer (uv_timer_t userdata) a timer that periodically
---   logs view counts and resets the counter
--- @field[opt] human_dur (string) human-readable representation of the
---   duration used by `timer`
--- @field count (table) keys are paths, values are view counts
--- @field increment (function) increments the count for the given path
---   if a timer is running
-local Views = {}
-
-function Views.new()
-  local state = {
-    timer = nil,
-    human_dur = nil,
-    count = {},
-    increment = function() end
-  }
-  return setmetatable(state, { __index = Views })
-end
-
---- Sets up a timer to log view counts.
--- @param dur_minutes (integer) log view counts at this interval
-function Views:start_timer(dur_minutes)
-  local units
-
-  if dur_minutes % 1440 == 0 then
-    units = dur_minutes / 1440
-    self.human_dur = string.format("%d day", units)
-  elseif dur_minutes % 60 == 0 then
-    units = dur_minutes / 60
-    self.human_dur = string.format("%d hour", units)
-  else
-    units = dur_minutes
-    self.human_dur = string.format("%d minute", units)
-  end
-
-  if units > 1 then
-    self.human_dur = self.human_dur .. "s"
-  end
-
-  local dur_ms = dur_minutes * 60 * 1000
-
-  self.timer = vim.uv.new_timer()
-  self.timer:start(dur_ms, dur_ms, vim.schedule_wrap(function()
-    local had_views = false
-    local log_views = function(...)
-      if not had_views then
-        had_views = true
-        log:info("Views in the past %s:", self.human_dur)
-      end
-      log:info(...)
-    end
-    local not_found = { paths = 0, views = 0 }
-
-    for path, count in pairs(self.count) do
-      self.count[path] = nil
-
-      if routing:has_path(path) then
-        log_views("- %d for '%s'", count, path)
-      else
-        -- Rather than log each such path individually, only log
-        -- them in the aggregate, in order to avoid DoS attacks
-        -- that aim to fill up the log.
-        --
-        not_found.paths = not_found.paths + 1
-        not_found.views = not_found.views + count
-      end
-    end
-
-    if not_found.paths > 0 then
-      log_views(
-        "- %d for %d nonexistent %s",
-        not_found.views,
-        not_found.paths,
-        not_found.paths > 1 and "paths" or "path"
-      )
-    end
-  end))
-
-  self.increment = function(this, path)
-    this.count[path] = (this.count[path] or 0) + 1
-  end
-end
-
-local views = nil
-
 --- Periodically logs resource use if a timer is running.
 -- @field[opt] timer (uv_timer_t userdata) a timer that periodically
 --   logs resource use
@@ -743,16 +655,12 @@ function M.init(config)
   log = Logger.new(M.config.log_filename)
   djotter = Djotter.new()
   routing = Routing.new(djotter)
-  views = Views.new()
   resource_use = ResourceUse.new()
 
   if not M.config.log_each_request then
     Logger.request = function() end
   end
 
-  if M.config.log_views_period > 0 then
-    views:start_timer(M.config.log_views_period)
-  end
 
   if M.config.log_resource_use_period > 0 then
     resource_use:start_timer(M.config.log_resource_use_period)
@@ -801,10 +709,6 @@ function M.init(config)
           truncate(result.request, 40)
         )
         socket:write(result.response.value)
-
-        if result.response.status ~= 400 then
-          views:increment(result.path)
-        end
 
         local keep_alive = (
           M.config.keep_alive
