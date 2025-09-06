@@ -8,5 +8,15 @@
         "prefix": "recur",
         "body": ["🔁"],
         "description": "🔁"
+    },
+    "today": {
+        "prefix": "today",
+        "body": ["${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}"],
+        "description": "Put the date in (Y-m-D) format"
+    } ,
+    "tomorrow": {
+        "prefix": "tomorrow",
+        "body": ["${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE + 1}"],
+        "description": "Put the date in (Y-m-D) format"
     }
 }

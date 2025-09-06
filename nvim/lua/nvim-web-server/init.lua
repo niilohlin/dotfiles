@@ -23,25 +23,25 @@ function Serve(host, port, routes)
   host = host or "127.0.0.1"
   port = port or 4999
   routes = routes or {
-    ["GET /"] = function()
-      return {
-        content_type = "text/html",
-        content = "hello"
-      }
-    end,
-    ["GET /test"] = function(query)
-      return {
-        content_type = "text/html",
-        content = "test, query " .. vim.inspect(query)
-      }
-    end,
-
-    ["POST /poster"] = function(body)
-      return {
-        content_type = "text/html",
-        content = "poster, body " .. vim.inspect(body)
-      }
-    end
+    -- ["GET /"] = function()
+    --   return {
+    --     content_type = "text/html",
+    --     content = "hello"
+    --   }
+    -- end,
+    -- ["GET /test"] = function(query)
+    --   return {
+    --     content_type = "text/html",
+    --     content = "test, query " .. vim.inspect(query)
+    --   }
+    -- end,
+    --
+    -- ["POST /poster"] = function(_query, body)
+    --   return {
+    --     content_type = "text/html",
+    --     content = "poster, body " .. vim.inspect(body)
+    --   }
+    -- end
   }
 
   create_server(host, port, function(socket)

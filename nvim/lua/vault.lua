@@ -1,6 +1,5 @@
 local vault_path = "/Users/niilohlin/Vault"
 
-
 function FindDueTasks()
   local cmd = {
     'rg',
@@ -146,64 +145,43 @@ end
 
 function OpenVault()
   vim.cmd("tabnew")
-  vim.cmd("tcd " .. vault_path)
+  vim.cmd("lcd " .. vault_path)
   vim.cmd("e Home.md")
   TODOs()
-  vim.keymap.set("n", "<leader>l", MarkAndUpdateTODO)
-  vim.snippet.add("markdown", {
-    trig = "tomorrow",
-    name = "Tomorrow's date",
-    dscr = "Insert tomorrow's date",
-  }, {
-    f(function()
-      return os.date("%Y-%m-%d", os.time() + 24 * 60 * 60)
-    end)
-  })
+  vim.keymap.set("n", "<leader>l", MarkAndUpdateTODO, { buffer = true })
+  -- vim.keymap.set("i", "<c-a>", function()
+  --
+  -- end, { buffer = true })
 end
 
 function ServeVault()
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].filetype = "markdown"
-  local qf_items = FindDueTasks()
   local lines = vim.fn.readfile(vault_path .. "/Home.md")
-  vim.api.nvim_buf_set_lines(buf, -1, -1, false, lines)
+  local routes = {
+    ["GET /"] = function(_query)
+      local qf_items = FindDueTasks()
+      return {
+        content_type = "text/html",
+        content = table.concat(vim.tbl_map(function(qf_item) return qf_item.text end, qf_items))
+      }
+    end
+  }
+  require("nvim-web-server")
+  Serve("127.0.0.1", 4999, routes)
 
-  vim.api.nvim_buf_set_lines(buf, -1, -1, false, { "", "# Found TODOS", "" })
-
-  local ws = require("web-server")
-  ws.init()
-  local templ_buf = vim.api.nvim_create_buf(false, true)
-
-  vim.api.nvim_buf_set_lines(templ_buf, -1, -1, false, {
-    "<!DOCTYPE html>",
-    "<html lang=\"en\">",
-    "<head>",
-    "<meta charset=\"UTF-8\">",
-    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
-    "<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">",
-    "<title>{{ title }}</title>",
-    "</head>",
-    "<body>",
-    "{{ content }}",
-    "</body>",
-    "</html>",
-  })
-  ws.WSSetBufferAsTemplate(templ_buf)
-  for _, qf_item in ipairs(qf_items) do
-    vim.api.nvim_buf_set_lines(buf, -1, -1, false,
-      { ("%s [%s](%s)"):format(qf_item.text, vim.fs.basename(qf_item.filename), vim.fs.basename(qf_item.filename)) })
-    local todo_buf = vim.api.nvim_create_buf(false, true)
-
-    local lines = vim.fn.readfile(qf_item.filename)
-    vim.api.nvim_buf_set_lines(todo_buf, -1, -1, false, lines)
-    vim.api.nvim_buf_set_name(todo_buf, qf_item.filename)
-
-    ws.WSAddBuffer("/" .. vim.fs.basename(qf_item.filename):gsub(" ", "%%20"), nil, todo_buf)
-  end
-
-  vim.cmd("wincmd j")
-
-  ws.WSAddBuffer("/", nil, buf)
+  -- "<!DOCTYPE html>",
+  -- "<html lang=\"en\">",
+  -- "<head>",
+  -- "<meta charset=\"UTF-8\">",
+  -- "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
+  -- "<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">",
+  -- "<title>{{ title }}</title>",
+  -- "</head>",
+  -- "<body>",
+  -- "{{ content }}",
+  -- "</body>",
+  -- "</html>",
 end
 
 vim.api.nvim_create_user_command("TODOs", TODOs, { nargs = "*" })
