@@ -20,35 +20,13 @@ end
 
 
 function Serve(host, port, routes)
-  host = host or "127.0.0.1"
+  host = host or "0.0.0.0"
   port = port or 4999
-  routes = routes or {
-    -- ["GET /"] = function()
-    --   return {
-    --     content_type = "text/html",
-    --     content = "hello"
-    --   }
-    -- end,
-    -- ["GET /test"] = function(query)
-    --   return {
-    --     content_type = "text/html",
-    --     content = "test, query " .. vim.inspect(query)
-    --   }
-    -- end,
-    --
-    -- ["POST /poster"] = function(_query, body)
-    --   return {
-    --     content_type = "text/html",
-    --     content = "poster, body " .. vim.inspect(body)
-    --   }
-    -- end
-  }
 
   create_server(host, port, function(socket)
     debug(("creating server %s %d"):format(host, port))
     Request = require("nvim-web-server.request")
     local request = ""
-    local result = nil
 
     socket:read_start(function(error, chunk)
       debug(("reading chunk %s %s"):format(error, chunk))
@@ -66,23 +44,23 @@ function Serve(host, port, routes)
       debug("request chunk")
       debug(request)
       if request:match("\r?\n\r?\n") then
-        result = Request.process(request, routes)
-      end
+        Request.process(request, routes, function(result)
+          if result ~= nil then
+            debug("result")
+            debug(result)
+            socket:write(result.response.value)
 
-      if result ~= nil then
-        debug("result")
-        debug(result)
-        socket:write(result.response.value)
+            local keep_alive = result.response.status ~= 400
 
-        local keep_alive = result.response.status ~= 400
-
-        if keep_alive then
-          request = ""
-          result = nil
-        else
-          socket:read_stop()
-          socket:close()
-        end
+            if keep_alive then
+              request = ""
+              result = nil
+            else
+              socket:read_stop()
+              socket:close()
+            end
+          end
+        end)
       end
     end)
   end)

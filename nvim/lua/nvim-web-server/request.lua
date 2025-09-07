@@ -21,7 +21,7 @@ local function parse_http_request(request_string)
   local method, path = request_line:match("^(%S+)%s+(%S+)")
 
   result.line.method = method
-  result.line.path = path
+  result.line.path = path:gsub("%%20", " ")
   result.line.protocol = "HTTP/1.1"
 
   local body_start_index = nil
@@ -70,21 +70,25 @@ local function parse_http_request(request_string)
   return result
 end
 
-function M.process(raw_request, routes)
+function M.process(raw_request, routes, done)
   Response = require("nvim-web-server.response")
   local request = parse_http_request(
     raw_request
   )
-  local response
 
   if request.bad then -- figure out how to check this
-    response = Response.bad()
+    -- response = Response.bad()
   else
     assert(request.line.path ~= nil)
     local normalized = request.line.method .. " " .. request.line.path:gsub("?.*", ""):gsub("/+", "/")
 
     if not routes[normalized] then
-      response = Response.not_found()
+      done(
+        {
+          request = request,
+          response = Response.not_found()
+        }
+      )
     else
       local query_string = request.line.path:match("%?(.*)")
 
@@ -95,19 +99,16 @@ function M.process(raw_request, routes)
         end
       end
 
-      local value = routes[normalized](query, request.body)
-
-      response = Response.ok(
-        value.content_type,
-        value.content
-      )
+      routes[normalized](query, request.body, function(response)
+        done(
+          {
+            request = request,
+            response = response
+          }
+        )
+      end)
     end
   end
-
-  return {
-    request = request,
-    response = response
-  }
 end
 
 return M

@@ -46,6 +46,24 @@ function Response.bad()
   }
 end
 
+--- Status code 303.
+function Response.see_other(location)
+  return {
+    status = 303,
+    value = (
+      "HTTP/1.1 303 See Other\r\n" ..
+      "Location: " .. location .. "\r\n" ..
+      "Server: nvim-web-server\r\n" ..
+      "Content-Length: 0\r\n" ..
+      "Cache-Control: no-cache, no-store, must-revalidate\r\n" ..
+      "Pragma: no-cache\r\n" ..
+      "Expires: 0\r\n" ..
+      response_connection ..
+      "\r\n"
+    )
+  }
+end
+
 --- Status code 304.
 function Response.not_modified()
   return {

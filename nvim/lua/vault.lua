@@ -138,9 +138,9 @@ function MarkAndUpdateTODO()
       local new_task = ("%s 🔁 %s 📅 %s"):format(title, parsed["🔁"], next_string)
 
       vim.cmd(("put! = '%s'"):format(new_task))
-      vim.cmd("write")
     end
   end
+  vim.cmd("write")
 end
 
 function OpenVault()
@@ -148,40 +148,136 @@ function OpenVault()
   vim.cmd("lcd " .. vault_path)
   vim.cmd("e Home.md")
   TODOs()
-  vim.keymap.set("n", "<leader>l", MarkAndUpdateTODO, { buffer = true })
+  vim.keymap.set("n", "<leader>l", MarkAndUpdateTODO)
   -- vim.keymap.set("i", "<c-a>", function()
   --
   -- end, { buffer = true })
 end
 
+local base_html_template = [[
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="X-UA-Compatible" content="ie=edge">
+            <title>Vault</title>
+            </head>
+            <body>
+            <a href="/Users/niilohlin/Vault/Home.md">Home</a> <a href="/">TODOs</a><br>
+            %s
+            </body>
+            </html>
+        ]]
+
 function ServeVault()
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].filetype = "markdown"
-  local lines = vim.fn.readfile(vault_path .. "/Home.md")
+  Response = require("nvim-web-server.response")
   local routes = {
-    ["GET /"] = function(_query)
-      local qf_items = FindDueTasks()
-      return {
-        content_type = "text/html",
-        content = table.concat(vim.tbl_map(function(qf_item) return qf_item.text end, qf_items))
-      }
+    ["GET /"] = function(_query, body, done)
+      vim.schedule(function()
+        local qf_items = FindDueTasks()
+
+        local content = ""
+        for _, item in ipairs(qf_items) do
+          content = content .. ([[
+            <a href="%s">
+              %s
+            </a>
+            <br>
+          ]]):format(item.filename, item.text)
+        end
+
+        local lines = vim.fn.readfile(vault_path .. "/Home.md")
+
+        done(Response.ok(
+          "text/html",
+          base_html_template:format(content)
+        ))
+      end)
+    end,
+    ["POST /"] = function(_query, body, done) -- post set notes,
     end
   }
-  require("nvim-web-server")
-  Serve("127.0.0.1", 4999, routes)
 
-  -- "<!DOCTYPE html>",
-  -- "<html lang=\"en\">",
-  -- "<head>",
-  -- "<meta charset=\"UTF-8\">",
-  -- "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
-  -- "<meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">",
-  -- "<title>{{ title }}</title>",
-  -- "</head>",
-  -- "<body>",
-  -- "{{ content }}",
-  -- "</body>",
-  -- "</html>",
+  local cmd = {
+    "rg",
+    "--files",
+    "--type=markdown",
+    vault_path,
+  }
+
+  for _, file_path in ipairs(vim.fn.systemlist(cmd)) do
+    routes["GET " .. file_path] = function(_query, body, done)
+      vim.schedule(function()
+        local lines = vim.fn.readfile(file_path)
+        local content = ([[<a href="%s/edit">edit</a><br>]]):format(file_path)
+        for i, line in ipairs(lines) do
+          if line:match("- %[ %] ") then
+            content = content .. ([[
+            <form action="%s" method="POST">
+              %s <button type="submit" name="line" value="%d">done</button>
+            </form>
+            <br>
+            ]]):format(file_path, line, i)
+          else
+            content = content .. line .. "<br>"
+          end
+        end
+        done(
+          Response.ok(
+            "text/html",
+            base_html_template:format(content)
+          )
+        )
+      end)
+    end
+    routes["GET " .. file_path .. "/edit"] = function(_query, body, done)
+      vim.schedule(function()
+        local lines = vim.fn.readfile(file_path)
+        local content = ([[
+        <form action="%s/save" method="POST">
+          <textarea id="content" name="content" rows="20" cols="50">%s</textarea>
+          <br>
+          <button type="submit">Save</button>
+        </form>
+        ]]):format(file_path, table.concat(lines, "\n"))
+        done(
+          Response.ok(
+            "text/html",
+            base_html_template:format(content)
+          )
+        )
+      end)
+    end
+    routes["POST " .. file_path .. "/save"] = function(_query, body, done)
+      vim.schedule(function()
+        if not body["content"] then
+          done(Response.bad())
+          return
+        end
+        local lines = vim.split(body["content"], "\r\n")
+        local filename = "output.txt"
+        -- Method 1: Using vim.fn.writefile()
+        vim.fn.writefile(lines, filename)
+        vim.cmd.edit(file_path)
+        vim.cmd.write()
+        done(Response.see_other(file_path))
+      end)
+    end
+    routes["POST " .. file_path] = function(_query, body, done)
+      vim.schedule(function()
+        vim.cmd.edit(file_path)
+        vim.cmd(body["line"])
+        MarkAndUpdateTODO()
+        done(Response.see_other(file_path))
+      end)
+    end
+  end
+
+  require("nvim-web-server")
+  Serve("0.0.0.0", 4999, routes)
 end
 
 vim.api.nvim_create_user_command("TODOs", TODOs, { nargs = "*" })
