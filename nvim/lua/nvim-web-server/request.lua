@@ -76,6 +76,13 @@ function M.process(raw_request, routes, done)
     raw_request
   )
 
+  if request.headers["content-length"] and tonumber(request.headers["content-length"]) > 0 then
+    local raw_body = vim.split(raw_request, "\r?\n\r?\n")[2]
+    if raw_request and #raw_body < tonumber(request.headers["content-length"]) then
+      return -- havent gotten the full content yet
+    end
+  end
+
   if request.bad then -- figure out how to check this
     -- response = Response.bad()
   else

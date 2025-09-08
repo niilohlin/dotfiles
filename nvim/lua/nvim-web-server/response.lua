@@ -18,13 +18,14 @@ function Response.ok(content_type, content)
   }
 end
 
-function Response.bad()
+function Response.bad(reason)
   local content = (
     "<!DOCTYPE html>" ..
     "<html>" ..
     "<head><title>Bad Request</title></head>" ..
     "<body>" ..
     "<center><h1>Bad Request</h1></center>" ..
+    reason .. "<br>" ..
     "<hr>" ..
     "<center>nvim-web-server</center>" ..
     "</body>" ..
@@ -40,6 +41,7 @@ function Response.bad()
       "Content-Type: text/html\n" ..
       "Content-Length: " .. content:len() .. "\n" ..
       "Connection: close\n" ..
+      "X-Error-Message: " .. reason .. "\n" ..
       "\n" ..
       content
     )

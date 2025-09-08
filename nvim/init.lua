@@ -1317,16 +1317,6 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   end
 })
 
--- :Messages show :messages in buffer
-vim.api.nvim_create_user_command("Messages", function()
-  local lines = vim.api.nvim_exec2("messages", { output = true }).output
-  vim.cmd("new")
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
-  vim.cmd("setlocal buftype=nofile bufhidden=wipe nobuflisted")
-  vim.api.nvim_buf_set_keymap(0, "n", "q", "<cmd>bd!<CR>", { noremap = true, silent = true })
-end, {})
-
-
 -- do not "go to next window"
 vim.api.nvim_set_keymap("n", "<C-W><C-W>", "<nop>", {})
 
