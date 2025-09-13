@@ -36,8 +36,17 @@ vim.api.nvim_create_autocmd("FileType", {
 vim.api.nvim_create_autocmd("FileType", {
   group = initgroup,
   pattern = "markdown",
-  command = "set spell nofoldenable"
+  callback = function()
+    vim.opt.spell = true
+    vim.opt.foldenable = false
+    vim.opt.wrap = true
+    vim.opt.linebreak = true
+    vim.opt.textwidth = 80
+    vim.opt.formatoptions:remove("t") -- Disable auto-wrapping at textwidth
+    vim.opt.colorcolumn = "80"        -- Visual guide
+  end
 })
+
 
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
   group = initgroup,
@@ -199,7 +208,7 @@ vim.opt.autowrite = true      -- Automatically write on :n and :p
 vim.opt.autoread = true       -- Automatically read file from disk on change
 vim.opt.number = true         -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.colorcolumn = "120"   -- Show max column highlight.
+vim.opt.colorcolumn = "80"    -- Show max column highlight.
 vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 vim.opt.wildmode = { "longest", "full" }
@@ -897,6 +906,20 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
 -- Markdown utility, go to link and so on.
 vim.pack.add({ "https://github.com/plasticboy/vim-markdown" })
+
+-- Automatically wrap words. Nice when writing prose.
+vim.pack.add({ "https://github.com/rickhowe/wrapwidth" })
+vim.api.nvim_create_autocmd({ "FileType" }, {
+  group = initgroup,
+  pattern = "markdown",
+  callback = function(ev)
+    vim.schedule(function()
+      vim.keymap.set("n", "j", "gj", { buffer = true })
+      vim.keymap.set("n", "k", "gk", { buffer = true })
+      vim.cmd("Wrapwidth 80")
+    end)
+  end
+})
 
 -- quickfix improvement
 vim.pack.add({ "https://github.com/stevearc/quicker.nvim" })

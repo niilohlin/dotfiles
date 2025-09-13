@@ -278,7 +278,9 @@ vim.api.nvim_create_autocmd("BufWrite", {
   callback = function(ev)
     local path = vim.fn.fnamemodify(ev.file, ":p")
     if path:sub(1, #vault_path) == vault_path then
-      vim.fn.system(("(cd %s && git commit -am 'autocommit' && git push)"):format(vault_path))
+      vim.schedule(function()
+        vim.fn.system(("(cd %s && git commit -am 'autocommit' && git push)"):format(vault_path))
+      end)
     end
   end
 })
