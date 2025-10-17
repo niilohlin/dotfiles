@@ -8,7 +8,7 @@ font-feature=-calt
 font-feature=-liga
 font-feature=-dlig
 
-theme = GruvboxDark
+theme = Gruvbox Dark
 
 keybind = cmd+t=unbind
 keybind = cmd+enter=unbind

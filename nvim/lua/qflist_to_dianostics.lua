@@ -213,12 +213,3 @@ vim.keymap.set("n", "<leader>td", function()
   end
 end, { desc = "Debug nearest pytest (current or up to 100 lines above)" })
 
-
-vim.keymap.set("n", "[Q", function()
-  vim.cmd("colder | copen")
-  qflist_to_diagnostics()
-end)
-vim.keymap.set("n", "]Q", function()
-  vim.cmd("cnewer | copen")
-  qflist_to_diagnostics()
-end)

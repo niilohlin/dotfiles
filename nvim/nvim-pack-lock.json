@@ -1,0 +1,18 @@
+{
+  "plugins": {
+    "gitsigns.nvim": [],
+    "gruvbox.nvim": [],
+    "mini-git": {
+      "rev": "dcb13b6",
+      "src": "https://github.com/nvim-mini/mini-git"
+    },
+    "plenary.nvim": [],
+    "telescope-fzf-native.nvim": [],
+    "telescope-ui-select.nvim": [],
+    "telescope.nvim": [],
+    "vim-fugitive": {
+      "rev": "61b51c0",
+      "src": "https://github.com/tpope/vim-fugitive"
+    }
+  }
+}

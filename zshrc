@@ -124,5 +124,13 @@ fi
 ulimit -n 8192
 
 # set neovim to man
-export MANPAGER='nvim +Man!'
+# export MANPAGER='nvim +Man!'
 
+
+# pnpm
+export PNPM_HOME="/Users/niilohlin/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end

@@ -247,14 +247,14 @@ vim.opt.wildignore:append("*.o,*.obj,*.pyc,*.class") -- ignore build files when 
 -- ignore git and pycache
 vim.opt.wildignore:append("*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store,*/.vscode/*,*/.pytest_cache/*,*/__pycache__/*")
 -- ignore venv
-vim.opt.wildignore:append("*/venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist/*,*/.next/*,*/.cache/*")
+vim.opt.wildignore:append("*/venv/*,*/.venv/*,*/node_modules/*,*/target/*,*/build/*,*/dist/*,*/.next/*,*/.cache/*")
 
 vim.g.markdown_enable_spell_checking = 0
 vim.g.python3_host_prog = os.getenv("HOME") .. "/.local/share/nvim/venv/bin/python"
 
 -- Set leader to <space>
 vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+vim.g.maplocalleader = "\\"
 
 -- show diagnostic source.
 vim.diagnostic.config({
@@ -837,6 +837,8 @@ end)
 
 vim.pack.add({ "https://github.com/johmsalas/text-case.nvim" })
 require("textcase").setup({})
+require("telescope").load_extension("textcase")
+vim.keymap.set({ "n", "x" }, "ga.", "<cmd>TextCaseOpenTelescope<CR>")
 
 -- nicer status line
 vim.pack.add({ "https://github.com/nvim-lualine/lualine.nvim" })
@@ -905,7 +907,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 -- Markdown utility, go to link and so on.
-vim.pack.add({ "https://github.com/plasticboy/vim-markdown" })
 
 -- Automatically wrap words. Nice when writing prose.
 vim.pack.add({ "https://github.com/rickhowe/wrapwidth" })
@@ -1182,8 +1183,49 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- Do not nest vim sessions
 vim.pack.add({ "https://github.com/brianhuster/unnest.nvim" })
 
--- neovim web server
-vim.pack.add({ "https://github.com/gn0/nvim-web-server" })
+-- neovim images
+vim.pack.add({ "https://github.com/3rd/image.nvim" })
+if not vim.g.neovide then
+  require("image").setup({
+    integrations = {
+      markdown = {
+        enabled = true,
+        clear_in_insert_mode = false,
+        download_remote_images = true,
+        only_render_image_at_cursor = false,
+        filetypes = { "markdown", "vimwiki" }, -- markdown extensions (ie. quarto) can go here
+      },
+    },
+  })
+end
+
+-- increment/decrement enhancement
+
+vim.pack.add({ "https://github.com/monaqa/dial.nvim" })
+vim.keymap.set("n", "<C-a>", function()
+  require("dial.map").manipulate("increment", "normal")
+end)
+vim.keymap.set("n", "<C-x>", function()
+  require("dial.map").manipulate("decrement", "normal")
+end)
+vim.keymap.set("n", "g<C-a>", function()
+  require("dial.map").manipulate("increment", "gnormal")
+end)
+vim.keymap.set("n", "g<C-x>", function()
+  require("dial.map").manipulate("decrement", "gnormal")
+end)
+vim.keymap.set("x", "<C-a>", function()
+  require("dial.map").manipulate("increment", "visual")
+end)
+vim.keymap.set("x", "<C-x>", function()
+  require("dial.map").manipulate("decrement", "visual")
+end)
+vim.keymap.set("x", "g<C-a>", function()
+  require("dial.map").manipulate("increment", "gvisual")
+end)
+vim.keymap.set("x", "g<C-x>", function()
+  require("dial.map").manipulate("decrement", "gvisual")
+end)
 
 -- end plugins
 
@@ -1348,5 +1390,4 @@ require("python_output")
 require("rope")
 require("project")
 require("qflist_to_dianostics")
-require("vault")
-ServeVault()
+dofile(vim.env.HOME .. '/Vault/vault.lua')

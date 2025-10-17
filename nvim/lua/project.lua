@@ -35,10 +35,13 @@ end
 function _G.project_picker()
   -- parent project dirs
   local base_dirs = {
-    { path = vim.fn.expand('~/dotfiles/'),      name = 'dotfiles' },
-    { path = vim.fn.expand('~/work/quickbit/'), name = 'quickbit' },
-    { path = vim.fn.expand('~/personal/'),      name = 'personal' },
-    { path = vim.fn.expand('/'),                name = 'root' },
+    { path = vim.fn.expand('~/dotfiles/'),               name = 'dotfiles' },
+    { path = vim.fn.expand('~/work/'),                   name = 'work' },
+    { path = vim.fn.expand('~/work/quickbit/'),          name = 'quickbit' },
+    { path = vim.fn.expand('~/work/quickbit/frontend/'), name = 'frontend' },
+    { path = vim.fn.expand('~/personal/'),               name = 'personal' },
+    { path = vim.fn.expand('~/Vault'),                   name = 'vault' },
+    { path = vim.fn.expand('/'),                         name = 'root' },
   }
 
   -- expand to include their subdirs too

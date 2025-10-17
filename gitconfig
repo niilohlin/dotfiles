@@ -18,8 +18,6 @@
 [push]
 	default = simple
 	followTags = true
-[credential]
-	helper = osxkeychain
 [rebase]
 	autosquash = true
 	autoStash = true
@@ -78,3 +76,5 @@
 	verbose = true
 [gpg "ssh"]
 	allowedSignersFile = /Users/niilohlin/.config/git/allowed_signers
+[credentail]
+	helper = store
