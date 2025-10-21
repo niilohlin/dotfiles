@@ -43,7 +43,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.linebreak = true
     vim.opt.textwidth = 80
     vim.opt.formatoptions:remove("t") -- Disable auto-wrapping at textwidth
-    vim.opt.colorcolumn = "80"        -- Visual guide
   end
 })
 
@@ -208,7 +207,6 @@ vim.opt.autowrite = true      -- Automatically write on :n and :p
 vim.opt.autoread = true       -- Automatically read file from disk on change
 vim.opt.number = true         -- Set line numbers
 vim.opt.relativenumber = true -- Set relative line numbers
-vim.opt.colorcolumn = "80"    -- Show max column highlight.
 vim.opt.cursorline = true     -- Show a horizontal line where the cursor is
 vim.opt.splitbelow = true     -- Show the preview window (code documentation) to the bottom of the screen.
 vim.opt.wildmode = { "longest", "full" }

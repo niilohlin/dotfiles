@@ -1,18 +1,59 @@
 {
   "plugins": {
+    "auto-cmdheight.nvim": [],
+    "bettercompile": {
+      "rev": "26d78df",
+      "src": "https://github.com/freddidit/bettercompile"
+    },
+    "blink.cmp": [],
+    "codecompanion.nvim": [],
+    "compile.nvim": {
+      "rev": "3003da2",
+      "src": "https://github.com/pohlrabi404/compile.nvim"
+    },
+    "dial.nvim": [],
+    "friendly-snippets": [],
     "gitsigns.nvim": [],
     "gruvbox.nvim": [],
+    "image.nvim": [],
+    "import.nvim": [],
+    "lazydev.nvim": [],
+    "log-highlight.nvim": [],
+    "lualine.nvim": [],
+    "mason.nvim": [],
     "mini-git": {
       "rev": "dcb13b6",
       "src": "https://github.com/nvim-mini/mini-git"
     },
+    "mini.ai": [],
+    "mini.diff": [],
+    "mini.icons": [],
+    "mini.surround": [],
+    "multicursor.nvim": [],
+    "neoindent": [],
+    "nvim-lspconfig": [],
+    "nvim-scrollbar": [],
+    "nvim-treesitter": [],
+    "nvim-treesitter-textobjects": [],
+    "oil.nvim": [],
     "plenary.nvim": [],
+    "quicker.nvim": [],
+    "refactoring.nvim": [],
+    "tabby.nvim": [],
     "telescope-fzf-native.nvim": [],
     "telescope-ui-select.nvim": [],
     "telescope.nvim": [],
+    "text-case.nvim": [],
+    "unnest.nvim": [],
+    "vim-cool": [],
+    "vim-dispatch": [],
+    "vim-fetch": [],
     "vim-fugitive": {
       "rev": "61b51c0",
       "src": "https://github.com/tpope/vim-fugitive"
-    }
+    },
+    "vim-pythonsense": [],
+    "vim-unimpaired": [],
+    "wrapwidth": []
   }
 }

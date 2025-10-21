@@ -31,6 +31,42 @@ local function get_subdirs(dir)
   return subdirs
 end
 
+local last_path = nil
+
+local function switch_to_path(path)
+  last_path = vim.fn.getcwd()
+  vim.cmd('cd ' .. path)
+
+  local current = vim.fn.expand('%:p')
+  if current:find(path, 1, true) then
+    return
+  end
+
+  local jumplist, idx = unpack(vim.fn.getjumplist())
+  local found = false
+  for pos = idx, 1, -1 do
+    local ent = jumplist[pos]
+    local bufnr = ent.bufnr
+    local fname = vim.api.nvim_buf_get_name(bufnr)
+    if fname:find(path, 1, true) then
+      vim.cmd('e ' .. fname)
+      found = true
+      break
+    end
+  end
+
+  if not found then
+    vim.cmd('e .')
+  end
+end
+
+vim.keymap.set("n", "<leader>L", function()
+  if last_path then
+    switch_to_path(last_path)
+  else
+    print("no last project")
+  end
+end)
 
 function _G.project_picker()
   -- parent project dirs
@@ -62,29 +98,7 @@ function _G.project_picker()
         return
       end
       local selection = project_dirs[project_index]
-      vim.cmd('cd ' .. selection.path)
-
-      local current = vim.fn.expand('%:p')
-      if current:find(selection.path, 1, true) then
-        return
-      end
-
-      local jumplist, idx = unpack(vim.fn.getjumplist())
-      local found = false
-      for pos = idx, 1, -1 do
-        local ent = jumplist[pos]
-        local bufnr = ent.bufnr
-        local fname = vim.api.nvim_buf_get_name(bufnr)
-        if fname:find(selection.path, 1, true) then
-          vim.cmd('e ' .. fname)
-          found = true
-          break
-        end
-      end
-
-      if not found then
-        vim.cmd('e .')
-      end
+      switch_to_path(selection.path)
     end
   )
 end
