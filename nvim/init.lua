@@ -1,3 +1,19 @@
+-- Clone 'mini.nvim' manually in a way that it gets managed by 'mini.deps'
+local path_package = vim.fn.stdpath('data') .. '/site/'
+local mini_path = path_package .. 'pack/deps/start/mini.nvim'
+if not vim.loop.fs_stat(mini_path) then
+  vim.cmd('echo "Installing `mini.nvim`" | redraw')
+  local clone_cmd = {
+    'git', 'clone', '--filter=blob:none',
+    'https://github.com/nvim-mini/mini.nvim', mini_path
+  }
+  vim.fn.system(clone_cmd)
+  vim.cmd('packadd mini.nvim | helptags ALL')
+  vim.cmd('echo "Installed `mini.nvim`" | redraw')
+end
+-- Set up 'mini.deps' (customize to your liking)
+require('mini.deps').setup({ path = { package = path_package } })
+
 function SetTabLength(tab_length)
   vim.opt.tabstop = tab_length
   vim.opt.shiftwidth = tab_length
@@ -262,7 +278,7 @@ vim.diagnostic.config({
 })
 
 -- Git status of changed lines to the left.
-vim.pack.add({ "https://github.com/lewis6991/gitsigns.nvim" })
+MiniDeps.add("https://github.com/lewis6991/gitsigns.nvim")
 local gitsigns = require("gitsigns")
 gitsigns.setup({
   signs = {
@@ -299,7 +315,7 @@ vim.api.nvim_create_user_command("Unreview", function()
 end, { nargs = "*" })
 
 -- Gruvbox with treesitter support
-vim.pack.add({ "https://github.com/ellisonleao/gruvbox.nvim" })
+MiniDeps.add("https://github.com/ellisonleao/gruvbox.nvim")
 require("gruvbox").setup()
 vim.o.background = "dark"
 vim.cmd("colorscheme gruvbox")
@@ -308,12 +324,10 @@ vim.api.nvim_set_hl(0, "IncSearch", { bg = "#af3a03", fg = "#fbf1c7" })
 vim.api.nvim_set_hl(0, "CurSearch", { bg = "#8f3f71", fg = "#fbf1c7" })
 
 -- project wide search, requires ripgrep
-vim.pack.add({
-  "https://github.com/nvim-telescope/telescope.nvim",
-  "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
-  "https://github.com/nvim-telescope/telescope-ui-select.nvim",
-  "https://github.com/nvim-lua/plenary.nvim",
-})
+MiniDeps.add("https://github.com/nvim-telescope/telescope.nvim")
+MiniDeps.add("https://github.com/nvim-telescope/telescope-fzf-native.nvim")
+MiniDeps.add("https://github.com/nvim-telescope/telescope-ui-select.nvim")
+MiniDeps.add("https://github.com/nvim-lua/plenary.nvim")
 -- packadd make
 
 require("telescope").setup({
@@ -375,38 +389,26 @@ vim.keymap.set("n", "<leader>ws", builtin.lsp_dynamic_workspace_symbols) -- live
 vim.keymap.set("n", "z=", builtin.spell_suggest)
 
 -- Git plugin, provides :Git add, :Git blame etc.
-vim.pack.add({ "https://github.com/tpope/vim-fugitive" })
+MiniDeps.add("https://github.com/tpope/vim-fugitive")
 
 -- async Make, Dispatch (run), and more, integrates with tmux
-vim.pack.add({ "https://github.com/tpope/vim-dispatch" })
+MiniDeps.add("https://github.com/tpope/vim-dispatch")
 
 -- [q and ]q to navigate quickfix list for example
-vim.pack.add({ "https://github.com/tpope/vim-unimpaired" })
+MiniDeps.add("https://github.com/tpope/vim-unimpaired")
 
 -- Semantic syntax highlighting
-vim.pack.add({ "https://github.com/nvim-treesitter/nvim-treesitter" })
+MiniDeps.add("https://github.com/nvim-treesitter/nvim-treesitter")
 vim.api.nvim_create_autocmd("BufReadPre", {
   group = initgroup,
   once = true,
   callback = function()
     local configs = require("nvim-treesitter.configs")
     configs.setup({
+      modules = {},
       ensure_installed = {
-        "bash",
-        "c",
-        "cpp",
-        "css",
-        "javascript",
-        "json",
-        "lua",
         "python",
-        "regex",
-        "rust",
-        "toml",
-        "yaml",
-        "swift",
-        "haskell",
-        "html",
+        "lua",
       },
 
       sync_install = false, -- Install languages synchronously (only applied to `ensure_installed`)
@@ -473,7 +475,8 @@ vim.api.nvim_create_autocmd("BufReadPre", {
 
 -- Tree sitter text objects
 -- Text objects plugin
-vim.pack.add({ "https://github.com/echasnovski/mini.ai", "https://github.com/nvim-treesitter/nvim-treesitter-textobjects" })
+MiniDeps.add("https://github.com/nvim-treesitter/nvim-treesitter-textobjects")
+MiniDeps.add("https://github.com/echasnovski/mini.ai")
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   group = initgroup,
   once = true,
@@ -483,7 +486,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 })
 
 -- Surround plugin, adds text objects like ci" and so on.
-vim.pack.add({ "https://github.com/echasnovski/mini.surround" })
+MiniDeps.add("https://github.com/echasnovski/mini.surround")
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   group = initgroup,
   once = true,
@@ -511,7 +514,7 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 })
 
 -- indentation text objects and jumps
-vim.pack.add({ "https://github.com/niilohlin/neoindent" })
+MiniDeps.add("https://github.com/niilohlin/neoindent")
 vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   group = initgroup,
   once = true,
@@ -522,7 +525,8 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
 
 -- Nerd Icons (for example in oil buffers)
 -- File explorer
-vim.pack.add({ "https://github.com/stevearc/oil.nvim", "https://github.com/echasnovski/mini.icons" })
+MiniDeps.add("https://github.com/echasnovski/mini.icons")
+MiniDeps.add("https://github.com/stevearc/oil.nvim")
 require("mini.icons").setup()
 vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
   group = initgroup,
@@ -533,28 +537,26 @@ vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
     -- Disable netrw. We don't need it if we use oil
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
-    -- vim.pack.add({"https://github.com/benomahony/oil-git.nvim"})
+    -- MiniDeps.add("https://github.com/benomahony/oil-git.nvim")
   end,
 })
 
 -- Snippets collection
-vim.pack.add({ "https://github.com/rafamadriz/friendly-snippets" })
+MiniDeps.add("https://github.com/rafamadriz/friendly-snippets")
 
 -- Completion engine.
-vim.api.nvim_create_autocmd('PackChanged', {
-  group = initgroup,
-  once = true,
-  callback = function(event)
-    if event.data.spec == "blink.cmp" then
-      vim.fn.system(("cd %s && cargo build --release"):format(event.data.path))
-    end
-  end
-})
-vim.pack.add({
-  "https://github.com/saghen/blink.cmp",
-})
+-- vim.api.nvim_create_autocmd('PackChanged', {
+--   group = initgroup,
+--   once = true,
+--   callback = function(event)
+--     if event.data.spec == "blink.cmp" then
+--       vim.fn.system(("cd %s && cargo build --release"):format(event.data.path))
+--     end
+--   end
+-- })
+MiniDeps.add("https://github.com/saghen/blink.cmp")
 
-vim.pack.add({ "https://github.com/folke/lazydev.nvim" })
+MiniDeps.add("https://github.com/folke/lazydev.nvim")
 vim.api.nvim_create_autocmd("FileType", {
   group = initgroup,
   pattern = "lua",
@@ -614,7 +616,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
 })
 
 -- LSP server Installer/manager
-vim.pack.add({ "https://github.com/mason-org/mason.nvim" })
+MiniDeps.add("https://github.com/mason-org/mason.nvim")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   group = initgroup,
   once = true,
@@ -623,13 +625,14 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   end,
 })
 
+local lsp_format_group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true })
+
 -- LSP setup
-vim.pack.add({ "https://github.com/neovim/nvim-lspconfig" })
+MiniDeps.add("https://github.com/neovim/nvim-lspconfig")
 vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   group = initgroup,
   once = true,
   callback = function()
-    local lspconfig = require("lspconfig")
     local capabilities = require("blink.cmp").get_lsp_capabilities()
 
     local vim_runtime_paths = {
@@ -640,7 +643,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     local rest = vim.api.nvim_list_runtime_paths()
     table.move(rest, 1, #rest, #vim_runtime_paths + 1, vim_runtime_paths)
 
-    lspconfig.lua_ls.setup({
+    vim.lsp.config("lua_ls", {
       capabilities = capabilities,
       settings = {
         Lua = {
@@ -662,21 +665,20 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           },
         },
       },
-    })
-    vim.lsp.config("lua_ls", lspconfig.lua_ls)
+    }
 
-    lspconfig.ts_ls.setup({
+  )
+    vim.lsp.config("ts_ls", {
       capabilities = capabilities,
     })
-    vim.lsp.config("ts_ls", lspconfig.ts_ls)
 
-    lspconfig.eslint.setup({
+    vim.lsp.config("eslint", {
       on_attach = function(client, bufnr)
         -- Enable formatting capability for ESLint
         client.server_capabilities.documentFormattingProvider = true
         -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePre", {
-          group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
+          group = lsp_format_group,
           buffer = bufnr,
           callback = function()
             vim.lsp.buf.format({ bufnr = bufnr })
@@ -684,25 +686,50 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         })
       end,
     })
-    vim.lsp.config("eslint", lspconfig.eslint)
 
-    lspconfig.jedi_language_server.setup({
-      init_options = {
-        codeAction = {
-          nameExtractVariable = "jls_extract_var",
-          nameExtractFunction = "jls_extract_def",
-        },
-        completion = {
-          -- LSP snippets turned out to insisting on inserting parens everywhere
-          disableSnippets = true,
-        },
-      },
+    -- vim.lsp.config("jedi_language_server", {
+    --   cmd = { "uvx", "jedi-language-server" },
+    --   init_options = {
+    --     codeAction = {
+    --       nameExtractVariable = "jls_extract_var",
+    --       nameExtractFunction = "jls_extract_def",
+    --     },
+    --     completion = {
+    --       -- LSP snippets turned out to insisting on inserting parens everywhere
+    --       disableSnippets = true,
+    --     },
+    --   },
+    --   capabilities = capabilities,
+    -- })
+    -- vim.lsp.enable('jedi_language_server')
+
+    vim.lsp.config("pyrefly", {
+      cmd = { "uvx", "pyrefly", "lsp" },
       capabilities = capabilities,
+      on_attach = function(client, bufnr)
+        -- client.server_capabilities.completionProvider = false
+        -- client.server_capabilities.definitionProvider = false
+        -- client.server_capabilities.documentHighlightProvider = false
+        -- client.server_capabilities.documentSymbolProvider = false
+        -- client.server_capabilities.hoverProvider = false
+        -- client.server_capabilities.inlayHintProvider = false
+        -- client.server_capabilities.referencesProvider = false
+        -- client.server_capabilities.renameProvider = { prepareProvider = false }
+        -- client.server_capabilities.semanticTokensProvider = { }
+        -- client.server_capabilities.signatureHelpProvider = { }
+        -- client.server_capabilities.typeDefinitionProvider = false
+        -- client.server_capabilities.workspaceSymbolProvider = false
+      end
     })
-    vim.lsp.config("jedi_language_server", lspconfig.jedi_language_server)
-    local lsp_format_group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true })
+    vim.lsp.enable('pyrefly')
 
-    lspconfig.ruff.setup({
+    -- vim.lsp.config("zuban", {
+    --   cmd = { "uvx", "zuban", "server" },
+    --   capabilities = capabilities,
+    -- })
+    -- vim.lsp.enable('zuban')
+
+    vim.lsp.config("ruff", {
       on_attach = function(client, bufnr)
         print("attaching ruff to buffer")
         -- Disable hover in favor of jedi?
@@ -710,13 +737,13 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         client.server_capabilities.documentFormattingProvider = true
         vim.api.nvim_create_autocmd("BufWritePre", {
           group = lsp_format_group,
+          buffer = bufnr,
           callback = function()
             vim.lsp.buf.format({ bufnr = bufnr })
           end
         })
       end
     })
-    vim.lsp.config("ruff", lspconfig.ruff)
     vim.lsp.enable('ruff')
 
     -- Global mappings.
@@ -736,38 +763,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     --   })
     --  end,
     -- })
-
-    vim.filetype.add({
-      extension = {
-        jinja = "jinja",
-        jinja2 = "jinja",
-        j2 = "jinja",
-      },
-    })
-
-    local lsp_configs = require("lspconfig.configs")
-
-    if not lsp_configs.jinja_lsp then
-      lsp_configs.jinja_lsp = {
-        default_config = {
-          name = "jinja-lsp",
-          cmd = { vim.fn.stdpath("data") .. "/mason/bin/jinja-lsp" },
-          filetypes = { "jinja", "html", "htmldjango" },
-          root_dir = function(fname)
-            return "."
-            --return nvim_lsp.util.find_git_ancestor(fname)
-          end,
-          init_options = {
-            templates = "./templates",
-            backend = { "./src" },
-            lang = "python",
-          },
-        },
-      }
-    end
-    lspconfig.jinja_lsp.setup({
-      capabilities = capabilities,
-    })
 
     -- Use LspAttach autocommand to only map the following keys
     -- after the language server attaches to the current buffer
@@ -800,7 +795,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         declare_method_if_supported("workspace/symbol", "<leader>o", builtin.lsp_workspace_symbols)
         if client:supports_method("textDocument/formatting") then
           vim.api.nvim_create_autocmd("BufWritePre", {
-            group = vim.api.nvim_create_augroup("lspformatgroup", { clear = true }),
+            group = lsp_format_group,
             buffer = ev.buf,
             callback = function()
               vim.lsp.buf.format({ bufnr = ev.buf })
@@ -818,7 +813,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   end,
 })
 
-vim.pack.add({ "https://github.com/piersolenski/import.nvim" })
+MiniDeps.add("https://github.com/piersolenski/import.nvim")
 require("import").setup({
   picker = "telescope"
 })
@@ -833,13 +828,13 @@ vim.keymap.set("v", "<leader>si", function()
 end)
 
 
-vim.pack.add({ "https://github.com/johmsalas/text-case.nvim" })
+MiniDeps.add("https://github.com/johmsalas/text-case.nvim")
 require("textcase").setup({})
 require("telescope").load_extension("textcase")
 vim.keymap.set({ "n", "x" }, "ga.", "<cmd>TextCaseOpenTelescope<CR>")
 
 -- nicer status line
-vim.pack.add({ "https://github.com/nvim-lualine/lualine.nvim" })
+MiniDeps.add("https://github.com/nvim-lualine/lualine.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   group = initgroup,
   once = true,
@@ -907,7 +902,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 -- Markdown utility, go to link and so on.
 
 -- Automatically wrap words. Nice when writing prose.
-vim.pack.add({ "https://github.com/rickhowe/wrapwidth" })
+MiniDeps.add("https://github.com/rickhowe/wrapwidth")
 vim.api.nvim_create_autocmd({ "FileType" }, {
   group = initgroup,
   pattern = "markdown",
@@ -921,13 +916,16 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
 })
 
 -- quickfix improvement
-vim.pack.add({ "https://github.com/stevearc/quicker.nvim" })
+MiniDeps.add("https://github.com/stevearc/quicker.nvim")
 vim.api.nvim_create_autocmd({ "FileType" }, {
   group = initgroup,
   pattern = "qf",
   once = true,
   callback = function()
     require("quicker").setup({
+      follow = {
+        enabled = true,
+      },
       on_qf = function(bufnr)
         vim.opt_local.number = true
       end
@@ -939,7 +937,7 @@ local terminals = {}
 local term_info = 0
 local term_error = 1
 -- Improved tabs
-vim.pack.add({ "https://github.com/nanozuki/tabby.nvim" })
+MiniDeps.add("https://github.com/nanozuki/tabby.nvim")
 local custom_fill = { fg = "#7c6f64", bg = "#504945", style = "italic" }
 local tab_api = require("tabby.module.api")
 require("tabby").setup({
@@ -1016,10 +1014,10 @@ vim.api.nvim_create_autocmd("TermOpen", {
 })
 
 -- Disable search highlight after searching.
-vim.pack.add({ "https://github.com/romainl/vim-cool" })
+MiniDeps.add("https://github.com/romainl/vim-cool")
 
 -- multi cursor support
-vim.pack.add({ "https://github.com/jake-stewart/multicursor.nvim" })
+MiniDeps.add("https://github.com/jake-stewart/multicursor.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   group = initgroup,
   once = true,
@@ -1064,7 +1062,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 -- removes all "press enter to continue"
-vim.pack.add({ "https://github.com/jake-stewart/auto-cmdheight.nvim" })
+MiniDeps.add("https://github.com/jake-stewart/auto-cmdheight.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   group = initgroup,
   once = true,
@@ -1074,7 +1072,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 -- add a scroll bar
-vim.pack.add({ "https://github.com/petertriho/nvim-scrollbar" })
+MiniDeps.add("https://github.com/petertriho/nvim-scrollbar")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   group = initgroup,
   once = true,
@@ -1090,11 +1088,11 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 -- better python movements and text objects
-vim.pack.add({ "https://github.com/jeetsukumaran/vim-pythonsense" })
+MiniDeps.add("https://github.com/jeetsukumaran/vim-pythonsense")
 vim.g.is_pythonsense_suppress_object_keymaps = 1
 
 -- refactoring library
-vim.pack.add({ "https://github.com/ThePrimeagen/refactoring.nvim" })
+MiniDeps.add("https://github.com/ThePrimeagen/refactoring.nvim")
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
   group = initgroup,
   once = true,
@@ -1125,7 +1123,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 })
 
 -- Generic log highlighting
-vim.pack.add({ "https://github.com/fei6409/log-highlight.nvim" })
+MiniDeps.add("https://github.com/fei6409/log-highlight.nvim")
 require("log-highlight").setup({
   extension = { "*.log", "*.logs", "*.out", "output", "dap-repl", "dap-repl.*" },
   filename = {},
@@ -1136,53 +1134,13 @@ require("log-highlight").setup({
 
 -- Vim open file including line number, including gF
 -- $ vim file.py:10
-vim.pack.add({ "https://github.com/wsdjeg/vim-fetch" })
-
--- ChatGPT plugin
-vim.pack.add({ "https://github.com/echasnovski/mini.diff" })
-vim.pack.add({ "https://github.com/olimorris/codecompanion.nvim" })
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  group = initgroup,
-  once = true,
-  callback = function()
-    local diff = require("mini.diff")
-    diff.setup({
-      -- Disabled by default
-      source = diff.gen_source.none(),
-    })
-    require("codecompanion").setup({
-      adapters = {
-        openai = function()
-          return require("codecompanion.adapters").extend("openai", {
-            env = {
-              api_key = os.getenv("OPEN_API_KEY"),
-            },
-          })
-        end,
-      },
-      strategies = {
-        chat = { adapter = "openai" },
-        inline = { adapter = "openai" },
-        agent = { adapter = "openai" },
-      },
-    })
-
-    vim.keymap.set({ "i", "v" }, "<C-X><C-E>", function()
-      vim.cmd("CodeCompanion")
-    end)
-    -- vim.keymap.set("<D-C>")
-
-    vim.keymap.set({ "n", "v" }, "<leader>cp", function()
-      vim.cmd("CodeCompanionChat")
-    end)
-  end,
-})
+MiniDeps.add("https://github.com/wsdjeg/vim-fetch")
 
 -- Do not nest vim sessions
-vim.pack.add({ "https://github.com/brianhuster/unnest.nvim" })
+MiniDeps.add("https://github.com/brianhuster/unnest.nvim")
 
 -- neovim images
-vim.pack.add({ "https://github.com/3rd/image.nvim" })
+MiniDeps.add("https://github.com/3rd/image.nvim")
 if not vim.g.neovide then
   require("image").setup({
     integrations = {
@@ -1199,7 +1157,7 @@ end
 
 -- increment/decrement enhancement
 
-vim.pack.add({ "https://github.com/monaqa/dial.nvim" })
+MiniDeps.add("https://github.com/monaqa/dial.nvim")
 vim.keymap.set("n", "<C-a>", function()
   require("dial.map").manipulate("increment", "normal")
 end)
@@ -1224,6 +1182,9 @@ end)
 vim.keymap.set("x", "g<C-x>", function()
   require("dial.map").manipulate("decrement", "gvisual")
 end)
+
+MiniDeps.add("https://github.com/j-hui/fidget.nvim")
+require("fidget").setup({})
 
 -- end plugins
 
@@ -1336,9 +1297,9 @@ vim.keymap.set("x", "ic", function()
 end)
 
 -- enable extui nightly
-require('vim._extui').enable({
-  enable = true,
-})
+-- require('vim._extui').enable({
+--   enable = true,
+-- })
 
 vim.keymap.set("o", "ie", function()
   vim.cmd("normal! ggVG")

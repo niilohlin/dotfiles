@@ -39,134 +39,249 @@ hs.window.filter
 -- local focus_next_window = hs.hotkey.new({ "ctrl", "shift" }, "`", function()
 -- end)
 
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "left", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus prev")
+end)
+
+hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "right", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus next")
+end)
+
 hs.window.animationDuration = 0
 
-local function moveWindowRight()
-  local win = hs.window.focusedWindow()
-  if not win then
-    return
-  end
+local win = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'W', 'window mode')
 
-  local screen = win:screen()
-  local frame = win:frame()
-  local screenFrame = screen:frame()
+win:bind('', 'escape', function() win:exit() end)
 
-  if frame.x == screenFrame.x + (screenFrame.w / 2) and frame.w <= screenFrame.w / 2 then
-    local nextScreen = screen:toEast()
-    if nextScreen then
-      local nextScreenFrame = nextScreen:frame()
-      win:setFrame(hs.geometry.rect(nextScreenFrame.x, nextScreenFrame.y, nextScreenFrame.w / 2, nextScreenFrame.h))
-    end
-  else
-    win:setFrame(hs.geometry.rect(screenFrame.x + (screenFrame.w / 2), screenFrame.y, screenFrame.w / 2, screenFrame.h))
-  end
-end
-
-local function moveWindowLeft()
-  local win = hs.window.focusedWindow()
-  if not win then
-    return
-  end
-  local screen = win:screen()
-  local frame = win:frame()
-  local screenFrame = screen:frame()
-
-  if frame.x == screenFrame.x and frame.w <= screenFrame.w / 2 then
-    local nextScreen = screen:toWest()
-    if nextScreen then
-      local nextScreenFrame = nextScreen:frame()
-      win:setFrame(
-        hs.geometry.rect(
-          nextScreenFrame.x + (nextScreenFrame.w / 2),
-          nextScreenFrame.y,
-          nextScreenFrame.w / 2,
-          nextScreenFrame.h
-        )
-      )
-    end
-  else
-    win:setFrame(hs.geometry.rect(screenFrame.x, screenFrame.y, screenFrame.w / 2, screenFrame.h))
-  end
-end
-
-local function maximizeWindow()
-  local win = hs.window.focusedWindow()
-  if not win then
-    return
-  end
-  local screen = win:screen()
-  local max = screen:frame()
-  win:setFrame(hs.geometry.rect(max.x, max.y, max.w, max.h))
-end
-
-local function moveWindowTop()
-  local win = hs.window.focusedWindow()
-  if not win then
-    return
-  end
-  local screen = win:screen()
-  local max = screen:frame()
-  win:setFrame(hs.geometry.rect(max.x, max.y, max.w, max.h / 2))
-end
-
-local function moveWindowBottom()
-  local win = hs.window.focusedWindow()
-  if not win then
-    return
-  end
-  local screen = win:screen()
-  local max = screen:frame()
-  win:setFrame(hs.geometry.rect(max.x, max.y + (max.h / 2), max.w, max.h / 2))
-end
-
--- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "K", moveWindowTop)
--- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "J", moveWindowBottom)
--- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "L", moveWindowRight)
--- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "H", moveWindowLeft)
--- hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "return", maximizeWindow)
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "Q", function()
-  hs.application.launchOrFocus("Safari")
-end)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "D", function()
-  hs.application.launchOrFocus("Ghostty")
-end)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "R", function()
-  hs.application.launchOrFocus("Slack")
-end)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "W", function()
-  hs.application.launchOrFocus("Obsidian")
-end)
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "S", function()
-  hs.application.launchOrFocus("Zen")
+win:bind('', "H", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --focus west")
+  win:exit()
 end)
 
-local marks = {}
-local incomingMark = false
-
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "M", function()
-  incomingMark = true
+win:bind('', "L", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --focus east")
+  win:exit()
 end)
 
-for _, character in ipairs({ "A", "B", "C" }) do
-  hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, character, function()
-    if incomingMark then
-      marks[character] = hs.application.frontmostApplication():name()
-    elseif marks[character] then
-      hs.application.launchOrFocus(marks[character])
-    end
-    incomingMark = false
-  end)
-end
+win:bind('', "K", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --focus north")
+  win:exit()
+end)
 
--- used by neovide project switcher
-function FocusWindowByName(windowName)
-  local windows = hs.window.allWindows()
-  for _, window in ipairs(windows) do
-    if window:title() == windowName then
-      window:focus()
-      return true
-    end
-  end
-  return false
-end
+win:bind('', "J", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --focus south")
+  win:exit()
+end)
+
+win:bind({'shift'}, "H", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --swap west")
+  win:exit()
+end)
+
+win:bind({'shift'}, "L", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --swap east")
+  win:exit()
+end)
+
+win:bind({'shift'}, "K", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --swap north")
+  win:exit()
+end)
+
+win:bind({'shift'}, "J", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --swap south")
+  win:exit()
+end)
+
+win:bind('', "t", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --toggle float --grid 4:4:1:1:2:2")
+  win:exit()
+end)
+
+win:bind('', "e", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --balance")
+  win:exit()
+end)
+
+win:bind('', "r", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --rotate 270")
+  win:exit()
+end)
+
+win:bind('', "o", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --toggle zoom-fullscreen")
+  win:exit()
+end)
+
+local tabs = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'N', 'next screen')
+
+Menubar = hs.menubar.new()
+Menubar:setTitle("1")
+Menubar:setTooltip("Just a letter")
+Menubar:setClickCallback(function() end)
+-- Menubar:setMenu({ { title = "1", disabled = true } })
+Menubar:setMenu({})
+
+tabs:bind('', 'escape', function() tabs:exit() end)
+
+tabs:bind('', "q", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 1")
+  Menubar:setTitle("1")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "q", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 1")
+  Menubar:setTitle("1")
+  tabs:exit()
+end)
+
+tabs:bind('', "d", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 2")
+  Menubar:setTitle("2")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "d", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 2")
+  Menubar:setTitle("2")
+  tabs:exit()
+end)
+
+tabs:bind('', "r", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 3")
+  Menubar:setTitle("3")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "r", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 3")
+  Menubar:setTitle("3")
+  tabs:exit()
+end)
+
+tabs:bind('', "w", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 4")
+  Menubar:setTitle("4")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "w", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 4")
+  Menubar:setTitle("4")
+  tabs:exit()
+end)
+
+tabs:bind('', "b", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 5")
+  Menubar:setTitle("5")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "b", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 5")
+  Menubar:setTitle("5")
+  tabs:exit()
+end)
+
+tabs:bind('', "a", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 6")
+  Menubar:setTitle("6")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "a", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 6")
+  Menubar:setTitle("6")
+  tabs:exit()
+end)
+
+tabs:bind('', "s", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 7")
+  Menubar:setTitle("7")
+  tabs:exit()
+end)
+
+tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "s", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 7")
+  Menubar:setTitle("7")
+  tabs:exit()
+end)
+
+local send_to = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'y', 'yeet to')
+send_to:bind('', 'escape', function() send_to:exit() end)
+
+send_to:bind('', "q", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 1")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "q", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 1")
+  send_to:exit()
+end)
+
+send_to:bind('', "d", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 2")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "d", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 2")
+  send_to:exit()
+end)
+
+send_to:bind('', "r", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 3")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "r", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 3")
+  send_to:exit()
+end)
+
+send_to:bind('', "w", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 4")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "w", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 4")
+  send_to:exit()
+end)
+
+send_to:bind('', "b", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 5")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "b", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 5")
+  send_to:exit()
+end)
+
+send_to:bind('', "a", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 6")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "a", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 6")
+  send_to:exit()
+end)
+
+send_to:bind('', "s", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 7")
+  send_to:exit()
+end)
+
+send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "s", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 7")
+  send_to:exit()
+end)
+
+
+
+print("done reloading")
+
