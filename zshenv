@@ -2,6 +2,7 @@
 export PATH=/opt/homebrew/bin/:$PATH
 export PATH=/opt/homebrew/opt/node@22/bin:$PATH
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH
+export PATH=/opt/homebrew/opt/swagger-codegen@2/bin:$PATH
 export PATH="/Users/niilohlin/.local/bin:$PATH"
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
@@ -37,6 +38,8 @@ export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
 # fi
 # export SSH_AUTH_SOCK=$(tmux show-environment | grep SSH_AUTH_SOCK | cut -d= -f2)
 #
+
+export ERL_AFLAGS="-kernel shell_history enabled"
 
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
