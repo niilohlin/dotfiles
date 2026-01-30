@@ -39,13 +39,49 @@ hs.window.filter
 -- local focus_next_window = hs.hotkey.new({ "ctrl", "shift" }, "`", function()
 -- end)
 
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "left", function()
+hs.hotkey.bind({ "ctrl" }, "[", function()
+  hs.eventtap.keyStroke({}, "escape")
+end)
+
+hs.hotkey.bind({ "ctrl" }, "j", function()
+  hs.eventtap.keyStroke({}, "return")
+end)
+
+hs.hotkey.bind({ "ctrl" }, "f", function()
+  hs.eventtap.keyStroke({}, "right")
+end)
+
+hs.hotkey.bind({ "ctrl" }, "b", function()
+  hs.eventtap.keyStroke({}, "left")
+end)
+
+hs.hotkey.bind({ "ctrl" }, "i", function()
+  hs.eventtap.keyStroke({}, "tab")
+end)
+
+hs.hotkey.bind({ "cmd", "ctrl" }, "left", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus prev")
 end)
 
-hs.hotkey.bind({ "cmd", "ctrl", "alt", "shift" }, "right", function()
+hs.hotkey.bind({ "cmd", "ctrl" }, "right", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus next")
 end)
+
+-- Block the original Enter key
+-- hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
+--     local keyCode = event:getKeyCode()
+--   print("keycode = ", keyCode)
+--     if keyCode == 36 then -- 36 is the key code for Enter
+--         return true -- Block the original Enter key
+--     end
+--     return false
+-- end):start()
+-- hs.hotkey.bind({ }, "escape", function()end)
+-- hs.hotkey.bind({ }, "enter", function()end)
+-- hs.hotkey.bind({ }, "left", function()end)
+-- hs.hotkey.bind({ }, "right", function()end)
+-- hs.hotkey.bind({ }, "backspace", function()end)
+
 
 hs.window.animationDuration = 0
 
@@ -53,67 +89,10 @@ local win = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'W', 'window 
 
 win:bind('', 'escape', function() win:exit() end)
 
-win:bind('', "H", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --focus west")
-  win:exit()
-end)
-
-win:bind('', "L", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --focus east")
-  win:exit()
-end)
-
-win:bind('', "K", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --focus north")
-  win:exit()
-end)
-
-win:bind('', "J", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --focus south")
-  win:exit()
-end)
-
-win:bind({'shift'}, "H", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --swap west")
-  win:exit()
-end)
-
-win:bind({'shift'}, "L", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --swap east")
-  win:exit()
-end)
-
-win:bind({'shift'}, "K", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --swap north")
-  win:exit()
-end)
-
-win:bind({'shift'}, "J", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --swap south")
-  win:exit()
-end)
-
-win:bind('', "t", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --toggle float --grid 4:4:1:1:2:2")
-  win:exit()
-end)
-
-win:bind('', "e", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --balance")
-  win:exit()
-end)
-
-win:bind('', "r", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --rotate 270")
-  win:exit()
-end)
-
 win:bind('', "o", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --toggle zoom-fullscreen")
   win:exit()
 end)
-
-local tabs = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'N', 'next screen')
 
 Menubar = hs.menubar.new()
 Menubar:setTitle("1")
@@ -122,166 +101,105 @@ Menubar:setClickCallback(function() end)
 -- Menubar:setMenu({ { title = "1", disabled = true } })
 Menubar:setMenu({})
 
-tabs:bind('', 'escape', function() tabs:exit() end)
-
-tabs:bind('', "q", function()
+hs.hotkey.bind("cmd", "1", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 1")
   Menubar:setTitle("1")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "q", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 1")
-  Menubar:setTitle("1")
-  tabs:exit()
-end)
-
-tabs:bind('', "d", function()
+hs.hotkey.bind("cmd", "2", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 2")
   Menubar:setTitle("2")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "d", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 2")
-  Menubar:setTitle("2")
-  tabs:exit()
-end)
-
-tabs:bind('', "r", function()
+hs.hotkey.bind("cmd", "3", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 3")
   Menubar:setTitle("3")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "r", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 3")
-  Menubar:setTitle("3")
-  tabs:exit()
-end)
-
-tabs:bind('', "w", function()
+hs.hotkey.bind("cmd", "4", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 4")
   Menubar:setTitle("4")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "w", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 4")
-  Menubar:setTitle("4")
-  tabs:exit()
-end)
-
-tabs:bind('', "b", function()
+hs.hotkey.bind("cmd", "5", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 5")
   Menubar:setTitle("5")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "b", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 5")
-  Menubar:setTitle("5")
-  tabs:exit()
-end)
-
-tabs:bind('', "a", function()
+hs.hotkey.bind("cmd", "6", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 6")
   Menubar:setTitle("6")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "a", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 6")
-  Menubar:setTitle("6")
-  tabs:exit()
-end)
-
-tabs:bind('', "s", function()
+hs.hotkey.bind("cmd", "7", function()
   hs.execute("/opt/homebrew/bin/yabai -m space --focus 7")
   Menubar:setTitle("7")
-  tabs:exit()
 end)
 
-tabs:bind({ "cmd", "ctrl", "alt", "shift" }, "s", function()
-  hs.execute("/opt/homebrew/bin/yabai -m space --focus 7")
+hs.hotkey.bind("cmd", "8", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 8")
   Menubar:setTitle("7")
-  tabs:exit()
+end)
+
+hs.hotkey.bind("cmd", "9", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 9")
+  Menubar:setTitle("7")
+end)
+
+hs.hotkey.bind("cmd", "0", function()
+  hs.execute("/opt/homebrew/bin/yabai -m space --focus 0")
+  Menubar:setTitle("7")
 end)
 
 local send_to = hs.hotkey.modal.new({ "cmd", "ctrl", "alt", "shift" }, 'y', 'yeet to')
 send_to:bind('', 'escape', function() send_to:exit() end)
 
-send_to:bind('', "q", function()
+send_to:bind('', "1", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 1")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "q", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 1")
-  send_to:exit()
-end)
-
-send_to:bind('', "d", function()
+send_to:bind('', "2", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 2")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "d", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 2")
-  send_to:exit()
-end)
-
-send_to:bind('', "r", function()
+send_to:bind('', "3", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 3")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "r", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 3")
-  send_to:exit()
-end)
-
-send_to:bind('', "w", function()
+send_to:bind('', "4", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 4")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "w", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 4")
-  send_to:exit()
-end)
-
-send_to:bind('', "b", function()
+send_to:bind('', "5", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 5")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "b", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 5")
-  send_to:exit()
-end)
-
-send_to:bind('', "a", function()
+send_to:bind('', "6", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 6")
   send_to:exit()
 end)
 
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "a", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 6")
-  send_to:exit()
-end)
-
-send_to:bind('', "s", function()
+send_to:bind('', "7", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 7")
   send_to:exit()
 end)
-
-send_to:bind({ "cmd", "ctrl", "alt", "shift" }, "s", function()
-  hs.execute("/opt/homebrew/bin/yabai -m window --space 7")
+send_to:bind('', "8", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 8")
   send_to:exit()
 end)
-
-
+send_to:bind('', "9", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 9")
+  send_to:exit()
+end)
+send_to:bind('', "0", function()
+  hs.execute("/opt/homebrew/bin/yabai -m window --space 0")
+  send_to:exit()
+end)
 
 print("done reloading")
 
