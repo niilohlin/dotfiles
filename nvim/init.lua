@@ -150,6 +150,8 @@ vim.api.nvim_create_autocmd("FileType", {
     -- Always use make. When entering `test_*.py` nvim automatically sets the makeprg to pytest.
     -- But I use neotest to run individual tests.
     vim.opt_local.makeprg = "make"
+
+    vim.keymap.set("n", "<leader>b", "Obreakpoint()<esc>")
   end,
 })
 
@@ -189,13 +191,13 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 })
 
 -- Open diagnostics on hover
-vim.api.nvim_create_autocmd({ "CursorHold" }, { --, "CursorHoldI" }, {
-  group = initgroup,
-  pattern = "*",
-  callback = function()
-    vim.diagnostic.open_float(nil, { focus = false })
-  end,
-})
+-- vim.api.nvim_create_autocmd({ "CursorHold" }, { --, "CursorHoldI" }, {
+--   group = initgroup,
+--   pattern = "*",
+--   callback = function()
+--     vim.diagnostic.open_float(nil, { focus = false })
+--   end,
+-- })
 
 -- automatically load the file if it has changed from an external source
 vim.api.nvim_create_autocmd({ "CursorHold" }, {
@@ -271,11 +273,11 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
 -- show diagnostic source.
-vim.diagnostic.config({
-  float = {
-    source = true,
-  },
-})
+-- vim.diagnostic.config({
+--   float = {
+--     source = true,
+--   },
+-- })
 
 -- Git status of changed lines to the left.
 MiniDeps.add("https://github.com/lewis6991/gitsigns.nvim")
@@ -399,6 +401,7 @@ MiniDeps.add("https://github.com/tpope/vim-unimpaired")
 
 -- Semantic syntax highlighting
 MiniDeps.add("https://github.com/nvim-treesitter/nvim-treesitter")
+MiniDeps.add("https://github.com/nvim-treesitter/nvim-treesitter-refactor") -- refactor plugin, only used for "highligt_definitions"
 vim.api.nvim_create_autocmd("BufReadPre", {
   group = initgroup,
   once = true,
@@ -406,6 +409,12 @@ vim.api.nvim_create_autocmd("BufReadPre", {
     local configs = require("nvim-treesitter.configs")
     configs.setup({
       modules = {},
+      refactor = {
+        highlight_definitions = {
+          enable = true,
+          clear_on_cursor_move = true,
+        },
+      },
       ensure_installed = {
         "python",
         "lua",
@@ -523,23 +532,22 @@ vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
   end,
 })
 
+
 -- Nerd Icons (for example in oil buffers)
 -- File explorer
 MiniDeps.add("https://github.com/echasnovski/mini.icons")
 MiniDeps.add("https://github.com/stevearc/oil.nvim")
 require("mini.icons").setup()
-vim.api.nvim_create_autocmd({ "BufWinEnter" }, {
-  group = initgroup,
-  once = true,
-  callback = function()
-    require("oil").setup()
-    vim.keymap.set("n", "-", "<CMD>Oil<CR>") -- Show current file in Oil
-    -- Disable netrw. We don't need it if we use oil
-    vim.g.loaded_netrw = 1
-    vim.g.loaded_netrwPlugin = 1
-    -- MiniDeps.add("https://github.com/benomahony/oil-git.nvim")
-  end,
+
+-- Disable netrw. We don't need it if we use oil
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+-- load oil on startup
+require("oil").setup({
+    default_file_explorer = true,
 })
+vim.keymap.set("n", "-", "<CMD>Oil<CR>") -- Show current file in Oil
+
 
 -- Snippets collection
 MiniDeps.add("https://github.com/rafamadriz/friendly-snippets")
@@ -671,6 +679,7 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     vim.lsp.config("ts_ls", {
       capabilities = capabilities,
     })
+    vim.lsp.enable('ts_ls')
 
     vim.lsp.config("eslint", {
       on_attach = function(client, bufnr)
@@ -686,68 +695,46 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         })
       end,
     })
-
-    -- vim.lsp.config("jedi_language_server", {
-    --   cmd = { "uvx", "jedi-language-server" },
-    --   init_options = {
-    --     codeAction = {
-    --       nameExtractVariable = "jls_extract_var",
-    --       nameExtractFunction = "jls_extract_def",
-    --     },
-    --     completion = {
-    --       -- LSP snippets turned out to insisting on inserting parens everywhere
-    --       disableSnippets = true,
-    --     },
-    --   },
-    --   capabilities = capabilities,
-    -- })
-    -- vim.lsp.enable('jedi_language_server')
+    vim.lsp.enable('eslint')
 
     vim.lsp.config("pyrefly", {
       cmd = { "uvx", "pyrefly", "lsp" },
       capabilities = capabilities,
-      on_attach = function(client, bufnr)
-        -- client.server_capabilities.completionProvider = false
-        -- client.server_capabilities.definitionProvider = false
-        -- client.server_capabilities.documentHighlightProvider = false
-        -- client.server_capabilities.documentSymbolProvider = false
-        -- client.server_capabilities.hoverProvider = false
-        -- client.server_capabilities.inlayHintProvider = false
-        -- client.server_capabilities.referencesProvider = false
-        -- client.server_capabilities.renameProvider = { prepareProvider = false }
-        -- client.server_capabilities.semanticTokensProvider = { }
-        -- client.server_capabilities.signatureHelpProvider = { }
-        -- client.server_capabilities.typeDefinitionProvider = false
-        -- client.server_capabilities.workspaceSymbolProvider = false
-      end
     })
     vim.lsp.enable('pyrefly')
 
-    -- vim.lsp.config("zuban", {
-    --   cmd = { "uvx", "zuban", "server" },
-    --   capabilities = capabilities,
-    -- })
-    -- vim.lsp.enable('zuban')
-
     vim.lsp.config("ruff", {
+      cmd = { "uvx", "ruff", "server" },
       on_attach = function(client, bufnr)
-        print("attaching ruff to buffer")
-        -- Disable hover in favor of jedi?
-        -- client.server_capabilities.hoverProvider = false
         client.server_capabilities.documentFormattingProvider = true
         vim.api.nvim_create_autocmd("BufWritePre", {
           group = lsp_format_group,
           buffer = bufnr,
           callback = function()
             vim.lsp.buf.format({ bufnr = bufnr })
+            vim.lsp.buf.code_action({
+              context = { only = { "source.organizeImports" } },
+              apply = true,
+            })
           end
         })
       end
     })
     vim.lsp.enable('ruff')
 
+    vim.lsp.config("rust_analyzer", { })
+    vim.lsp.enable('rust_analyzer')
+
+    vim.lsp.config("elixirls", {
+      cmd = { "elixir-ls" }
+    })
+    vim.lsp.enable('elixirls')
+
     -- Global mappings.
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
+
+
+
 
     -- local pwd = vim.loop.cwd()
     -- vim.api.nvim_create_autocmd("FileType", {
@@ -899,21 +886,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
--- Markdown utility, go to link and so on.
-
--- Automatically wrap words. Nice when writing prose.
-MiniDeps.add("https://github.com/rickhowe/wrapwidth")
-vim.api.nvim_create_autocmd({ "FileType" }, {
-  group = initgroup,
-  pattern = "markdown",
-  callback = function(ev)
-    vim.schedule(function()
-      vim.keymap.set("n", "j", "gj", { buffer = true })
-      vim.keymap.set("n", "k", "gk", { buffer = true })
-      vim.cmd("Wrapwidth 80")
-    end)
-  end
-})
 
 -- quickfix improvement
 MiniDeps.add("https://github.com/stevearc/quicker.nvim")
@@ -1183,8 +1155,18 @@ vim.keymap.set("x", "g<C-x>", function()
   require("dial.map").manipulate("decrement", "gvisual")
 end)
 
-MiniDeps.add("https://github.com/j-hui/fidget.nvim")
-require("fidget").setup({})
+
+-- Nicer looking Inline diagnostics/virtual text
+MiniDeps.add("https://github.com/rachartier/tiny-inline-diagnostic.nvim")
+require("tiny-inline-diagnostic").setup({})
+vim.diagnostic.config({ virtual_text = false }) -- disable built in virutal text
+
+
+-- tree sitter awaire split/join lines
+MiniDeps.add("https://github.com/Wansmer/treesj")
+require("treesj").setup({use_default_keymaps = true})
+vim.keymap.set("n", "<leader>j", "<cmd>TSJToggle<CR>")
+
 
 -- end plugins
 
@@ -1344,9 +1326,33 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 -- do not "go to next window"
 vim.api.nvim_set_keymap("n", "<C-W><C-W>", "<nop>", {})
 
+OnWrites = {}
+
+vim.api.nvim_create_autocmd("BufWrite", {
+  group = vim.api.nvim_create_augroup("OnSave", { clear = true }),
+  callback = function()
+    for _, value in ipairs(OnWrites) do
+      vim.cmd(value)
+    end
+  end
+})
+
+vim.api.nvim_create_user_command("OnWrite", function(input)
+  if input.bang then
+    OnWrites = {}
+    return
+  end
+  ok, _ = pcall(function() vim.cmd(input.args) end)
+  if ok then
+    OnWrites[#OnWrites + 1] = input.args
+  end
+end, { nargs = "*", bang = true })
+
+
+
 require("gui")
 require("python_output")
 require("rope")
 require("project")
 require("qflist_to_dianostics")
-dofile(vim.env.HOME .. '/Vault/vault.lua')
+
