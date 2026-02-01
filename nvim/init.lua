@@ -1162,11 +1162,19 @@ require("tiny-inline-diagnostic").setup({})
 vim.diagnostic.config({ virtual_text = false }) -- disable built in virutal text
 
 
--- tree sitter awaire split/join lines
-MiniDeps.add("https://github.com/Wansmer/treesj")
-require("treesj").setup({use_default_keymaps = true})
-vim.keymap.set("n", "<leader>j", "<cmd>TSJToggle<CR>")
+MiniDeps.add("https://github.com/nickjvandyke/opencode.nvim")
+vim.g.opencode_opts = {
+  -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
+}
 
+vim.o.autoread = true
+
+vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
+vim.keymap.set({ "n", "x" }, "<leader>ox", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
+vim.keymap.set({ "n", "t" }, "<leader>ot", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+
+vim.keymap.set({ "n", "x" }, "<leader>go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
+vim.keymap.set("n",          "<leader>goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
 
 -- end plugins
 
