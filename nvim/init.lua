@@ -393,6 +393,14 @@ vim.keymap.set("n", "z=", builtin.spell_suggest)
 -- Git plugin, provides :Git add, :Git blame etc.
 MiniDeps.add("https://github.com/tpope/vim-fugitive")
 
+vim.api.nvim_create_autocmd("FileType", {
+  group = initgroup,
+  pattern = "fugitive",
+  callback = function()
+    vim.keymap.set("n", "<C-l>", "<cmd>Git<cr>", { buffer = true })
+  end,
+})
+
 -- async Make, Dispatch (run), and more, integrates with tmux
 MiniDeps.add("https://github.com/tpope/vim-dispatch")
 
@@ -1173,7 +1181,7 @@ vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").ask("@
 vim.keymap.set({ "n", "x" }, "<leader>ox", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
 vim.keymap.set({ "n", "t" }, "<leader>ot", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
 
-vim.keymap.set({ "n", "x" }, "<leader>go",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
+vim.keymap.set({ "n", "x" }, "<leader>gO",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
 vim.keymap.set("n",          "<leader>goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
 
 -- end plugins
