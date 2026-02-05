@@ -1177,12 +1177,40 @@ vim.g.opencode_opts = {
 
 vim.o.autoread = true
 
-vim.keymap.set({ "n", "x" }, "<leader>oa", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask opencode…" })
-vim.keymap.set({ "n", "x" }, "<leader>ox", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
-vim.keymap.set({ "n", "t" }, "<leader>ot", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
+vim.api.nvim_create_user_command("Opencode", function(input)
+  local opencode = require("opencode")
+  local has_args = input.args ~= ""
+  local has_range = input.range ~= 0
 
-vim.keymap.set({ "n", "x" }, "<leader>gO",  function() return require("opencode").operator("@this ") end,        { desc = "Add range to opencode", expr = true })
-vim.keymap.set("n",          "<leader>goo", function() return require("opencode").operator("@this ") .. "_" end, { desc = "Add line to opencode", expr = true })
+  if has_args and has_range then
+    -- Range + args: add range to opencode with the argument as prompt
+    ---@type opencode.context.Range
+    local range = {
+      from = { input.line1, 0 },
+      to = { input.line2, vim.fn.col({ input.line2, "$" }) - 1 },
+      kind = "line",
+    }
+    local context = require("opencode.context").new(range)
+    opencode.prompt("@this: " .. input.args, { context = context, submit = true })
+  elseif has_args then
+    -- Args only: ask opencode with the argument
+    opencode.ask(input.args, { submit = true })
+  elseif has_range then
+    -- Range only: add range to opencode
+    ---@type opencode.context.Range
+    local range = {
+      from = { input.line1, 0 },
+      to = { input.line2, vim.fn.col({ input.line2, "$" }) - 1 },
+      kind = "line",
+    }
+    local context = require("opencode.context").new(range)
+    opencode.prompt("@this: ", { context = context })
+  else
+    -- No range, no args: toggle opencode
+    opencode.toggle()
+  end
+end, { nargs = "*", range = true })
+vim.keymap.set({ "n", "x" }, "<leader>o", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
 
 -- end plugins
 
