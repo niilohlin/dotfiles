@@ -43,18 +43,6 @@ hs.hotkey.bind({ "ctrl" }, "[", function()
   hs.eventtap.keyStroke({}, "escape")
 end)
 
-hs.hotkey.bind({ "ctrl" }, "j", function()
-  hs.eventtap.keyStroke({}, "return")
-end)
-
-hs.hotkey.bind({ "ctrl" }, "f", function()
-  hs.eventtap.keyStroke({}, "right")
-end)
-
-hs.hotkey.bind({ "ctrl" }, "b", function()
-  hs.eventtap.keyStroke({}, "left")
-end)
-
 hs.hotkey.bind({ "ctrl" }, "i", function()
   hs.eventtap.keyStroke({}, "tab")
 end)
