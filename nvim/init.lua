@@ -1082,23 +1082,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
       refactoring.select_refactor()
     end)
-    vim.keymap.set({ "n", "x" }, "<leader>iv", function()
-      refactoring.refactor("Inline Variable")
-    end)
-    vim.keymap.set({ "n", "x" }, "<leader>if", function()
-      refactoring.refactor("Inline Function")
-    end)
-    vim.keymap.set({ "n", "x" }, "<leader>ev", function()
-      refactoring.refactor("Extract Variable")
-    end)
-    vim.keymap.set({ "n", "x" }, "<leader>ef", function()
-      refactoring.refactor("Extract Function")
-    end)
-    vim.keymap.set("n", "<leader>pv", refactoring.debug.print_var_operatorfunc)
-    vim.keymap.set("n", "<leader>pf", refactoring.debug.printf_operatorfunc)
-    vim.api.nvim_create_user_command("RefactorClean", function()
-      refactoring.debug.cleanup({})
-    end, { nargs = "*" })
   end,
 })
 
@@ -1135,34 +1118,6 @@ if not vim.g.neovide then
     },
   })
 end
-
--- increment/decrement enhancement
-
-MiniDeps.add("https://github.com/monaqa/dial.nvim")
-vim.keymap.set("n", "<C-a>", function()
-  require("dial.map").manipulate("increment", "normal")
-end)
-vim.keymap.set("n", "<C-x>", function()
-  require("dial.map").manipulate("decrement", "normal")
-end)
-vim.keymap.set("n", "g<C-a>", function()
-  require("dial.map").manipulate("increment", "gnormal")
-end)
-vim.keymap.set("n", "g<C-x>", function()
-  require("dial.map").manipulate("decrement", "gnormal")
-end)
-vim.keymap.set("x", "<C-a>", function()
-  require("dial.map").manipulate("increment", "visual")
-end)
-vim.keymap.set("x", "<C-x>", function()
-  require("dial.map").manipulate("decrement", "visual")
-end)
-vim.keymap.set("x", "g<C-a>", function()
-  require("dial.map").manipulate("increment", "gvisual")
-end)
-vim.keymap.set("x", "g<C-x>", function()
-  require("dial.map").manipulate("decrement", "gvisual")
-end)
 
 
 -- Nicer looking Inline diagnostics/virtual text
@@ -1211,7 +1166,6 @@ vim.api.nvim_create_user_command("Opencode", function(input)
     opencode.toggle()
   end
 end, { nargs = "*", range = true })
-vim.keymap.set({ "n", "x" }, "<leader>o", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
 
 MiniDeps.add("https://github.com/smjonas/inc-rename.nvim")
 require("inc_rename").setup()
@@ -1235,9 +1189,6 @@ end, { nargs = "*" })
 
 -- Never use Q for ex mode.
 vim.keymap.set("n", "Q", "<nop>")
-
-vim.keymap.set("n", "p", "p=`]") -- paste and reindent
-vim.keymap.set("n", "P", "P=`]") -- paste and reindent above
 
 vim.keymap.set("i", "<C-X><C-G>", function()
   vim.api.nvim_put({ vim.fn.expand("%") }, "c", true, true)
