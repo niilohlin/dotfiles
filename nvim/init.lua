@@ -741,9 +741,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     -- Global mappings.
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
 
-
-
-
     -- local pwd = vim.loop.cwd()
     -- vim.api.nvim_create_autocmd("FileType", {
     --  pattern = "python",
@@ -1387,4 +1384,5 @@ require("gui")
 require("python_output")
 require("project")
 require("qflist_to_dianostics")
+require("autotype_lsp")
 
