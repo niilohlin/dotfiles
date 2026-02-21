@@ -1115,6 +1115,7 @@ require("log-highlight").setup({
 -- Vim open file including line number, including gF
 -- $ vim file.py:10
 MiniDeps.add("https://github.com/wsdjeg/vim-fetch")
+-- consider https://github.com/HawkinsT/pathfinder.nvim
 
 -- Do not nest vim sessions
 MiniDeps.add("https://github.com/brianhuster/unnest.nvim")
@@ -1211,6 +1212,13 @@ vim.api.nvim_create_user_command("Opencode", function(input)
   end
 end, { nargs = "*", range = true })
 vim.keymap.set({ "n", "x" }, "<leader>o", function() require("opencode").select() end,                          { desc = "Execute opencode action…" })
+
+MiniDeps.add("https://github.com/smjonas/inc-rename.nvim")
+require("inc_rename").setup()
+vim.keymap.set("n", "grn", function()
+  return ":IncRename " .. vim.fn.expand("<cword>")
+end, { expr = true })
+
 
 -- end plugins
 
@@ -1393,10 +1401,39 @@ vim.api.nvim_create_user_command("OnWrite", function(input)
 end, { nargs = "*", bang = true })
 
 
+vim.api.nvim_create_user_command("Manage", function(input)
+  if input.bang then
+    vim.cmd("Dispatch uv run quickbit/manage.py " .. input.args)
+  else
+    vim.cmd("Start uv run quickbit/manage.py " .. input.args)
+  end
+end, {
+    nargs = "*" ,
+    bang = true,
+    complete = function(ArgLead, CmdLine, CursorPos)
+      if not _G._manage_commands_cache then
+        _G._manage_commands_cache = vim.split(
+          vim.fn.system("uv run quickbit/manage.py help | grep '    '"):gsub("    ", ""),
+          "\n"
+        )
+    end
+    return _G._manage_commands_cache
+  end,
+  }
+)
+
+vim.api.nvim_create_user_command("Release", function(input)
+  local path = vim.fs.root(0, { ".git" }) or vim.loop.cwd()
+  vim.cmd("botright 12split | term (cd " .. path .. "/production-diff; yarn release " .. input.args .. ")")
+end, {
+    nargs = "*",
+    complete = function(ArgLead, CmdLine, CursorPos)
+      return {"app-backend", "qb-backoffice-frontedn", "merchant-backoffice-frontend", "qb-pay-frontend", "qb-web"}
+    end
+  })
 
 require("gui")
 require("python_output")
-require("rope")
 require("project")
 require("qflist_to_dianostics")
 
