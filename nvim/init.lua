@@ -584,7 +584,19 @@ ls.add_snippets("python", {
   }),
 })
 
-vim.keymap.set({"i"}, "<C-L>", function() ls.expand() end, {silent = true})
+local function uuid()
+  local handle = io.popen("uuidgen")
+  local result = handle:read("*a")
+  handle:close()
+  return result:gsub("%s+", ""):lower()
+end
+
+local d = ls.dynamic_node
+ls.add_snippets("all", {
+  s("uuid", {
+    d(1, function() return ls.snippet_node(nil, { t(uuid()) }) end),
+  }),
+})
 
 -- Snippets collection
 MiniDeps.add("https://github.com/rafamadriz/friendly-snippets")
@@ -654,6 +666,9 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         },
         -- signature = { enabled = true }
       },
+      snippets = {
+        preset = "luasnip",
+      }
     })
     -- ?? idk where this is going
     -- opts_extend = { "sources.default" },
@@ -1199,6 +1214,8 @@ vim.keymap.set("n", "grn", function()
   return ":IncRename " .. vim.fn.expand("<cword>")
 end, { expr = true })
 
+-- Prose writing plugin
+-- MiniDeps.add("https://github.com/preservim/vim-pencil")
 
 -- end plugins
 
