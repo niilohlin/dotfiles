@@ -374,8 +374,9 @@ vim.keymap.set("n", "<leader>sr", builtin.resume, {})    -- Resume last search
 vim.keymap.set("n", "<leader>sg", builtin.live_grep, {}) -- live grep
 vim.keymap.set("v", "<leader>sg", function()
   vim.cmd('normal! "vy')
-  local selected_text = vim.fn.getreg("v")
-  builtin.live_grep({ default_text = selected_text })
+  local selected_text = vim.fn.getreg("v"):gsub("\n", "")
+  local escaped_text = selected_text:gsub("([%^%$%(%)%%%.%[%]%*%+%-%?%{%}%|])", "\\%1")
+  builtin.live_grep({ default_text = escaped_text })
 end)
 vim.keymap.set("n", "<leader>sf", function()
   builtin.find_files({ hidden = true, find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" } })
