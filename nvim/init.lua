@@ -557,6 +557,34 @@ require("oil").setup({
 })
 vim.keymap.set("n", "-", "<CMD>Oil<CR>") -- Show current file in Oil
 
+MiniDeps.add("https://github.com/L3MON4D3/LuaSnip")
+local ls = require("luasnip")
+ls.setup()
+local s = ls.snippet
+local i = ls.insert_node
+local t = ls.text_node
+local rep = require("luasnip.extras").rep
+
+ls.add_snippets("python", {
+  s("self._", {
+    t("self._"),
+    rep(1),
+    t(" = "),
+    i(1),
+  }),
+})
+
+local f = ls.function_node
+ls.add_snippets("python", {
+  s("get_", {
+    f(function(args) return args[1][1]:gsub("^get_", "") end, {1}),
+    t(" = get_"),
+    i(1),           -- cursor lands here, type "get_affiliate_service"
+    t("()"),
+  }),
+})
+
+vim.keymap.set({"i"}, "<C-L>", function() ls.expand() end, {silent = true})
 
 -- Snippets collection
 MiniDeps.add("https://github.com/rafamadriz/friendly-snippets")

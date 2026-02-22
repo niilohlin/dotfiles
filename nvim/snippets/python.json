@@ -8,9 +8,4 @@
         ],
         "description": "init"
     },
-    "private_property": {
-        "prefix": "self._",
-        "body": ["self._$1 = ${1:property_name}$0"],
-        "description": "Private property"
-    }
 }
