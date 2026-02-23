@@ -584,22 +584,37 @@ ls.add_snippets("python", {
   }),
 })
 
-local function uuid()
-  local handle = io.popen("uuidgen")
-  local result = handle:read("*a")
-  handle:close()
-  return result:gsub("%s+", ""):lower()
-end
-
+local ls = require("luasnip")
+local s = ls.snippet
+local i = ls.insert_node
+local t = ls.text_node
 local d = ls.dynamic_node
-ls.add_snippets("all", {
-  s("uuid", {
-    d(1, function() return ls.snippet_node(nil, { t(uuid()) }) end),
+local sn = ls.snippet_node
+local f = ls.function_node
+
+ls.add_snippets("python", {
+  s("init", {
+    t("def __init__(self, "),
+    i(1, "args"),
+    t({"):", ""}),
+    d(2, function(args)
+      local params = vim.split(args[1][1], ", ")
+      local lines = {}
+      for _, param in ipairs(params) do
+        param = param:gsub("%s*:.*", ""):gsub("%s*=.*", ""):gsub("%s+", "")
+        if param ~= "" then
+          table.insert(lines, "\t\tself._" .. param .. " = " .. param)
+        end
+      end
+      return sn(nil, { t(lines) })
+    end, {1}),
   }),
 })
 
 -- Snippets collection
 MiniDeps.add("https://github.com/rafamadriz/friendly-snippets")
+require("luasnip.loaders.from_vscode").lazy_load()
+
 
 -- Completion engine.
 -- vim.api.nvim_create_autocmd('PackChanged', {
