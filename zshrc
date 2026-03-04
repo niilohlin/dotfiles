@@ -33,7 +33,7 @@ alias cp="cp -i -r"                          # confirm before overwriting someth
 alias free='free -m'                      # show sizes in MB
 alias gl="git log --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --graph"
 alias vim='nvim'
-alias less='vim -R' # use vim in readonly mode as a pager
+alias less='nvim -R' # use vim in readonly mode as a pager
 alias psp='source ~/dotfiles/bin/cd_to_pane_start_path'
 alias lg='lazygit'
 
@@ -51,19 +51,22 @@ autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-bindkey -M viins "^[[A" up-line-or-beginning-search
-bindkey -M viins "^[[B" down-line-or-beginning-search
+# bindkey -M viins "^[[A" up-line-or-beginning-search
+# bindkey -M viins "^[[B" down-line-or-beginning-search
 
 autoload edit-command-line; zle -N edit-command-line
-bindkey -M vicmd "^[[E" edit-command-line
+bindkey '^Xe' edit-command-line   # Ctrl+X then E
+bindkey '^X^E' edit-command-line  # Ctrl+X then Ctrl+E (like bash)
+bindkey -e
+# bindkey -M vicmd "^[[E" edit-command-line
 
 # Automatically ls after cd and add it to a hook
 chpwd_functions+=(ls)
 
 # Set vi keybindings
-set -o vi
+# set -o vi
 # Start in command mode.
-set keymap vi-insert
+# set keymap vi-insert
 
 eval "$(pyenv init - zsh)"
 eval "$(pyenv virtualenv-init -)"
@@ -96,23 +99,23 @@ source ~/.zsh/fzf-history
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# ci", ci', ci`, di", etc
-autoload -U select-quoted
-zle -N select-quoted
-for m in visual viopp; do
-    for c in {a,i}{\',\",\`}; do
-        bindkey -M $m $c select-quoted
-    done
-done
-
-# ci{, ci(, ci<, di{, etc
-autoload -U select-bracketed
-zle -N select-bracketed
-for m in visual viopp; do
-    for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-        bindkey -M $m $c select-bracketed
-    done
-done
+# # ci", ci', ci`, di", etc
+# autoload -U select-quoted
+# zle -N select-quoted
+# for m in visual viopp; do
+#     for c in {a,i}{\',\",\`}; do
+#         bindkey -M $m $c select-quoted
+#     done
+# done
+#
+# # ci{, ci(, ci<, di{, etc
+# autoload -U select-bracketed
+# zle -N select-bracketed
+# for m in visual viopp; do
+#     for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+#         bindkey -M $m $c select-bracketed
+#     done
+# done
 
 eval $(keychain --eval id_rsa)
 

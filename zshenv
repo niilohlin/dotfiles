@@ -32,6 +32,9 @@ export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
 export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
 export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
 
+# Add ctrl-j to "accept" in fzf
+export FZF_DEFAULT_OPTS='--bind "ctrl-j:accept"'
+
 
 # if [ "$SSH_AUTH_SOCK" = "" -a -x /usr/bin/ssh-agent ]; then
 #     eval `/usr/bin/ssh-agent`

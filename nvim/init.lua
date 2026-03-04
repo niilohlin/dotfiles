@@ -1135,10 +1135,13 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   callback = function()
     local refactoring = require("refactoring")
     refactoring.setup({})
-    vim.keymap.set({ "n", "x" }, "<leader>cr", function() -- code/refactor in the same style as codeAction
+    vim.keymap.set({ "n", "x" }, "<leader>rr", function() -- code/refactor in the same style as codeAction
       refactoring.select_refactor()
     end)
-  end,
+    vim.keymap.set({ "n", "x" }, "<leader>ri", function()
+      return refactoring.refactor('Inline Variable')
+    end, { expr = true })
+  end
 })
 
 -- Generic log highlighting
@@ -1437,7 +1440,7 @@ vim.api.nvim_create_user_command("Release", function(input)
 end, {
     nargs = "*",
     complete = function(ArgLead, CmdLine, CursorPos)
-      return {"app-backend", "qb-backoffice-frontedn", "merchant-backoffice-frontend", "qb-pay-frontend", "qb-web"}
+      return {"app-backend", "qb-backoffice-frontend", "merchant-backoffice-frontend", "qb-pay-frontend", "qb-web"}
     end
   })
 
