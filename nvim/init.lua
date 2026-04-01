@@ -394,7 +394,6 @@ vim.pack.add({ "https://github.com/tpope/vim-unimpaired" })
 
 -- Semantic syntax highlighting
 vim.pack.add({ "https://github.com/nvim-treesitter/nvim-treesitter" })
-vim.pack.add({ "https://github.com/nvim-treesitter/nvim-treesitter-locals" }) -- refactor plugin, only used for "highligt_definitions"
 vim.api.nvim_create_autocmd("BufReadPre", {
   group = initgroup,
   once = true,
@@ -846,6 +845,31 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
   end,
 })
 
+vim.api.nvim_set_hl(0, "LspReferenceText", { bg = "#454545" })
+vim.api.nvim_set_hl(0, "LspReferenceRead", { bg = "#454545" })
+vim.api.nvim_set_hl(0, "LspReferenceWrite", { bg = "#454545" })
+
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(ev)
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client:supports_method("textDocument/documentHighlight") then
+      local group = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = false })
+      vim.api.nvim_clear_autocmds({ buffer = ev.buf, group = group })
+
+      vim.api.nvim_create_autocmd("CursorHold", {
+        buffer = ev.buf,
+        group = group,
+        callback = vim.lsp.buf.document_highlight,
+      })
+      vim.api.nvim_create_autocmd("CursorMoved", {
+        buffer = ev.buf,
+        group = group,
+        callback = vim.lsp.buf.clear_references,
+      })
+    end
+  end,
+})
+
 vim.pack.add({ "https://github.com/ThePrimeagen/vim-be-good" })
 
 vim.pack.add({ "https://github.com/piersolenski/import.nvim" })
@@ -1081,16 +1105,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
   end,
 })
 
--- removes all "press enter to continue"
-vim.pack.add({ "https://github.com/jake-stewart/auto-cmdheight.nvim" })
-vim.api.nvim_create_autocmd({ "VimEnter" }, {
-  group = initgroup,
-  once = true,
-  callback = function()
-    require("auto-cmdheight").setup()
-  end,
-})
-
 -- add a scroll bar
 vim.pack.add({ "https://github.com/petertriho/nvim-scrollbar" })
 vim.api.nvim_create_autocmd({ "VimEnter" }, {
@@ -1145,23 +1159,6 @@ vim.pack.add({ "https://github.com/wsdjeg/vim-fetch" })
 
 -- Do not nest vim sessions
 vim.pack.add({ "https://github.com/brianhuster/unnest.nvim" })
-
--- neovim images
-vim.pack.add({ "https://github.com/3rd/image.nvim" })
-if not vim.g.neovide then
-  require("image").setup({
-    integrations = {
-      markdown = {
-        enabled = true,
-        clear_in_insert_mode = false,
-        download_remote_images = true,
-        only_render_image_at_cursor = false,
-        filetypes = { "markdown", "vimwiki" }, -- markdown extensions (ie. quarto) can go here
-      },
-    },
-  })
-end
-
 
 -- Nicer looking Inline diagnostics/virtual text
 vim.pack.add({ "https://github.com/rachartier/tiny-inline-diagnostic.nvim" })
@@ -1368,6 +1365,7 @@ vim.api.nvim_create_autocmd("ModeChanged", {
   callback = function()
     vim.opt_local.relativenumber = false
     vim.opt_local.number = false
+
   end
 })
 
@@ -1384,18 +1382,6 @@ vim.api.nvim_create_autocmd("BufWrite", {
     end
   end
 })
-
-vim.api.nvim_create_user_command("OnWrite", function(input)
-  if input.bang then
-    OnWrites = {}
-    return
-  end
-  ok, _ = pcall(function() vim.cmd(input.args) end)
-  if ok then
-    OnWrites[#OnWrites + 1] = input.args
-  end
-end, { nargs = "*", bang = true })
-
 
 vim.api.nvim_create_user_command("Manage", function(input)
   if input.bang then
@@ -1426,7 +1412,12 @@ end, {
     complete = function(ArgLead, CmdLine, CursorPos)
       return {"app-backend", "qb-backoffice-frontend", "merchant-backoffice-frontend", "qb-pay-frontend", "qb-web"}
     end
-  })
+  }
+)
+
+vim.cmd([[ :packadd nvim.undotree ]]) -- enable built in undo tree
+
+require('vim._core.ui2').enable({}) -- remove "press enter to continue", makes it possible to select :messages with g<
 
 require("gui")
 require("python_output")

@@ -1,4 +1,4 @@
--- Claude Code terminal integration
+-- Claude code terminal integration
 local claude_buf = nil
 local claude_win = nil
 
@@ -31,13 +31,13 @@ vim.api.nvim_create_user_command("Claude", function(input)
   if claude_is_visible() then
     vim.api.nvim_set_current_win(claude_win)
   elseif claude_buf and vim.api.nvim_buf_is_valid(claude_buf) then
-    -- Buffer exists but not visible, show it in a new window
+    -- buffer exists but not visible, show it in a new window
     vim.cmd("botright vsplit")
     claude_win = vim.api.nvim_get_current_win()
     vim.api.nvim_win_set_buf(claude_win, claude_buf)
   else
-    -- Create a new terminal
-    vim.cmd("botright vsplit | terminal claude")
+    -- create a new terminal
+    vim.cmd("botright vsplit | terminal Claude")
     claude_win = vim.api.nvim_get_current_win()
     claude_buf = vim.api.nvim_get_current_buf()
   end
