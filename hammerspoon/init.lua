@@ -43,7 +43,7 @@ local ctrl_u_delete_line = hs.hotkey.new({ "ctrl" }, "u", function()
   hs.eventtap.keyStroke({ "cmd" }, "delete")
 end)
 local ctrl_j_shift_enter = hs.hotkey.new({ "ctrl" }, "j", function()
-  hs.eventtap.keyStroke({ "ctrl" }, "return")
+  hs.eventtap.keyStroke({ "shift" }, "return")
 end)
 hs.hotkey.new({ "ctrl" }, "m", function()
   hs.eventtap.keyStroke({  }, "return")
@@ -55,7 +55,6 @@ end):enable()
 
 ctrl_w_delete_word:enable()
 ctrl_u_delete_line:enable()
-ctrl_j_shift_enter:enable()
 hs.window.filter
     .new("Ghostty")
     :subscribe(hs.window.filter.windowFocused, function()
@@ -71,6 +70,14 @@ end)
 
 -- local focus_next_window = hs.hotkey.new({ "ctrl", "shift" }, "`", function()
 -- end)
+
+hs.hotkey.bind({"alt"}, "f", function()
+  hs.eventtap.keyStroke({"alt"}, "right")
+end)
+
+hs.hotkey.bind({"alt"}, "b", function()
+  hs.eventtap.keyStroke({"alt"}, "left")
+end)
 
 hs.hotkey.bind({ "ctrl" }, "[", function()
   hs.eventtap.keyStroke({}, "escape")
