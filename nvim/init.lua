@@ -27,7 +27,7 @@ vim.api.nvim_create_autocmd({ "BufWritePre" }, {
 
 vim.api.nvim_create_autocmd("FileType", {
   group = initgroup,
-  pattern = { "javascript", "typescriptreact", "*.js", "*.jsx", "typescript", "*.ts", "*.tsx", "html", "htmldjango", "lua", "yaml", "yml" },
+  pattern = { "javascript", "javascriptreact", "typescriptreact", "typescript", "html", "htmldjango", "lua", "yaml" },
   callback = function()
     SetTabLength(2)
   end,
@@ -214,7 +214,7 @@ vim.opt.splitbelow = true     -- Show the preview window (code documentation) to
 vim.opt.wildmode = { "longest", "full" }
 vim.opt.swapfile = false      -- Disable swapfile
 vim.opt.signcolumn = "yes"    -- Always show sign column to avoid indenting and jumping
-vim.cmd([[set virtualedit="block"]])
+vim.opt.virtualedit = "block"
 
 -- Remove annoying auto inserting comment string
 vim.api.nvim_create_autocmd("BufEnter", {
@@ -255,13 +255,6 @@ vim.g.python3_host_prog = os.getenv("HOME") .. "/.local/share/nvim/venv/bin/pyth
 -- Set leader to <space>
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
-
--- show diagnostic source.
--- vim.diagnostic.config({
---   float = {
---     source = true,
---   },
--- })
 
 -- Git status of changed lines to the left.
 vim.pack.add({ "https://github.com/lewis6991/gitsigns.nvim" })
@@ -561,13 +554,8 @@ ls.add_snippets("python", {
   }),
 })
 
-local ls = require("luasnip")
-local s = ls.snippet
-local i = ls.insert_node
-local t = ls.text_node
 local d = ls.dynamic_node
 local sn = ls.snippet_node
-local f = ls.function_node
 
 ls.add_snippets("python", {
   s("init", {
@@ -594,15 +582,6 @@ require("luasnip.loaders.from_vscode").lazy_load()
 
 
 -- Completion engine.
--- vim.api.nvim_create_autocmd('PackChanged', {
---   group = initgroup,
---   once = true,
---   callback = function(event)
---     if event.data.spec == "blink.cmp" then
---       vim.fn.system(("cd %s && cargo build --release"):format(event.data.path))
---     end
---   end
--- })
 vim.pack.add({ "https://github.com/saghen/blink.cmp" })
 
 vim.pack.add({ "https://github.com/folke/lazydev.nvim" })
@@ -662,8 +641,6 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         preset = "luasnip",
       }
     })
-    -- ?? idk where this is going
-    -- opts_extend = { "sources.default" },
   end,
 })
 
@@ -774,29 +751,22 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     })
     vim.lsp.enable('elixirls')
 
+    -- vim.lsp.config('prlsp', {
+    --   cmd = { os.getenv("HOME") .. '/.local/share/nvim/site/pack/core/opt/prlsp/go/prlsp' },
+    --   root_markers = { '.git' },
+    -- })
+    -- vim.lsp.enable({'prlsp'})
+
+
     -- Global mappings.
     vim.keymap.set("n", "<leader>q", vim.diagnostic.setqflist)
-
-    -- local pwd = vim.loop.cwd()
-    -- vim.api.nvim_create_autocmd("FileType", {
-    --  pattern = "python",
-    --  callback = function()
-    --   vim.lsp.start({
-    --  name = "Omnisearch LSP",
-    --  filetypes = { "python" },
-    --  root_dir = pwd,
-    --  --- @field cmd? string[]|fun(dispatchers: vim.lsp.rpc.Dispatchers): vim.lsp.rpc.PublicClient
-    --  cmd = function(dispatchers)
-    --  end,
-    --   })
-    --  end,
-    -- })
 
     -- Use LspAttach autocommand to only map the following keys
     -- after the language server attaches to the current buffer
     vim.api.nvim_create_autocmd("LspAttach", {
       group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
       callback = function(ev)
+        vim.lsp.codelens.enable()
         -- Enable completion triggered by <c-x><c-o>
         vim.bo[ev.buf].omnifunc = "v:lua.vim.lsp.omnifunc"
 
@@ -923,7 +893,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
           "diagnostics",
         },
         lualine_c = { function() return vim.uv.cwd() end },
-        lualine_x = { function() return vim.fn.expand("%p") end },
+        lualine_x = { function() return vim.fn.expand("%:p") end },
         lualine_y = {
           function()
             local attached_clients = vim.lsp.get_clients({ bufnr = 0 })
@@ -1080,7 +1050,7 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
 
         local max_matches = 100
 
-        while not (start_line == current_line and start_col == current_col) and max_matches do
+        while not (start_line == current_line and start_col == current_col) and max_matches > 0 do
           mc.toggleCursor()
           vim.cmd("normal n")
           local current_pos = vim.api.nvim_win_get_cursor(0)
@@ -1096,7 +1066,6 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     vim.keymap.set("v", "A", mc.appendVisual)
 
     vim.keymap.set("n", "]<c-x>", mc.nextCursor)
-    vim.keymap.set("n", "[<c-x>", mc.prevCursor)
     vim.keymap.set("n", "[<c-x>", mc.prevCursor)
     vim.keymap.set("n", "<leader><down>", function()
       mc.lineAddCursor(1)
@@ -1171,8 +1140,6 @@ vim.g.opencode_opts = {
   -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition" on the type or field.
 }
 
-vim.o.autoread = true
-
 vim.api.nvim_create_user_command("Opencode", function(input)
   local opencode = require("opencode")
   local has_args = input.args ~= ""
@@ -1216,9 +1183,39 @@ end, { expr = true })
 -- Prose writing plugin
 -- vim.pack.add({ "https://github.com/preservim/vim-pencil" })
 
+-- PRLSP
+-- vim.pack.add({ "https://github.com/toziegler/prlsp" })
+
 -- end plugins
 
+local function get_highest_severity(count)
+  count = count or vim.diagnostic.count()
+
+  for _, s in ipairs({ vim.diagnostic.severity.ERROR, vim.diagnostic.severity.WARN, vim.diagnostic.severity.INFO, vim.diagnostic.severity.HINT, }) do
+    if count[s] and count[s] > 0 then
+      return s
+    end
+  end
+
+  return nil
+end
+
+vim.keymap.set('n', ']d', function ()
+    local severity = get_highest_severity()
+    vim.diagnostic.jump({ count = vim.v.count1, severity = severity })
+  end,
+  {}
+)
+
+vim.keymap.set('n', '[d', function ()
+    local severity = get_highest_severity()
+    vim.diagnostic.jump({ count = -vim.v.count1, severity = severity })
+  end,
+  {}
+)
+
 vim.keymap.set({ "s" }, "<c-e>", function()
+
   if vim.snippet then
     vim.snippet.stop()
   end
@@ -1306,11 +1303,11 @@ vim.api.nvim_create_autocmd({ "VimEnter", "BufEnter" }, {
 
 -- Last paste object
 vim.keymap.set({ "o" }, "iP", function()
-  vim.cmd("normal `[v`]`")
+  vim.cmd("normal `[v`]")
 end)
 vim.keymap.set("x", "iP", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
-  vim.cmd("normal `[v`]`")
+  vim.cmd("normal `[v`]")
 end)
 
 vim.keymap.set("c", "<C-a>", "<Home>") -- Go to start of line
@@ -1322,11 +1319,6 @@ vim.keymap.set("x", "ic", function()
   vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", false, true, true), "nx", false)
   require("vim._comment").textobject()
 end)
-
--- enable extui nightly
--- require('vim._extui').enable({
---   enable = true,
--- })
 
 vim.keymap.set("o", "ie", function()
   vim.cmd("normal! ggVG")
@@ -1425,3 +1417,11 @@ require("project")
 require("qflist_to_dianostics")
 require("autotype_lsp")
 require("claude")
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "elixir", "eelixir", "heex" },
+  callback = function()
+    vim.treesitter.start()
+    vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
