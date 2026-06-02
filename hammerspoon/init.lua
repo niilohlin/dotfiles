@@ -1,6 +1,23 @@
 ---@diagnostic disable: undefined-global
 require("hs.ipc")
 
+-- Track every hotkey created below so we can suspend them all (e.g. while a
+-- fullscreen game is running). Wrapping new/bind keeps the rest of the config
+-- untouched while still capturing each hotkey object.
+local all_hotkeys = {}
+local orig_hotkey_new = hs.hotkey.new
+hs.hotkey.new = function(...)
+  local hk = orig_hotkey_new(...)
+  table.insert(all_hotkeys, hk)
+  return hk
+end
+local orig_hotkey_bind = hs.hotkey.bind
+hs.hotkey.bind = function(...)
+  local hk = orig_hotkey_bind(...)
+  table.insert(all_hotkeys, hk)
+  return hk
+end
+
 local go_to_in_slack = hs.hotkey.new({ "cmd", "shift" }, "o", function()
   hs.eventtap.keyStroke({ "cmd" }, "k")
 end)
@@ -228,6 +245,53 @@ send_to:bind('', "0", function()
   hs.execute("/opt/homebrew/bin/yabai -m window --space 0")
   send_to:exit()
 end)
+
+-- Suspend all Hammerspoon hotkeys while Age of Empires II is running, so the
+-- game receives every keystroke without interference. ------------------------
+local AOE_NAME_PATTERNS = { "age of empires", "aoe2", "aoe" }
+
+local function is_aoe(app_name)
+  if not app_name then return false end
+  local lower = string.lower(app_name)
+  for _, pat in ipairs(AOE_NAME_PATTERNS) do
+    if string.find(lower, pat, 1, true) then return true end
+  end
+  return false
+end
+
+local hotkeys_suspended = false
+
+local function suspend_hotkeys()
+  if hotkeys_suspended then return end
+  hotkeys_suspended = true
+  for _, hk in ipairs(all_hotkeys) do hk:disable() end
+  print("AoE2 detected: Hammerspoon hotkeys suspended")
+end
+
+local function resume_hotkeys()
+  if not hotkeys_suspended then return end
+  hotkeys_suspended = false
+  for _, hk in ipairs(all_hotkeys) do hk:enable() end
+  print("AoE2 closed: Hammerspoon hotkeys resumed")
+end
+
+-- Handle the case where the game is already running when the config loads.
+for _, app in ipairs(hs.application.runningApplications()) do
+  if is_aoe(app:name()) then
+    suspend_hotkeys()
+    break
+  end
+end
+
+AoeWatcher = hs.application.watcher.new(function(app_name, event_type, _app)
+  if not is_aoe(app_name) then return end
+  if event_type == hs.application.watcher.launched then
+    suspend_hotkeys()
+  elseif event_type == hs.application.watcher.terminated then
+    resume_hotkeys()
+  end
+end)
+AoeWatcher:start()
 
 print("done reloading")
 
