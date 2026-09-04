@@ -12,6 +12,7 @@ theme = Gruvbox Dark
 
 keybind = cmd+t=unbind
 keybind = cmd+enter=unbind
+keybind = ctrl+o=unbind
 
 mouse-hide-while-typing = true
 
