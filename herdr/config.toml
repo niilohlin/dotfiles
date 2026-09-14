@@ -1,0 +1,41 @@
+onboarding = false
+
+[theme]
+name = "gruvbox"
+auto_switch = false
+
+[ui]
+show_agent_labels_on_pane_borders = false
+prompt_new_tab_name = false
+
+# tmux-style splitters: panes share a single divider line, no outer frame.
+pane_gaps = false
+pane_outer_borders = false
+
+agent_panel_sort = "spaces"
+[ui.toast]
+delivery = "system"
+
+[keys]
+prefix = "ctrl+b"
+
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+last_pane = "prefix+\\"
+split_vertical = ["prefix+v", "prefix+%"]
+split_horizontal = ["prefix+minus", "prefix+\""]
+
+reload_config = "prefix+r"
+# prefix+r is the tmux reload key, so resize_mode takes reload_config's default.
+resize_mode = "prefix+shift+r"
+
+edit_scrollback = "prefix+["
+close_workspace = "prefix+`"
+
+[[keys.command]]
+key = "prefix+shift+l"
+type = "plugin_action"
+command = "third774.last-workspace.toggle"
+description = "last workspace"
