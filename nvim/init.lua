@@ -474,6 +474,9 @@ vim.api.nvim_create_autocmd("BufReadPre", {
         enable = true,
       },
     })
+
+    -- ensure_installed above is a no-op on nvim-treesitter main, install() is the API
+    configs.install({ "yaml", "bash" })
   end,
 })
 
@@ -1439,5 +1442,13 @@ vim.api.nvim_create_autocmd("FileType", {
   callback = function()
     vim.treesitter.start()
     vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+  end,
+})
+
+-- highlighting only, yaml's own indentexpr behaves better than the treesitter one
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "yaml",
+  callback = function()
+    vim.treesitter.start()
   end,
 })
