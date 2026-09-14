@@ -17,15 +17,18 @@ setopt sharehistory
 setopt incappendhistory
 
 # sort tmp directory by modified date
-function ls() {
+function eza_ls() {
     if [[ $PWD == '/tmp' ]]
     then
-        eza --long --sort=modified
+        eza --long --sort=modified "${@:-.}"
     else
-        eza -G -F
+        eza -G -F "${@:-.}"
     fi
 }
 
+# The `${@:-.}` above matters: given no path, eza reads its file list from stdin
+# whenever stdin isn't a tty, so a bare `eza` in a pipe lists nothing.
+alias ls='eza_ls'
 alias ll='eza -l --group-directories-first --color=auto -F'
 alias la='eza -la --group-directories-first --color=auto -F'
 alias grep='grep --color=tty -d skip'
@@ -61,7 +64,7 @@ bindkey -e
 # bindkey -M vicmd "^[[E" edit-command-line
 
 # Automatically ls after cd and add it to a hook
-chpwd_functions+=(ls)
+chpwd_functions+=(eza_ls)
 
 # Set vi keybindings
 # set -o vi
@@ -69,7 +72,6 @@ chpwd_functions+=(ls)
 # set keymap vi-insert
 
 eval "$(pyenv init - zsh)"
-eval "$(pyenv virtualenv-init -)"
 eval "$(rbenv init - --no-rehash zsh)"
 
 # Load /etc/paths.d/ into the PATH
