@@ -1,15 +1,9 @@
-
-
-
 [core]
 	user = Niil Öhlin
 	email = niilohlin@gmail.com
 	excludesfile = /Users/niilohlin/.gitignore
 	editor = nvim
 	pager = diff-so-fancy | less --tabs=4 -RFX
-[user]
-	name = Niil Öhlin
-	email = niil.ohlin@quickbit.com
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -47,8 +41,6 @@
 	defaultBranch = main
 [branch]
 	sort = -committerdate
-[maintenance]
-	repo = /Users/niilohlin/workspace/quickbit
 [gpg]
 	format = ssh
 [column]
@@ -78,3 +70,6 @@
 	allowedSignersFile = /Users/niilohlin/.config/git/allowed_signers
 [credentail]
 	helper = store
+[user]
+	name = Niil Öhlin
+	email = niilohlin@gmail.com
