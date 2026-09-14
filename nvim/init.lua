@@ -770,6 +770,17 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     })
     vim.lsp.enable('elixirls')
 
+    vim.lsp.config("gopls", {
+      capabilities = capabilities,
+    })
+    vim.lsp.enable('gopls')
+
+    vim.lsp.config("tailwindcss-language-server", {
+      capabilities = capabilities,
+      cmd = { 'tailwindcss-language-server', '--stdio' }
+    })
+    vim.lsp.enable('tailwindcss-language-server')
+
     -- vim.lsp.config('prlsp', {
     --   cmd = { os.getenv("HOME") .. '/.local/share/nvim/site/pack/core/opt/prlsp/go/prlsp' },
     --   root_markers = { '.git' },
