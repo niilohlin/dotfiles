@@ -3,14 +3,15 @@ export PATH=/opt/homebrew/bin/:$PATH
 export PATH=/opt/homebrew/opt/node@22/bin:$PATH
 export PATH=/opt/homebrew/opt/llvm/bin:$PATH
 export PATH=/opt/homebrew/opt/swagger-codegen@2/bin:$PATH
-export PATH="/Users/niilohlin/.local/bin:$PATH"
+export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
 export PATH=$PATH:$HOME/.cargo/bin
 export PATH=$PATH:$HOME/.pyenv/bin
 export PATH=$PATH:$HOME/.rbenv/shims/
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
-
+export PATH=$PATH:$HOME/go/bin
 
 export NVIM_BIN=/opt/homebrew/bin/nvim
 
