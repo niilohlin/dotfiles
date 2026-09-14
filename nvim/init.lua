@@ -1403,16 +1403,9 @@ vim.api.nvim_create_autocmd("ModeChanged", {
 -- do not "go to next window"
 vim.api.nvim_set_keymap("n", "<C-W><C-W>", "<nop>", {})
 
-OnWrites = {}
-
-vim.api.nvim_create_autocmd("BufWrite", {
-  group = vim.api.nvim_create_augroup("OnSave", { clear = true }),
-  callback = function()
-    for _, value in ipairs(OnWrites) do
-      vim.cmd(value)
-    end
-  end
-})
+vim.api.nvim_create_user_command('TermHl', function()
+  vim.api.nvim_open_term(0, {})
+end, { desc = 'Highlights ANSI termcodes in curbuf' })
 
 vim.api.nvim_create_user_command("Manage", function(input)
   if input.bang then
