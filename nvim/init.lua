@@ -601,7 +601,7 @@ require("luasnip.loaders.from_vscode").lazy_load()
 
 
 -- Completion engine.
-vim.pack.add({ "https://github.com/saghen/blink.cmp" })
+vim.pack.add({ {src = "https://github.com/saghen/blink.cmp", version = 'v1' }})
 
 vim.pack.add({ "https://github.com/folke/lazydev.nvim" })
 vim.api.nvim_create_autocmd("FileType", {
