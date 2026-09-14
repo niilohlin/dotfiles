@@ -1,0 +1,148 @@
+// Zed keymap — ported from nvim/init.lua. Leader is <space>, localleader has no
+// equivalent. Docs: https://zed.dev/docs/key-bindings
+[
+  // ---------------------------------------------------------------- normal+visual
+  {
+    "context": "VimControl && !menu && !Terminal",
+    "bindings": {
+      // telescope
+      "space s f": "file_finder::Toggle",
+      "space s F": "file_finder::Toggle",
+      "space s g": "pane::DeploySearch",
+      "space s r": "project_search::ToggleFocus",
+      "space s b": "tab_switcher::Toggle",
+      "space s o": "projects::OpenRecent",
+      "space w s": "project_symbols::Toggle",
+      "space o": "project_symbols::Toggle",
+      "g O": "outline::Toggle",
+
+      // lsp
+      "g r r": "editor::FindAllReferences",
+      "g r i": "editor::GoToImplementation",
+      "g r n": "editor::Rename",
+      "g r a": "editor::ToggleCodeActions",
+      "g r t": "editor::GoToTypeDefinition",
+      "space r r": "editor::ToggleCodeActions",
+
+      // diagnostics: ]d/[d walk everything, ]D/[D errors only
+      "] d": "editor::GoToDiagnostic",
+      "[ d": "editor::GoToPreviousDiagnostic",
+      "] D": ["editor::GoToDiagnostic", { "severity": { "min": "error", "max": "error" } }],
+      "[ D": ["editor::GoToPreviousDiagnostic", { "severity": { "min": "error", "max": "error" } }],
+      "space q": "diagnostics::Deploy",
+
+      // gitsigns
+      "] c": "editor::GoToHunk",
+      "[ c": "editor::GoToPreviousHunk",
+      "space h d": "git::Restore",
+      "space h p": "editor::ToggleSelectedDiffHunks",
+      "space h b": "editor::ToggleGitBlameInline",
+      "space g g": "git_panel::ToggleFocus",
+
+      // treesitter goto_next_start / goto_previous_start
+      "] m": "vim::NextMethodStart",
+      "[ m": "vim::PreviousMethodStart",
+      "] k": "vim::NextSectionStart",
+      "[ k": "vim::PreviousSectionStart",
+
+      // neoindent jumps
+      "] i": "vim::NextSameIndent",
+      "[ i": "vim::PreviousSameIndent",
+      "] I": "vim::NextLesserIndent",
+      "[ I": "vim::PreviousLesserIndent",
+
+      // oil.nvim — "-" opens the file tree instead of a file browser buffer
+      "-": "project_panel::ToggleFocus",
+
+      // never use Q for ex mode
+      "Q": null,
+
+      // mini.surround uses gs to add
+      "g s": "vim::PushAddSurrounds",
+
+      // text-case.nvim had ga.; Zed only has upper/lower
+      "g a u": "vim::ConvertToUpperCase",
+      "g a l": "vim::ConvertToLowerCase"
+    }
+  },
+
+  // -------------------------------------------------------------------- normal only
+  {
+    "context": "vim_mode == normal && !menu",
+    "bindings": {
+      // treesitter incremental_selection (gV / + / -)
+      "g V": "editor::SelectLargerSyntaxNode",
+
+      // multicursor.nvim <leader><down>
+      "space down": "editor::AddSelectionBelow",
+      "space up": "editor::AddSelectionAbove",
+
+      // terminal instead of :term / vim-dispatch
+      "space t": "workspace::NewTerminal",
+
+      "space e": "project_panel::ToggleFocus",
+      "space z": "workspace::ToggleZoom"
+    }
+  },
+
+  // -------------------------------------------------------------------- visual only
+  {
+    "context": "vim_mode == visual && !menu",
+    "bindings": {
+      "+": "editor::SelectLargerSyntaxNode",
+      "-": "editor::SelectSmallerSyntaxNode",
+
+      // multicursor.nvim visual I / A
+      "I": "editor::AddSelectionBelow",
+
+      // select every occurrence of the selection (nvim: <c-x> in cmdline)
+      "ctrl-x": "editor::SelectAllMatches",
+
+      "space s g": "pane::DeploySearch"
+    }
+  },
+
+  // ------------------------------------------------------ text objects (a…/i…/cs…)
+  {
+    "context": "vim_operator == a || vim_operator == i || vim_operator == cs",
+    "bindings": {
+      // treesitter textobjects
+      "f": "vim::Method",
+      "k": "vim::Class",
+      "a": "vim::Argument",
+      // neoindent
+      "n": "vim::IndentObj",
+      // vim._comment.textobject
+      "c": "vim::Comment",
+      // whole-buffer object (nvim: ie / ae)
+      "e": "vim::EntireFile",
+      // mini.ai
+      "q": "vim::MiniQuotes",
+      "b": "vim::MiniBrackets"
+    }
+  },
+
+  // ------------------------------------------------------------------------- insert
+  {
+    "context": "vim_mode == insert",
+    "bindings": {
+      // blink.cmp snippet navigation
+      "ctrl-l": "editor::NextSnippetTabstop",
+      "ctrl-h": "editor::PreviousSnippetTabstop",
+      "ctrl-k": "editor::ShowSignatureHelp",
+      "ctrl-c": "editor::Cancel"
+    }
+  },
+
+  // --------------------------------------------------- work when no editor is open
+  {
+    "context": "EmptyPane || SharedScreen",
+    "bindings": {
+      "space s f": "file_finder::Toggle",
+      "space s g": "pane::DeploySearch",
+      "space s o": "projects::OpenRecent",
+      "space t": "workspace::NewTerminal",
+      "space e": "project_panel::ToggleFocus"
+    }
+  }
+]

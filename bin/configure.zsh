@@ -16,7 +16,7 @@ defaults write -g com.apple.swipescrolldirection -bool FALSE
 defaults write com.apple.screencapture location /tmp/
 
 # install homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # shell tools
 brew install eza tmux diff-so-fancy git git-lfs keychain
@@ -25,15 +25,19 @@ brew install neovim fzf rust lua node rustup luarocks ripgrep xz
 # applications
 brew install slack messenger anki docker-desktop obsidian gifox
 # keyboard navigation
-brew install rectangle hammerspoon
+brew install hammerspoon
 
-mkdir -v ~/dotfiles/.config
+mkdir -v ~/.config
 
 # Link config files
 ln -s ~/dotfiles/tmux.conf ~/.tmux.conf
 ln -s ~/dotfiles/nvim ~/.config/nvim
 ln -s ~/dotfiles/gitconfig ~/.gitconfig
 ln -s ~/dotfiles/ghostty ~/.config/ghostty
+# Zed keeps a prompts db in ~/.config/zed, so link the files instead of the dir
+mkdir -p ~/.config/zed
+ln -s ~/dotfiles/zed/settings.json ~/.config/zed/settings.json
+ln -s ~/dotfiles/zed/keymap.json ~/.config/zed/keymap.json
 ln -s ~/dotfiles/hammerspoon ~/.hammerspoon
 ln -s ~/dotfiles/zsh ~/.zsh
 ln -s ~/dotfiles/zshrc ~/.zshrc
@@ -41,4 +45,4 @@ ln -s ~/dotfiles/zshenv ~/.zshenv
 ln -s ~/dotfiles/gitconfig ~/.gitconfig
 
 # install antidote zsh package manager
-git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.zsh/.antidote
+# git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.zsh/.antidote

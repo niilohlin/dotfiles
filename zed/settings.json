@@ -1,0 +1,205 @@
+// Zed settings — ported from nvim/init.lua where an equivalent exists.
+// Docs: https://zed.dev/docs/configuring-zed
+{
+  "proxy": "",
+  "agent": {
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {}
+    },
+    "sandbox_permissions": {
+      "allow_all_hosts": true,
+      "write_paths": [
+        {
+          "requested": "/Users/n.ohlin/.config/gcloud",
+          "resolved": "/Users/n.ohlin/.config/gcloud"
+        }
+      ]
+    },
+    "default_model": {
+      "provider": "google",
+      "model": "gemini-3.1-pro-preview",
+      "enable_thinking": true,
+      "effort": "high"
+    },
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "vim_mode": true,
+  "base_keymap": "Zed",
+
+  "vim": {
+    // ignorecase + smartcase
+    "use_smartcase_find": true,
+    // `d`/`y` do not clobber the system clipboard; "+ still works
+    "use_system_clipboard": "never",
+    // number + relativenumber in normal mode, absolute in insert
+    "toggle_relative_line_numbers": true,
+    // :s applies to the whole line without /g
+    "gdefault": true,
+    "highlight_on_yank_duration": 50,
+  },
+
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry",
+    },
+  },
+
+  "icon_theme": "Zed (Default)",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "dark",
+    "light": "Gruvbox Light",
+    "dark": "Gruvbox Dark",
+  },
+
+  // vim.opt.cursorline
+  "current_line_highlight": "all",
+  "cursor_blink": false,
+  // vim.opt.scrolloff = 1
+  "vertical_scroll_margin": 1,
+  // vim.opt.list / listchars
+  "show_whitespaces": "boundary",
+  "whitespace_map": {
+    "space": "·",
+    "tab": "›",
+  },
+  // LspReference* highlight groups
+  "selection_highlight": true,
+  "relative_line_numbers": "enabled",
+  "use_smartcase_search": true,
+  "seed_search_query_from_cursor": "selection",
+
+  // vim.opt.tabstop/shiftwidth/softtabstop = 4, expandtab
+  "tab_size": 4,
+  "hard_tabs": false,
+
+  // BufWritePre :%s/\s\+$//e
+  "remove_trailing_whitespace_on_save": true,
+  "ensure_final_newline_on_save": true,
+  // LspAttach BufWritePre vim.lsp.buf.format
+  "format_on_save": "on",
+
+  // tiny-inline-diagnostic.nvim
+  "diagnostics": {
+    "inline": {
+      "enabled": true,
+      "update_debounce_ms": 150,
+    },
+  },
+
+  // gitsigns.nvim
+  "git": {
+    "git_gutter": "tracked_files",
+    "inline_blame": {
+      "enabled": false,
+    },
+  },
+
+  // vim.opt.wildignore
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.hg",
+    "**/.svn",
+    "**/.DS_Store",
+    "**/.pytest_cache",
+    "**/__pycache__",
+    "**/node_modules",
+    "**/venv",
+    "**/.venv",
+    "**/target",
+    "**/build",
+    "**/dist",
+    "**/.next",
+    "**/.cache",
+    "**/*.pyc",
+  ],
+
+  // command W w
+  "command_aliases": {
+    "W": "w",
+    "Wq": "wq",
+    "Q": "q",
+    "Qa": "qa",
+  },
+
+  // Autocmds that set 2-space indent, plus per-language LSP wiring.
+  "languages": {
+    "Python": {
+      // pyrefly + ruff, no pyright (requires the Pyrefly extension)
+      "language_servers": ["pyrefly", "ruff", "!pyright", "!basedpyright"],
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "ruff" } }],
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+      },
+    },
+    "TypeScript": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "code_actions_on_format": { "source.fixAll.eslint": true },
+    },
+    "TSX": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "code_actions_on_format": { "source.fixAll.eslint": true },
+    },
+    "JavaScript": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "code_actions_on_format": { "source.fixAll.eslint": true },
+    },
+    "JSX": {
+      "tab_size": 2,
+      "formatter": "prettier",
+      "code_actions_on_format": { "source.fixAll.eslint": true },
+    },
+    "HTML": { "tab_size": 2 },
+    "Lua": { "tab_size": 2 },
+    "YAML": { "tab_size": 2 },
+    "JSON": { "tab_size": 2 },
+    "JSONC": { "tab_size": 2 },
+    "Markdown": {
+      // wrap + linebreak + textwidth=80, but no auto-hard-wrap while typing
+      "soft_wrap": "preferred_line_length",
+      "preferred_line_length": 80,
+      "show_wrap_guides": false,
+      "remove_trailing_whitespace_on_save": false,
+      "format_on_save": "off",
+    },
+  },
+
+  "lsp": {
+    "pyrefly": {
+      "binary": {
+        "path": "uvx",
+        "arguments": ["pyrefly", "lsp"],
+      },
+    },
+    "ruff": {
+      "binary": {
+        "path": "uvx",
+        "arguments": ["ruff", "server"],
+      },
+    },
+    "elixir-ls": {
+      "binary": { "path": "elixir-ls" },
+    },
+  },
+
+  "auto_install_extensions": {
+    "pyrefly": true,
+    "elixir": true,
+    "toml": true,
+    "html": true,
+    "make": true,
+    "log": true,
+  },
+
+  "terminal": {
+    "shell": { "program": "/bin/zsh" },
+    "line_height": "standard",
+  },
+}
