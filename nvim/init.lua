@@ -722,18 +722,18 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
     vim.lsp.enable('ts_ls')
 
     vim.lsp.config("eslint", {
-      on_attach = function(client, bufnr)
-        -- Enable formatting capability for ESLint
-        client.server_capabilities.documentFormattingProvider = true
-        -- Auto-format on save
-        vim.api.nvim_create_autocmd("BufWritePre", {
-          group = lsp_format_group,
-          buffer = bufnr,
-          callback = function()
-            vim.lsp.buf.format({ bufnr = bufnr })
-          end,
-        })
-      end,
+      -- on_attach = function(client, bufnr)
+      --   -- Enable formatting capability for ESLint
+      --   client.server_capabilities.documentFormattingProvider = true
+      --   -- Auto-format on save
+      --   vim.api.nvim_create_autocmd("BufWritePre", {
+      --     group = lsp_format_group,
+      --     buffer = bufnr,
+      --     callback = function()
+      --       vim.lsp.buf.format({ bufnr = bufnr })
+      --     end,
+      --   })
+      -- end,
     })
     vim.lsp.enable('eslint')
 
@@ -751,7 +751,10 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
           group = lsp_format_group,
           buffer = bufnr,
           callback = function()
-            vim.lsp.buf.format({ bufnr = bufnr })
+            -- fit-api uses black, not ruff-format; skip ruff formatting there
+            if vim.api.nvim_buf_get_name(bufnr):match("/work/fit%-api/") then
+              return
+            end
             vim.lsp.buf.code_action({
               context = { only = { "source.organizeImports" } },
               apply = true,
@@ -821,11 +824,16 @@ vim.api.nvim_create_autocmd({ "InsertEnter", "CmdlineEnter", "FileType" }, {
         declare_method_if_supported("textDocument/references", "grr", builtin.lsp_references)
         declare_method_if_supported("textDocument/documentSymbol", "gO", builtin.lsp_document_symbols)
         declare_method_if_supported("workspace/symbol", "<leader>o", builtin.lsp_workspace_symbols)
-        if client:supports_method("textDocument/formatting") then
+        local prettier_types = { typescript = true, typescriptreact = true, javascript = true, javascriptreact = true }
+        if client:supports_method("textDocument/formatting") and not prettier_types[vim.bo[ev.buf].filetype] and client.name ~= "ts_ls" then
           vim.api.nvim_create_autocmd("BufWritePre", {
             group = lsp_format_group,
             buffer = ev.buf,
             callback = function()
+              -- fit-api uses black, not ruff-format; skip ruff formatting there
+              if vim.api.nvim_buf_get_name(ev.buf):match("/work/fit%-api/") then
+                return
+              end
               vim.lsp.buf.format({ bufnr = ev.buf })
             end
           })
