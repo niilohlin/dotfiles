@@ -284,10 +284,26 @@ vim.keymap.set("n", "[c", function()
   end
 end)
 
-vim.api.nvim_create_user_command("Review", function()
-  gitsigns.change_base(vim.fn.system('git merge-base main HEAD'):gsub("\n", ""), true)
+local function git_out(cmd)
+  local out = vim.fn.system(cmd)
+  if vim.v.shell_error ~= 0 then
+    return nil
+  end
+  return vim.trim(out)
+end
+
+vim.api.nvim_create_user_command("Review", function(opts)
+  local trunk = opts.args ~= "" and opts.args
+      or git_out({ "git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD" })
+      or "origin/master"
+  local base = git_out({ "git", "merge-base", trunk, "HEAD" })
+  if not base then
+    vim.notify("Review: no merge-base with " .. trunk, vim.log.levels.ERROR)
+    return
+  end
+  gitsigns.change_base(base, true)
   gitsigns.setqflist("all")
-end, { nargs = "*" })
+end, { nargs = "?" })
 
 vim.api.nvim_create_user_command("Unreview", function()
   gitsigns.change_base(nil, true)
