@@ -1428,16 +1428,81 @@ end, {
   }
 )
 
-vim.api.nvim_create_user_command("Release", function(input)
-  local path = vim.fs.root(0, { ".git" }) or vim.loop.cwd()
-  vim.cmd("botright 12split | term (cd " .. path .. "/production-diff; yarn release " .. input.args .. ")")
+vim.api.nvim_create_user_command("Dev", function(input)
+  vim.cmd("Dispatch ./dev " .. input.args)
+end, { nargs = "*" })
+
+vim.api.nvim_create_user_command("Deploy", function(input)
+  vim.cmd("botright 12split | term /Users/n.ohlin/work/deploy " .. input.args)
 end, {
     nargs = "*",
-    complete = function(ArgLead, CmdLine, CursorPos)
-      return {"app-backend", "qb-backoffice-frontend", "merchant-backoffice-frontend", "qb-pay-frontend", "qb-web"}
-    end
-  }
-)
+    complete = function(ArgLead, CmdLine, _)
+      local helm = vim.env.HOME .. "/work/helm-chart-values"
+      local registry_prefix = "europe-north1-docker.pkg.dev/volumental-infra/images/"
+
+      local tokens = vim.split(CmdLine, "%s+", { trimempty = true })
+      local ends_with_space = CmdLine:sub(-1) == " "
+      local typed = #tokens - 1 -- exclude command name
+      local pos = ends_with_space and (typed + 1) or typed
+
+      local function filter(list)
+        local out = {}
+        for _, v in ipairs(list) do
+          if ArgLead == "" or v:sub(1, #ArgLead) == ArgLead then
+            table.insert(out, v)
+          end
+        end
+        table.sort(out)
+        return out
+      end
+
+      if pos == 1 then
+        return filter({ "staging", "production" })
+      elseif pos == 2 then
+        local services = {}
+        if vim.fn.isdirectory(helm) == 1 then
+          for _, name in ipairs(vim.fn.readdir(helm)) do
+            if vim.fn.filereadable(helm .. "/" .. name .. "/kustomization.yaml") == 1 then
+              table.insert(services, name)
+            end
+          end
+        end
+        return filter(services)
+      elseif pos == 3 then
+        local service = tokens[3]
+        if not service then return {} end
+        local ks = helm .. "/" .. service .. "/kustomization.yaml"
+        if vim.fn.filereadable(ks) ~= 1 then return {} end
+        local names, cur_name, cur_newname, in_images = {}, nil, "", false
+        local function flush()
+          if cur_name and cur_newname:sub(1, #registry_prefix) == registry_prefix then
+            table.insert(names, cur_name)
+          end
+        end
+        for line in io.lines(ks) do
+          if line:match("^images:") then
+            in_images = true
+          elseif in_images and line:match("^%S") then
+            flush(); cur_name, cur_newname = nil, ""; in_images = false
+          elseif in_images then
+            local n = line:match("^%s*-%s*name:%s*(.+)")
+            if n then
+              flush()
+              cur_name = n:gsub("^%s+", ""):gsub("%s+$", ""):gsub('^"(.*)"$', "%1")
+              cur_newname = ""
+            else
+              local nn = line:match("^%s*newName:%s*(.+)")
+              if nn then cur_newname = nn:gsub("^%s+", ""):gsub("%s+$", "") end
+            end
+          end
+        end
+        flush()
+        if service == "visa" then table.insert(names, "sdk") end
+        return filter(names)
+      end
+      return {}
+    end,
+  })
 
 vim.cmd([[ :packadd nvim.undotree ]]) -- enable built in undo tree
 
