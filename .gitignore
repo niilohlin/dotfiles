@@ -2,3 +2,9 @@ nvim/undodir/*
 nvim/plugged/*
 nvim/.netrwhist
 .env
+
+# antidote clones itself here, see bin/configure.zsh
+zsh/.antidote/
+
+# per-machine permission grants
+.claude/settings.local.json
