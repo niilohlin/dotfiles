@@ -104,6 +104,10 @@ hs.hotkey.bind({ "ctrl" }, "i", function()
   hs.eventtap.keyStroke({}, "tab")
 end)
 
+hs.hotkey.bind({ "cmd" }, "m", function()
+  hs.eventtap.keyStroke({ "cmd" }, "return")
+end)
+
 -- Block the original Enter key
 -- hs.eventtap.new({hs.eventtap.event.types.keyDown}, function(event)
 --     local keyCode = event:getKeyCode()
