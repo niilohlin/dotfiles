@@ -1275,7 +1275,8 @@ vim.api.nvim_command("command W w") -- Remap :W to :w
 
 vim.api.nvim_create_user_command("PrettyPrint", function(input)
   if input.bang then
-    vim.cmd("%s/\\\\n/\\r/g")
+    pcall(vim.cmd, "%s/\\\\n/\\r/g")
+    pcall(vim.cmd, "%s/\\\\t/	/g")
     return
   end
 
