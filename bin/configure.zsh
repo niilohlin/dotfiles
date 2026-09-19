@@ -44,5 +44,7 @@ ln -s ~/dotfiles/zshrc ~/.zshrc
 ln -s ~/dotfiles/zshenv ~/.zshenv
 ln -s ~/dotfiles/gitconfig ~/.gitconfig
 
+herdr plugin link ~/dotfiles/herdr/plugins/ghostty-progress
+
 # install antidote zsh package manager
 # git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.zsh/.antidote

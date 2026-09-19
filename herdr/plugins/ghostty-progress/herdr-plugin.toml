@@ -1,0 +1,37 @@
+id = "ghostty-progress"
+name = "Ghostty Progress Bar"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "Mirror the focused agent's state onto the outer terminal's OSC 9;4 progress bar."
+platforms = ["linux", "macos"]
+
+[[startup]]
+command = ["./sync.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["./sync.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["./sync.sh"]
+
+[[events]]
+on = "pane.focused"
+command = ["./sync.sh"]
+
+[[events]]
+on = "pane.closed"
+command = ["./sync.sh"]
+
+[[events]]
+on = "pane.exited"
+command = ["./sync.sh"]
+
+[[events]]
+on = "workspace.focused"
+command = ["./sync.sh"]
+
+[[events]]
+on = "tab.focused"
+command = ["./sync.sh"]
