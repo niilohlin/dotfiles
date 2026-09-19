@@ -14,6 +14,10 @@ keybind = cmd+t=unbind
 keybind = cmd+enter=unbind
 keybind = ctrl+o=unbind
 
+# herdr has no way to bind one key to a sequence of its own actions, so this
+# types ctrl+b g / into it: open the session navigator, then start filtering.
+keybind = ctrl+b>y=text:\x02g/
+
 mouse-hide-while-typing = true
 
 # keybind = cmd+c=text:\x03
