@@ -7,14 +7,24 @@ auto_switch = false
 [ui]
 show_agent_labels_on_pane_borders = false
 prompt_new_tab_name = false
+hide_tab_bar_when_single_tab = true
 
 # tmux-style splitters: panes share a single divider line, no outer frame.
 pane_gaps = false
 pane_outer_borders = false
 
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
+status_indicators = "symbols"
+
 [ui.toast]
 delivery = "system"
+
+# $num comes from the numbered-workspaces plugin; the rest is the default layout.
+[ui.sidebar.spaces]
+rows = [
+  ["$num", "state_icon", "workspace"],
+  ["branch", "git_status"],
+]
 
 [keys]
 prefix = "ctrl+b"
@@ -26,9 +36,18 @@ focus_pane_right = "prefix+l"
 last_pane = "prefix+\\"
 split_vertical = ["prefix+v", "prefix+%"]
 split_horizontal = ["prefix+minus", "prefix+\""]
+switch_workspace = "prefix+1..9"
+next_workspace = "prefix+n"
+previous_workspace = "prefix+p"
+new_workspace = "prefix+c"
+
+# Tabs take a back seat to workspaces, so they give up their defaults here.
+switch_tab = []
+next_tab = []
+previous_tab = []
+new_tab = []
 
 reload_config = "prefix+r"
-# prefix+r is the tmux reload key, so resize_mode takes reload_config's default.
 resize_mode = "prefix+shift+r"
 
 edit_scrollback = "prefix+["
