@@ -1,0 +1,98 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "model": "opus[1m]",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/tmux-window-status.sh '~'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/tmux-window-status.sh '?'"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/snapshot-edited-file.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "export PATH=\"/opt/homebrew/bin:$PATH\"; command -v uv >/dev/null 2>&1 || exit 0; uv run --quiet --script \"$HOME/.claude/hooks/strip-added-comments.py\"",
+            "timeout": 60,
+            "statusMessage": "Stripping added comments"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/tmux-window-status.sh '✓'"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/herdr-workspace-title.sh",
+            "timeout": 30,
+            "async": true
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "i-have-adhd@i-have-adhd": true,
+    "clangd-lsp@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "tech": {
+      "source": {
+        "source": "github",
+        "repo": "Volumental/claude-plugins-tech"
+      }
+    },
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      }
+    }
+  },
+  "language": "English",
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "Thinking"
+    ]
+  },
+  "effortLevel": "high",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "theme": "auto",
+  "editorMode": "vim",
+  "voiceEnabled": true
+}

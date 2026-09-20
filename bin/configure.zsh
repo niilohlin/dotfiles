@@ -43,6 +43,11 @@ ln -s ~/dotfiles/zsh ~/.zsh
 ln -s ~/dotfiles/zshrc ~/.zshrc
 ln -s ~/dotfiles/zshenv ~/.zshenv
 ln -s ~/dotfiles/gitconfig ~/.gitconfig
+mkdir -p ~/.claude
+ln -s ~/dotfiles/claude/hooks ~/.claude/hooks
+ln -s ~/dotfiles/claude/settings.json ~/.claude/settings.json
+ln -s ~/dotfiles/claude/tmux-window-status.sh ~/.claude/tmux-window-status.sh
+ln -s ~/dotfiles/claude/herdr-workspace-title.sh ~/.claude/herdr-workspace-title.sh
 
 herdr plugin link ~/dotfiles/herdr/plugins/ghostty-progress
 
