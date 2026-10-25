@@ -54,22 +54,19 @@ autoload -U up-line-or-beginning-search
 autoload -U down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-# bindkey -M viins "^[[A" up-line-or-beginning-search
-# bindkey -M viins "^[[B" down-line-or-beginning-search
+# Vi mode. Must come before the other bindkeys, which bind into the main keymap.
+bindkey -v
+KEYTIMEOUT=1 # 10ms Esc delay instead of 400ms
+bindkey -M viins "^[[A" up-line-or-beginning-search
+bindkey -M viins "^[[B" down-line-or-beginning-search
 
 autoload edit-command-line; zle -N edit-command-line
 bindkey '^Xe' edit-command-line   # Ctrl+X then E
 bindkey '^X^E' edit-command-line  # Ctrl+X then Ctrl+E (like bash)
-bindkey -e
-# bindkey -M vicmd "^[[E" edit-command-line
+bindkey -M vicmd v edit-command-line
 
 # Automatically ls after cd and add it to a hook
 chpwd_functions+=(eza_ls)
-
-# Set vi keybindings
-# set -o vi
-# Start in command mode.
-# set keymap vi-insert
 
 eval "$(pyenv init - zsh)"
 eval "$(rbenv init - --no-rehash zsh)"
@@ -101,23 +98,23 @@ source ~/.zsh/fzf-history
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# # ci", ci', ci`, di", etc
-# autoload -U select-quoted
-# zle -N select-quoted
-# for m in visual viopp; do
-#     for c in {a,i}{\',\",\`}; do
-#         bindkey -M $m $c select-quoted
-#     done
-# done
-#
-# # ci{, ci(, ci<, di{, etc
-# autoload -U select-bracketed
-# zle -N select-bracketed
-# for m in visual viopp; do
-#     for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
-#         bindkey -M $m $c select-bracketed
-#     done
-# done
+# ci", ci', ci`, di", etc
+autoload -U select-quoted
+zle -N select-quoted
+for m in visual viopp; do
+    for c in {a,i}{\',\",\`}; do
+        bindkey -M $m $c select-quoted
+    done
+done
+
+# ci{, ci(, ci<, di{, etc
+autoload -U select-bracketed
+zle -N select-bracketed
+for m in visual viopp; do
+    for c in {a,i}${(s..)^:-'()[]{}<>bB'}; do
+        bindkey -M $m $c select-bracketed
+    done
+done
 
 eval $(keychain --eval id_rsa)
 
