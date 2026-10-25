@@ -149,6 +149,10 @@
       "rev": "3b753cf8c6a4dcde6edee8827d464ba9b8c4a6f0",
       "src": "https://github.com/tpope/vim-fugitive"
     },
+    "vim-pencil": {
+      "rev": "6d70438a8886eaf933c38a7a43a61adb0a7815ed",
+      "src": "https://github.com/preservim/vim-pencil"
+    },
     "vim-pythonsense": {
       "rev": "9200a57629c904ed2ab8c9b2e8c5649d311794ba",
       "src": "https://github.com/jeetsukumaran/vim-pythonsense"

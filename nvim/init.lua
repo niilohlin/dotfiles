@@ -1219,7 +1219,7 @@ vim.keymap.set("n", "grn", function()
 end, { expr = true })
 
 -- Prose writing plugin
--- vim.pack.add({ "https://github.com/preservim/vim-pencil" })
+vim.pack.add({ "https://github.com/preservim/vim-pencil" })
 
 -- PRLSP
 -- vim.pack.add({ "https://github.com/toziegler/prlsp" })
