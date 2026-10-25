@@ -52,3 +52,10 @@ export NVM_DIR="$HOME/.nvm"
 
 source ~/dotfiles/.env
 . "$HOME/.cargo/env"
+
+# Use Homebrew's updated Mozilla CA bundle instead of each tool's stale bundled one (emSign/eMudhra distrust, Oct 2026)
+export SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
+export REQUESTS_CA_BUNDLE=$SSL_CERT_FILE
+export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
+# The claude binary honors --use-openssl-ca but not SSL_CERT_FILE, so it ends up trusting nothing
+claude() { env -u NODE_OPTIONS claude "$@"; }
