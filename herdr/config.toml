@@ -13,7 +13,7 @@ hide_tab_bar_when_single_tab = true
 pane_gaps = false
 pane_outer_borders = false
 
-agent_panel_sort = "priority"
+agent_panel_sort = "spaces"
 status_indicators = "symbols"
 
 [ui.toast]
