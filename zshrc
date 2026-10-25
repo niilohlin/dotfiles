@@ -22,15 +22,15 @@ function eza_ls() {
     then
         eza --long --sort=modified "${@:-.}"
     else
-        eza -G -F "${@:-.}"
+        eza -G --classify=auto "${@:-.}"
     fi
 }
 
 # The `${@:-.}` above matters: given no path, eza reads its file list from stdin
 # whenever stdin isn't a tty, so a bare `eza` in a pipe lists nothing.
 alias ls='eza_ls'
-alias ll='eza -l --group-directories-first --color=auto -F'
-alias la='eza -la --group-directories-first --color=auto -F'
+alias ll='eza -l --group-directories-first --color=auto --classify=auto'
+alias la='eza -la --group-directories-first --color=auto --classify=auto'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
 alias free='free -m'                      # show sizes in MB
