@@ -19,11 +19,11 @@ defaults write com.apple.screencapture location /tmp/
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # shell tools
-brew install eza tmux diff-so-fancy git git-lfs keychain
+brew install eza tmux diff-so-fancy git git-lfs keychain bitwarden-cli
 # neovim and dependencies
 brew install neovim fzf rust lua node rustup luarocks ripgrep xz
 # applications
-brew install slack messenger anki docker-desktop obsidian gifox
+brew install slack messenger anki docker-desktop obsidian gifox bitwarden
 # keyboard navigation
 brew install hammerspoon
 
