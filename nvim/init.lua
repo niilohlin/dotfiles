@@ -1108,7 +1108,31 @@ vim.api.nvim_create_autocmd({ "VimEnter" }, {
     vim.keymap.set("n", "<leader><down>", function()
       mc.lineAddCursor(1)
     end)
-    vim.keymap.set("n", "<leader><c-x>", mc.clearCursors)
+
+    -- Mirror the Neovim 0.13 built-in multicursor defaults.
+    vim.keymap.set({ "n", "x" }, "Q", function()
+      if vim.v.count > 0 then
+        for _ = 1, vim.v.count do
+          mc.searchAddCursor(1)
+        end
+      else
+        mc.toggleCursor()
+      end
+    end)
+    vim.keymap.set("n", "<c-leftmouse>", mc.handleMouse)
+    vim.keymap.set("n", "<c-leftdrag>", mc.handleMouseDrag)
+    vim.keymap.set("n", "<c-leftrelease>", mc.handleMouseRelease)
+    vim.keymap.set("n", "gQ", mc.restoreCursors)
+    mc.addKeymapLayer(function(layerSet)
+      layerSet("n", "q=", function()
+        if mc.cursorsEnabled() then
+          mc.disableCursors()
+        else
+          mc.enableCursors()
+        end
+      end)
+      layerSet("n", "<c-l>", mc.clearCursors)
+    end)
   end,
 })
 
@@ -1263,9 +1287,6 @@ vim.api.nvim_create_user_command("SnippetStop", function()
     vim.snippet.stop()
   end
 end, { nargs = "*" })
-
--- Never use Q for ex mode.
-vim.keymap.set("n", "Q", "<nop>")
 
 vim.keymap.set("i", "<C-X><C-G>", function()
   vim.api.nvim_put({ vim.fn.expand("%") }, "c", true, true)
