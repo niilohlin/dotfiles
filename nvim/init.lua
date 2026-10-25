@@ -43,6 +43,7 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt.linebreak = true
     vim.opt.textwidth = 80
     vim.opt.formatoptions:remove("t") -- Disable auto-wrapping at textwidth
+    vim.b.completion = false
   end
 })
 
