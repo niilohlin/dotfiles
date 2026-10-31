@@ -1,2 +1,2 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 cd $(tmux display-message -p -F '#{pane_start_path}')

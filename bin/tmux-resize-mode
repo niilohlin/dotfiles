@@ -1,9 +1,9 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 # Read the next character from the keyboard
 # if it's 'j', run tmux resize-pane -D 5
 
-read -k 1 -s char
+read -n 1 -s char
 if [[ $char == "j" ]]; then
   tmux resize-pane -D 5
 fi

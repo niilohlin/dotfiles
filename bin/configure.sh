@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/usr/bin/env bash
 
 set -o pipefail
 
@@ -19,7 +19,7 @@ defaults write com.apple.screencapture location /tmp/
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # shell tools
-brew install eza tmux diff-so-fancy git git-lfs keychain bitwarden-cli
+brew install bash bash-completion@2 eza tmux diff-so-fancy git git-lfs keychain bitwarden-cli
 # neovim and dependencies
 brew install neovim fzf rust lua node rustup luarocks ripgrep xz
 # applications
@@ -39,9 +39,9 @@ mkdir -p ~/.config/zed
 ln -s ~/dotfiles/zed/settings.json ~/.config/zed/settings.json
 ln -s ~/dotfiles/zed/keymap.json ~/.config/zed/keymap.json
 ln -s ~/dotfiles/hammerspoon ~/.hammerspoon
-ln -s ~/dotfiles/zsh ~/.zsh
-ln -s ~/dotfiles/zshrc ~/.zshrc
-ln -s ~/dotfiles/zshenv ~/.zshenv
+ln -s ~/dotfiles/bashrc ~/.bashrc
+ln -s ~/dotfiles/bash_profile ~/.bash_profile
+ln -s ~/dotfiles/inputrc ~/.inputrc
 ln -s ~/dotfiles/gitconfig ~/.gitconfig
 mkdir -p ~/.claude
 ln -s ~/dotfiles/claude/hooks ~/.claude/hooks
@@ -51,5 +51,6 @@ ln -s ~/dotfiles/claude/herdr-workspace-title.sh ~/.claude/herdr-workspace-title
 
 herdr plugin link ~/dotfiles/herdr/plugins/ghostty-progress
 
-# install antidote zsh package manager
-# git clone --depth=1 https://github.com/mattmc3/antidote.git ~/.zsh/.antidote
+# bash from Homebrew as login shell
+grep -qx /opt/homebrew/bin/bash /etc/shells || echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells
+chsh -s /opt/homebrew/bin/bash

@@ -199,7 +199,7 @@
   },
 
   "terminal": {
-    "shell": { "program": "/bin/zsh" },
+    "shell": { "program": "/opt/homebrew/bin/bash" },
     "line_height": "standard",
   },
 }

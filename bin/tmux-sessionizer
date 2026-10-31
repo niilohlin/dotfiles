@@ -1,4 +1,4 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 
 if [[ $# -eq 1 ]]; then
     selected=$1
@@ -6,15 +6,14 @@ else
     if [[ -z $TMUX ]] && [[ -z $tmux_running ]]; then
         selected=$(find ~/work/quickbit ~/dotfiles ~/work ~/personal ~ -mindepth 1 -maxdepth 1 -type d | fzf)
     else
-        : ${tmp_dir:=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER}
         sessions=$(tmux list-sessions)
         # session names with a dollar appended at the end of it so that we can filter them out from the directories
-        session_names=$(echo $sessions | sed -n 's/^\([^:]*\):.*/\1$/p')
+        session_names=$(echo "$sessions" | sed -n 's/^\([^:]*\):.*/\1$/p')
         directories=$(find ~/work/quickbit ~/dotfiles ~/work ~/personal /private ~ -mindepth 1 -maxdepth 1 -type d | grep -v "$session_names")
 
-        selected=$({ echo $sessions; echo $directories } | fzf-tmux -p --preview 'tmux list-windows -t $(echo {} | cut -d ":" -f 1) 2> /dev/null || ls -l {}')
+        selected=$({ echo "$sessions"; echo "$directories"; } | fzf-tmux -p --preview 'tmux list-windows -t $(echo {} | cut -d ":" -f 1) 2> /dev/null || ls -l {}')
         if [[ ! -d $selected ]]; then
-            selected=$(echo $selected | cut -d ':' -f 1)
+            selected=$(echo "$selected" | cut -d ':' -f 1)
         fi
     fi
 fi
