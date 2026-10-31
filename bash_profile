@@ -1,8 +1,24 @@
-export PATH=/opt/homebrew/bin/:$PATH
-export PATH=/opt/homebrew/opt/node@22/bin:$PATH
-export PATH=/opt/homebrew/opt/llvm/bin:$PATH
-export PATH=/opt/homebrew/opt/swagger-codegen@2/bin:$PATH
-export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
+# Omarchy's PATH/OMARCHY_PATH bootstrap (mise shims etc.)
+[[ -r /usr/share/omarchy/default/bash/env-bootstrap ]] && source /usr/share/omarchy/default/bash/env-bootstrap
+
+if [[ $OSTYPE == darwin* ]]; then
+  export PATH=/opt/homebrew/bin/:$PATH
+  export PATH=/opt/homebrew/opt/llvm/bin:$PATH
+  export PATH=/opt/homebrew/opt/swagger-codegen@2/bin:$PATH
+  export PATH=/opt/homebrew/share/google-cloud-sdk/bin:"$PATH"
+  export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
+  export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+  export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
+  # Use Homebrew's updated Mozilla CA bundle instead of each tool's stale bundled one (emSign/eMudhra distrust, Oct 2026)
+  export SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
+  export REQUESTS_CA_BUNDLE=$SSL_CERT_FILE
+  export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="$HOME/.local/share/pnpm"
+  export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"
+fi
 export PATH="$HOME/.local/bin:$PATH"
 export PATH=$PATH:$HOME/dotfiles/bin/
 export PATH=$PATH:/usr/local/bin/
@@ -12,23 +28,17 @@ export PATH=$PATH:$HOME/.rbenv/shims/
 export PATH=$PATH:$HOME/.config/composer/vendor/bin
 export PATH=$PATH:$HOME/go/bin
 
-export NVIM_BIN=/opt/homebrew/bin/nvim
+export NVIM_BIN=$(command -v nvim)
 
 export PYTHONDONTWRITEBYTECODE=1
 
-# postgresql 16 config
-export PATH=$PATH:/opt/homebrew/opt/postgresql@16/bin
 export CARGO_HOME=$HOME/.cargo/
 
 export LANG=C
-export CC=clang
+command -v clang >/dev/null && export CC=clang
 export LC_ALL=en_US.UTF-8
 export INPUTRC=~/.inputrc
 export EDITOR=nvim
-
-export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
 
 # Add ctrl-j to "accept" in fzf
 export FZF_DEFAULT_OPTS='--bind "ctrl-j:accept"'
@@ -40,16 +50,9 @@ export PYENV_ROOT="$HOME/.pyenv"
 
 export NVM_DIR="$HOME/.nvm"
 
-source ~/dotfiles/.env
-. "$HOME/.cargo/env"
+[[ -f ~/dotfiles/.env ]] && source ~/dotfiles/.env
+[[ -f "$HOME/.cargo/env" ]] && . "$HOME/.cargo/env"
 
-# Use Homebrew's updated Mozilla CA bundle instead of each tool's stale bundled one (emSign/eMudhra distrust, Oct 2026)
-export SSL_CERT_FILE=/opt/homebrew/etc/ca-certificates/cert.pem
-export REQUESTS_CA_BUNDLE=$SSL_CERT_FILE
-export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
-
-# pnpm
-export PNPM_HOME="$HOME/Library/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;

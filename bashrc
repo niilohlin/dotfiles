@@ -1,5 +1,5 @@
 # The claude binary honors --use-openssl-ca but not SSL_CERT_FILE, so it ends up trusting nothing
-claude() { env -u NODE_OPTIONS claude "$@"; }
+[[ $OSTYPE == darwin* ]] && claude() { env -u NODE_OPTIONS claude "$@"; }
 
 [[ $- == *i* ]] || return
 
@@ -32,21 +32,24 @@ alias less='nvim -R'
 alias psp='source ~/dotfiles/bin/cd_to_pane_start_path'
 alias lg='lazygit'
 
-eval "$(pyenv init - bash)"
-eval "$(rbenv init - --no-rehash bash)"
+command -v pyenv >/dev/null && eval "$(pyenv init - bash)"
+command -v rbenv >/dev/null && eval "$(rbenv init - --no-rehash bash)"
+command -v mise >/dev/null && eval "$(mise activate bash)"
 
-# Load /etc/paths.d/ into the PATH
-eval "$(/usr/libexec/path_helper -s)"
-eval "$(/opt/homebrew/bin/brew shellenv)"
+# Load /etc/paths.d/ into the PATH (macOS only)
+[[ -x /usr/libexec/path_helper ]] && eval "$(/usr/libexec/path_helper -s)"
+[[ -x /opt/homebrew/bin/brew ]] && eval "$(/opt/homebrew/bin/brew shellenv)"
 
-[[ -r /opt/homebrew/etc/profile.d/bash_completion.sh ]] && . /opt/homebrew/etc/profile.d/bash_completion.sh
+for f in /opt/homebrew/etc/profile.d/bash_completion.sh /usr/share/bash-completion/bash_completion; do
+    [[ -r $f ]] && . "$f" && break
+done
 command -v aws_completer >/dev/null && complete -C aws_completer aws
 
 # Hit ctrl-r to fzf search history
 export FZF_TMUX=1
 eval "$(fzf --bash)"
 
-eval "$(keychain --eval id_rsa)"
+command -v keychain >/dev/null && eval "$(keychain --eval id_rsa)"
 
 if [[ -z "$TMUX" && -n "$SSH_TTY" ]]; then
   tmux attach-session || tmux new-session
@@ -79,5 +82,7 @@ _prompt_hook() {
 }
 VIRTUAL_ENV_DISABLE_PROMPT=1
 GIT_PS1_SHOWDIRTYSTATE=1
-source /opt/homebrew/etc/bash_completion.d/git-prompt.sh
+for f in /opt/homebrew/etc/bash_completion.d/git-prompt.sh /usr/share/git/completion/git-prompt.sh; do
+    [[ -r $f ]] && . "$f" && break
+done
 PROMPT_COMMAND=_prompt_hook
