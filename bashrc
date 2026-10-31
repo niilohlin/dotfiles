@@ -3,6 +3,9 @@
 
 [[ $- == *i* ]] || return
 
+# ble.sh: autosuggestions + syntax highlighting. Attached at the end of this file.
+[[ -t 0 && -t 1 && -f ~/.local/share/blesh/ble.sh ]] && source ~/.local/share/blesh/ble.sh --attach=none
+
 HISTSIZE=100000
 HISTFILESIZE=$HISTSIZE
 HISTFILE=~/.bash_hist
@@ -47,7 +50,13 @@ command -v aws_completer >/dev/null && complete -C aws_completer aws
 
 # Hit ctrl-r to fzf search history
 export FZF_TMUX=1
-eval "$(fzf --bash)"
+if [[ ${BLE_VERSION-} ]]; then
+    ble-import -d integration/fzf-key-bindings
+    ble-import -d integration/fzf-completion
+    bleopt history_share=1
+else
+    eval "$(fzf --bash)"
+fi
 
 command -v keychain >/dev/null && eval "$(keychain --eval id_rsa)"
 
@@ -71,7 +80,7 @@ _auto_venv() {
 # Runs only at the prompt, like zsh's chpwd_functions: ls after cd, venv autodetect
 _prompt_hook() {
     local status=$?
-    history -a; history -n
+    [[ ${BLE_VERSION-} ]] || { history -a; history -n; }
     if [[ $PWD != "$_last_pwd" ]]; then
         [[ -n $_last_pwd ]] && eza_ls
         _last_pwd=$PWD
@@ -86,3 +95,5 @@ for f in /opt/homebrew/etc/bash_completion.d/git-prompt.sh /usr/share/git/comple
     [[ -r $f ]] && . "$f" && break
 done
 PROMPT_COMMAND=_prompt_hook
+
+[[ ${BLE_VERSION-} ]] && ble-attach

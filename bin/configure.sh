@@ -54,3 +54,6 @@ herdr plugin link ~/dotfiles/herdr/plugins/ghostty-progress
 # bash from Homebrew as login shell
 grep -qx /opt/homebrew/bin/bash /etc/shells || echo /opt/homebrew/bin/bash | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/bash
+
+# ble.sh (autosuggestions, syntax highlighting), not packaged in Homebrew
+d=$(mktemp -d) && curl -fsSL https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz | tar xJf - -C "$d" && bash "$d/ble-nightly/ble.sh" --install ~/.local/share
