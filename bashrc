@@ -23,7 +23,6 @@ eza_ls() {
 
 # The `${@:-.}` above matters: given no path, eza reads its file list from stdin
 # whenever stdin isn't a tty, so a bare `eza` in a pipe lists nothing.
-alias ls='eza_ls'
 alias ll='eza -l --group-directories-first --color=auto --classify=auto'
 alias la='eza -la --group-directories-first --color=auto --classify=auto'
 alias grep='grep --color=tty -d skip'
