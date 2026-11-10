@@ -19,7 +19,7 @@ defaults write com.apple.screencapture location /tmp/
 # /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # shell tools
-brew install bash bash-completion@2 eza tmux diff-so-fancy git git-lfs keychain bitwarden-cli
+brew install bash bash-completion@2 tmux diff-so-fancy git git-lfs keychain bitwarden-cli
 # neovim and dependencies
 brew install neovim fzf rust lua node rustup luarocks ripgrep xz
 # applications

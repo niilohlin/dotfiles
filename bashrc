@@ -12,19 +12,8 @@ HISTFILE=~/.bash_hist
 HISTCONTROL=ignoreboth:erasedups
 shopt -s histappend checkwinsize globstar
 
-# sort tmp directory by modified date
-eza_ls() {
-    if [[ $PWD == /tmp ]]; then
-        eza --long --sort=modified "${@:-.}"
-    else
-        eza -G --classify=auto "${@:-.}"
-    fi
-}
-
-# The `${@:-.}` above matters: given no path, eza reads its file list from stdin
-# whenever stdin isn't a tty, so a bare `eza` in a pipe lists nothing.
-alias ll='eza -l --group-directories-first --color=auto --classify=auto'
-alias la='eza -la --group-directories-first --color=auto --classify=auto'
+alias ll='ls -l'
+alias la='ls -la'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"
 alias free='free -m'
@@ -81,7 +70,7 @@ _prompt_hook() {
     local status=$?
     [[ ${BLE_VERSION-} ]] || { history -a; history -n; }
     if [[ $PWD != "$_last_pwd" ]]; then
-        [[ -n $_last_pwd ]] && eza_ls
+        [[ -n $_last_pwd ]] && ls
         _last_pwd=$PWD
         _auto_venv
     fi

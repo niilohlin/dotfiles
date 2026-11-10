@@ -16,20 +16,8 @@ setopt sharehistory
 # Save history after each command (should not be combined with sharehistory)
 setopt incappendhistory
 
-# sort tmp directory by modified date
-function eza_ls() {
-    if [[ $PWD == '/tmp' ]]
-    then
-        eza --long --sort=modified "${@:-.}"
-    else
-        eza -G --classify=auto "${@:-.}"
-    fi
-}
-
-# The `${@:-.}` above matters: given no path, eza reads its file list from stdin
-# whenever stdin isn't a tty, so a bare `eza` in a pipe lists nothing.
-alias ll='eza -l --group-directories-first --color=auto --classify=auto'
-alias la='eza -la --group-directories-first --color=auto --classify=auto'
+alias ll='ls -l'
+alias la='ls -la'
 alias grep='grep --color=tty -d skip'
 alias cp="cp -i -r"                          # confirm before overwriting something
 alias free='free -m'                      # show sizes in MB
@@ -65,7 +53,8 @@ bindkey '^X^E' edit-command-line  # Ctrl+X then Ctrl+E (like bash)
 bindkey -M vicmd v edit-command-line
 
 # Automatically ls after cd and add it to a hook
-chpwd_functions+=(eza_ls)
+chpwd_ls() { ls; }
+chpwd_functions+=(chpwd_ls)
 
 eval "$(pyenv init - zsh)"
 eval "$(rbenv init - --no-rehash zsh)"
